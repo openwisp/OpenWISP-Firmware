@@ -1,0 +1,123 @@
+div.fieldWithErrors {
+  padding: 3px;
+  background-color: red;
+  display: inline;
+  width:99%;
+}
+
+div.fieldWithErrors input {
+  width:98%;
+}
+
+div.fieldWithErrors select {
+  width:99%;
+  margin-left:2px;
+}
+
+div.fieldWithErrors checkbox {
+}
+
+fieldset textarea {
+  width:98%;
+  margin-left:5px;
+}
+
+input:focus {
+  outline: green solid thin;
+}
+
+select:focus {
+  outline: green solid thin;
+}
+
+textarea:focus {
+  outline: green solid thin;
+}
+
+img.wispmanager_logo {
+  vertical-align:sub;
+}
+
+h4 {
+  text-align:center;
+}
+
+fieldset p div {
+  width:98%;
+  margin-left:5px;
+}
+
+fieldset p textarea {
+  width:98%;
+  margin-left:5px;
+}
+
+fieldset p label {
+  width:98%;
+  margin-left:5px;
+}
+
+fieldset p input {
+  width:98%;
+  margin-left:5px;
+}
+
+fieldset p select {
+  width:99%;
+  margin-left:5px;
+}
+
+th, td {
+  text-align:center;
+}
+
+td label {
+  font-weight:bold;
+  font-style:italic;
+}
+
+tr.labels_row td {
+  background-color:lightgray;
+}
+
+th.sortup img.arrow_up {
+  display:inline;
+}
+
+th.sortdown img.arrow_up {
+  display:none;
+}
+
+th.nosort img.arrow_up {
+  display:none;
+}
+
+th.sortup img.arrow_down {
+  display:none;
+}
+
+th.sortdown img.arrow_down {
+  display:inline;
+}
+
+th.nosort img.arrow_down {
+  display:none;
+}
+
+div.simple_captcha_image {
+  text-align:center;
+}
+
+div.simple_captcha_label {
+  text-align:center;
+}
+
+div.simple_captcha_field {
+  text-align:center;
+}
+
+table#branding tr td {
+  background:#aaa;
+  margin:0;
+  border:0;
+}

@@ -1,0 +1,46 @@
+OpenWISP Firmware
+
+Copyright (C) 2010 CASPUR (Davide Guerri d.guerri@caspur.it)
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
++----owf
+     +----Makefile
+     +----README.license
+     +----common.sh
+     +----deploy-firmware.sh
+     +----gpl.txt
+     +----owispmanager.sh
+     +----web
+          +----cgi-bin
+          |    +----owispmanager.sh
+          +----images
+          |    +----logo_caspur.png
+          |    +----spinner.gif
+          |    +----switch_minus.gif
+          +----index.html
+          +----javascripts
+          |    +----fluid16.js
+          |    +----jquery-ui.js
+          |    +----jquery.js
+          +----stylesheets
+               +----custom.css
+               +----fluid960
+                    +----960.css
+                    +----grid.css
+                    +----ie.css
+                    +----ie6.css
+                    +----layout.css
+                    +----nav.css
+                    +----reset.css
+                    +----text.css
