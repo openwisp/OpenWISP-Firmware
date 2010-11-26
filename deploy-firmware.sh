@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <openwrt rootfs> <owispmanager firmware tools directory> <openwrt root fs path> <opkg packages repository url>"
+  echo "Usage: $0 <openwrt sources path> <owispmanager firmware tools directory> <openwrt root fs path> <opkg packages repository url>"
   exit 1
 fi
 
