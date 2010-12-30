@@ -16,35 +16,69 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#     our ROOTFS will be $BUILDROOT/build_dir/arch/root-*/
+#     arch will be one of i386, mips, ....
+
+
+TOOLS='.'
+
 if [ -z "$1" ]; then
-  echo "Usage: $0 <openwrt sources path> <owispmanager firmware tools directory> <openwrt root fs path> <opkg packages repository url>"
+  echo "Usage: $0 <openwrt sources path> <platform>"
+  echo "Read the README file for more instruction "
   exit 1
 fi
 
+REPO=http://downloads.openwrt.org/kamikaze/8.09.2/$PLATFORM/packages/
+
+PLATFORM=$2
 BUILDROOT=$1
+
 if [ -z "$BUILDROOT" ] || [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
-  echo "Invalid openwrt build root"
+  echo "Invalid openwrt sources path"
   exit 1
 fi
 
-TOOLS=$2
-if [ -z "$TOOLS" ] || [ ! -x "$TOOLS" ]; then
-	echo "Invalid owispmanager path!"
-	exit 1
+if [ ! -x $BUILDROOT/build_dir/root-* ]; then 
+  echo "You don't have an already compiled system, I'll build a minimal one for you "
+  REPLAY="y"
+else
+  echo "Do you want to build a minimal OpenWRT system?[y/n]"
+  read REPLAY
 fi
 
-ROOTFS=$3
+if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
+  # Configure and compile a minimal owrt system
+  echo "Building images..."
+  cp configwrt.minimal $BUILDROOT/.config
+  #echo $1
+  pushd $1
+  make package/symlinks
+  make oldconfig
+  make
+  popd
+else 
+  echo "Assuming No"
+fi
+
+# Assume that the script will be launched in the same dir  
+
+if [ -z "$TOOLS" ] || [ ! -x "$TOOLS" ]; then
+	echo "You must run this script in the openwisp manager tools directory"
+  exit 1
+fi
+
+# By default the buildroot is a bit difficult to find :)
+
+ROOTFS=$(find $BUILDROOT/build_dir -name root-*)
+
 if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
   echo "Invalid openwrt rootfs path"
   exit 1
 fi
 
-REPO=$4
-if [ -z "$REPO" ]; then
-  echo "Invalid repo url"
-  exit 1
-fi
+#Copy custom file to target os 
 
+echo $ROOTFS 
 echo "Copying file..."
 mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
@@ -72,6 +106,13 @@ fi
 echo "Configuring openwrt default firmware:"
 echo "* Disabling unneeded services"
 rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+
+echo "* Enabling needed services"
+pushd $ROOTFS
+ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate
+popd 
+
+#You can put here your configuration if needed
 
 echo "* Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
@@ -119,6 +160,7 @@ if [ "$?" -ne "0" ]; then
 fi
 
 echo "Rebuilding images..."
+echo $BUILDROOT
 pushd $BUILDROOT
 make target/install
 make package/index
