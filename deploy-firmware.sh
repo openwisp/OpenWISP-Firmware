@@ -84,6 +84,7 @@ mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
 find $ROOTFS/etc/owispmanager -iname "*.svn" -exec rm -Rf {} \; 2>/dev/null
 chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh 
+cp $TOOLS/htpdate.default $ROOTFS/etc/default/htpdate
 if [ "$?" -ne "0" ]; then
  echo "Failed to copy files..."
  exit 2
@@ -110,6 +111,7 @@ rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dn
 echo "* Enabling needed services"
 pushd $ROOTFS
 ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate
+ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate
 popd 
 
 #You can put here your configuration if needed
