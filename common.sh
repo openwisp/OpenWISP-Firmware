@@ -114,13 +114,13 @@ checkPrereq() {
   # The following ar not "fatal"
 
   # ntpclient
-  if [ -x "`which ntpclient`" ]; then
-    echo "ntpclient is present"
+  if [ -x "`which ntpdate`" ] || [ -x "`which htpdate` "]; then
+    echo "Time synchronization daemon is present"
   else
     if [ "$__ret" -lt "2" ]; then
       __ret="1"
     fi
-    echo "ntpclient is missing!"
+    echo "Time syncronization daemon is missing!"
   fi
 
   # Curl / GNU Wget

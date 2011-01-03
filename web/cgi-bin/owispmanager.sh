@@ -314,7 +314,7 @@ test_dns() {
 }
 
 test_ntp() {
-  local result="`/usr/sbin/ntpclient -d -i 2 -s -h ntp.ien.it 2>&1 | grep \"^set time to\"`"
+  local result="`/usr/sbin/ntpdate ntp.ien.it 2>&1 | grep \"adjust time server\"`"
 
   eval "$1=\"$result\""
   if [ "$result" != "" ]; then 

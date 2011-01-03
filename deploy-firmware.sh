@@ -84,7 +84,8 @@ mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
 find $ROOTFS/etc/owispmanager -iname "*.svn" -exec rm -Rf {} \; 2>/dev/null
 chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh 
-cp $TOOLS/htpdate.default $ROOTFS/etc/default/htpdate
+cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
+cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate
 if [ "$?" -ne "0" ]; then
  echo "Failed to copy files..."
  exit 2

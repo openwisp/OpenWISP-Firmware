@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Kamikaze (r18961)
-# Mon Dec 27 12:47:12 2010
+# Mon Jan  3 11:56:53 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1007,7 +1007,7 @@ CONFIG_PACKAGE_wireless-tools=y
 # Time Synchronization
 #
 # CONFIG_PACKAGE_chrony is not set
-# CONFIG_PACKAGE_htpdate is not set
+CONFIG_PACKAGE_htpdate=y
 # CONFIG_PACKAGE_ntp-utils is not set
 # CONFIG_PACKAGE_ntpclient is not set
 # CONFIG_PACKAGE_ntpd is not set
@@ -1269,7 +1269,7 @@ CONFIG_PACKAGE_hostapd=y
 # CONFIG_PACKAGE_nbtscan is not set
 # CONFIG_PACKAGE_ndyndns is not set
 # CONFIG_PACKAGE_net-tools is not set
-# CONFIG_PACKAGE_netcat is not set
+CONFIG_PACKAGE_netcat=y
 # CONFIG_PACKAGE_netperf is not set
 # CONFIG_PACKAGE_netpipe is not set
 # CONFIG_PACKAGE_netstat-nat is not set
