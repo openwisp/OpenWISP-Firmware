@@ -83,9 +83,10 @@ configurationRetrieve() {
   echo "Retrieving configuration..."
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$1" -eq "0" ] && [ "$SATUS_OK" -eq "1" ]; then
+  if [ "$1" -eq "0" ] && [ "$STATUS_OK" -eq "1" ]; then
     RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://`echo \"$INNER_SERVER\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL"
   else
+    closeStatusLogResults
     return 2
   fi
   

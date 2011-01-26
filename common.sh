@@ -69,8 +69,8 @@ VPN_REMOTE=""
 STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
-_APP_NAME="open WISP Manager"
-_APP_VERS="1.7"
+_APP_NAME="open WISP Firmware"
+_APP_VERS="1.0"
 
 # -------
 # Function:     checkPrereq
