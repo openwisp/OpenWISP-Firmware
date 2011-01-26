@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2010 CASPUR (Davide Guerri d.guerri@caspur.it)
+# Copyright (C) 2010 CASPUR
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -49,11 +49,17 @@ render_page() {
   if [ ! -z "$2" ]; then
     if [ ! -z "$3" ]; then
       REDIRECT="<meta http-equiv=\"refresh\" content=\"$3; url=$2\">"
-    else
+    else  
       REDIRECT="<meta http-equiv=\"refresh\" content=\"1; url=$2\">"
     fi
   else
     REDIRECT=""
+  fi
+
+  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then 
+    SERVER_PAGE=""
+  else
+    SERVER_PAGE="<li><a href="?page=server">Server settings</a></li>"
   fi
 
   /bin/cat << EOH
@@ -78,6 +84,9 @@ render_page() {
   <script src="/javascripts/jquery.js" type="text/javascript"></script>
   <script src="/javascripts/jquery-ui.js" type="text/javascript"></script>
   <script src="/javascripts/fluid16.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+  </script>
 </head>
 <body>
   <div class="container_12">
@@ -89,7 +98,7 @@ render_page() {
     <div class="grid_12">
       <ul class="nav main">
         <li><a href="?page=connectivity">Connectivity settings</a></li>
-        <li><a href="?page=server">Server settings</a></li>
+        $SERVER_PAGE
         <li>
           <a href="?page=wait_redirect" onclick="if (confirm('This is a long test, you are warned... Please confirm.')) { window.location=this.href; return true; }; return false;">
               Site test
@@ -113,7 +122,7 @@ render_page() {
     <div class="clear">&nbsp;</div>
     <div class="grid_12" id="site_info">
       <div class="box" style="text-align:center">
-        <p>$_APP_NAME v. $_APP_VERS - <a href="http://www.caspur.it/~guerri">Davide Guerri</a> - Copyright (C) 2010 - <a href="http://www.caspur.it/">CASPUR</a></p>
+        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) 2010 - <a href="http://www.caspur.it/">CASPUR</a></p>
       </div>
     </div>
     <div class="clear">&nbsp;</div>
@@ -137,10 +146,15 @@ function SelectAll(id) {
     <legend id="_server_legend">
       $_APP_NAME Settings
     </legend>
-    <p>
-      <b><label for="server_address">Server address</label></b>
+     <p>
+      <b><label for="server_address">OpenVpn Remote Server address</label></b>
       <br />
       <input id="server_address" name="server_address" size="30" type="text" value="$CURRENT_SERVER"/>
+    </p>
+    <p>
+      <b><label for="server_port">OpenVPN Remote Server port</label></b>
+      <br />
+      <input id="server_port" name="server_port" size="30" type="text" value="1194"/>
     </p>
     <p>
       <b><label for="client_certificates">Client certificates</label></b>
@@ -153,7 +167,8 @@ function SelectAll(id) {
       <textarea id="ca_certificate" name="ca_certificate" rows="10" cols="60" onClick="SelectAll('ca_certificate');">$CURRENT_CA_CERT</textarea>
     </p>
     <p>
-      <input id="server_submit" name="commit" type="submit" value="Ok" />
+      <input id="server_submit" name="commit" type="submit" value="Commit and reboot"  onclick="if (confirm('You\'re about to reboot this device... Please confirm.')) { window.location=this.href; return true; }; return false;"</input>
+
     </p>
   </fieldset>
 </form>
@@ -366,16 +381,26 @@ test_configuration_retrieve() {
     return 0
   fi
 
-  local server="`echo $CONFIG_home_address | cut -d':' -f1`"
-  local port="`echo $CONFIG_home_address | cut -s -d':' -f2`"
+  #local server="`echo $CONFIG_home_address | cut -d':' -f1`"
+  #local port="`echo $CONFIG_home_address | cut -s -d':' -f2`"
   
-  if [ -z "$port" ]; then
-    port="443"
+  #if [ -z "$port" ]; then
+  #  port="443"
+  #fi
+  
+  # Fixes vpn up control and server functionality
+  eval $VPN_CHECK_CMD
+  if [ "$?" -eq "0" ]; then   
+     eval "$1=\"VPN is up\""
+    return 1
+  else
+    eval "$1=\"VPN is down\""
+    return 0
   fi
-  
-  nc -z -w2 $server $port >/dev/null 2>&1
+
+  nc -z -w2 $INNER_SERVER $INNER_SERVER_PORT >/dev/null 2>&1
   if [ "$?" -eq "0" ]; then
-    eval "$1=\"$server is responding on port $port\""
+    eval "$1=\"$INNER_SERVER is responding on port $INNER_SERVER_PORT\""
     return 1
   else
     eval "$1=\"Failed\""
@@ -499,6 +524,12 @@ EOC
 
 render_info_page() {
   local __prereq=""
+
+  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then 
+    SERVER_INFOS=""
+  else
+    SERVER_INFOS="<li><b>Server settings.</b> Configure "home" server and the certificates needed to communicate with it.</li>"
+  fi
   
   checkPrereq >/dev/null 2>&1
   if [ "$?" -ne "0" ]; then
@@ -518,11 +549,9 @@ render_info_page() {
             <b>Connectivity settings.</b> Configure basic connectivity: IP address, Netmask, Default gateway and DNS server.
           </li>
           <li>
-            <b>Server settings.</b> Configure "home" server and the certificates needed to communicate with it.
-          </li>
-          <li>
             <b>Site test.</b> Performs some basic connectivity tests. 
           </li>
+          $SERVER_INFOS
           <li>
             <b>Status log.</b> Show status log.
           </li>
@@ -641,6 +670,7 @@ case $F_page in
   server)
     if [ "${REQUEST_METHOD}" = "POST" ]; then
       uci set owispmanager.home.address="$F_server_address" 2>&1
+      uci set openvpn.client_config.remote="$F_server_address $F_server_port"
       if [ ! "$F_client_certificates" == "$CURRENT_CLIENT_CERTS" ]; then
         eval "echo \"$F_client_certificates\" > $CLIENT_CERTIFICATES_FILE"
       fi
@@ -650,15 +680,20 @@ case $F_page in
       if [ "`cat $CA_CERTIFICATE_FILE`" != "" ] && [ "`cat $CLIENT_CERTIFICATES_FILE`" != "" ] && [ "$F_server_address" != "" ]; then
         uci set owispmanager.home.status="configured"
         uci commit owispmanager
+        uci commit openvpn
         PAGE_STATUS="Server configuration committed"
       else
         uci set owispmanager.home.status="unconfigured"
         uci commit owispmanager
+        uci commit openvpn
         PAGE_STATUS="Server configuration committed (incomplete)"
       fi      
       load_current_configuration
+      render_reboot_page
+      reboot
+    else
+      render_server_page
     fi
-    render_server_page
     ;;
   wait_redirect)
     render_site_test_wait_page

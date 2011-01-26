@@ -1,0 +1,70 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2 (0x2)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=IT, ST=RM, L=Rome, O=caspur, CN=caspur CA/emailAddress=a.ferraresi@caspur.it
+        Validity
+            Not Before: Dec 22 10:03:22 2010 GMT
+            Not After : Dec 19 10:03:22 2020 GMT
+        Subject: C=IT, ST=RM, L=Rome, O=caspur, CN=client/emailAddress=a.ferraresi@caspur.it
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:b5:96:d5:9f:06:f4:ac:6a:f6:90:41:cc:cf:9b:
+                    33:04:52:7d:96:af:47:85:9e:12:d4:f3:6b:74:b8:
+                    4f:fd:5f:60:b8:c4:22:03:69:00:0a:0c:34:39:42:
+                    c1:8e:3e:70:b7:50:85:88:fc:17:c2:d7:30:fa:c2:
+                    d0:4f:4a:28:39:74:0f:9c:c9:36:68:02:2f:2d:45:
+                    60:67:75:7a:a8:22:35:82:7a:68:1d:cd:5a:37:2b:
+                    4d:23:67:82:28:11:48:86:b5:08:bd:d3:0f:7d:59:
+                    ec:ab:32:35:75:bf:73:56:de:76:25:43:50:ad:da:
+                    de:49:b7:e5:b7:22:72:0b:1d
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                Easy-RSA Generated Certificate
+            X509v3 Subject Key Identifier: 
+                DF:43:B9:56:2B:68:77:C0:08:51:4D:5E:83:95:D7:34:6B:DF:B9:92
+            X509v3 Authority Key Identifier: 
+                keyid:62:71:95:B9:50:F8:23:27:E7:9B:60:A7:C0:79:13:EE:88:3D:04:E4
+                DirName:/C=IT/ST=RM/L=Rome/O=caspur/CN=caspur CA/emailAddress=a.ferraresi@caspur.it
+                serial:FF:38:6D:6F:30:0C:F5:3C
+
+            X509v3 Extended Key Usage: 
+                TLS Web Client Authentication
+            X509v3 Key Usage: 
+                Digital Signature
+    Signature Algorithm: sha1WithRSAEncryption
+        85:c5:be:1c:b6:53:98:6e:a1:6f:6e:e4:7c:b3:24:7d:2e:48:
+        40:ac:9a:68:42:58:39:e0:8b:8c:a1:fe:6a:6d:8d:29:fd:07:
+        ed:cd:4c:f6:17:4e:75:a4:fa:ab:32:7e:9d:98:fb:68:1f:35:
+        11:3c:e2:20:d4:66:65:ad:ea:a1:f1:25:21:c7:2e:db:04:a0:
+        14:04:3b:09:24:d9:e6:0c:20:5f:e3:20:5d:5a:e4:6a:b5:46:
+        5d:0a:77:b2:45:5f:ac:c1:42:46:5e:e3:29:90:00:b6:3c:c9:
+        c1:92:68:91:63:e0:64:82:33:bd:65:c4:ba:92:ed:76:ab:aa:
+        55:7b
+-----BEGIN CERTIFICATE-----
+MIIDhTCCAu6gAwIBAgIBAjANBgkqhkiG9w0BAQUFADB0MQswCQYDVQQGEwJJVDEL
+MAkGA1UECBMCUk0xDTALBgNVBAcTBFJvbWUxDzANBgNVBAoTBmNhc3B1cjESMBAG
+A1UEAxMJY2FzcHVyIENBMSQwIgYJKoZIhvcNAQkBFhVhLmZlcnJhcmVzaUBjYXNw
+dXIuaXQwHhcNMTAxMjIyMTAwMzIyWhcNMjAxMjE5MTAwMzIyWjBxMQswCQYDVQQG
+EwJJVDELMAkGA1UECBMCUk0xDTALBgNVBAcTBFJvbWUxDzANBgNVBAoTBmNhc3B1
+cjEPMA0GA1UEAxMGY2xpZW50MSQwIgYJKoZIhvcNAQkBFhVhLmZlcnJhcmVzaUBj
+YXNwdXIuaXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALWW1Z8G9Kxq9pBB
+zM+bMwRSfZavR4WeEtTza3S4T/1fYLjEIgNpAAoMNDlCwY4+cLdQhYj8F8LXMPrC
+0E9KKDl0D5zJNmgCLy1FYGd1eqgiNYJ6aB3NWjcrTSNngigRSIa1CL3TD31Z7Ksy
+NXW/c1bediVDUK3a3km35bcicgsdAgMBAAGjggEoMIIBJDAJBgNVHRMEAjAAMC0G
+CWCGSAGG+EIBDQQgFh5FYXN5LVJTQSBHZW5lcmF0ZWQgQ2VydGlmaWNhdGUwHQYD
+VR0OBBYEFN9DuVYraHfACFFNXoOV1zRr37mSMIGmBgNVHSMEgZ4wgZuAFGJxlblQ
++CMn55tgp8B5E+6IPQTkoXikdjB0MQswCQYDVQQGEwJJVDELMAkGA1UECBMCUk0x
+DTALBgNVBAcTBFJvbWUxDzANBgNVBAoTBmNhc3B1cjESMBAGA1UEAxMJY2FzcHVy
+IENBMSQwIgYJKoZIhvcNAQkBFhVhLmZlcnJhcmVzaUBjYXNwdXIuaXSCCQD/OG1v
+MAz1PDATBgNVHSUEDDAKBggrBgEFBQcDAjALBgNVHQ8EBAMCB4AwDQYJKoZIhvcN
+AQEFBQADgYEAhcW+HLZTmG6hb27kfLMkfS5IQKyaaEJYOeCLjKH+am2NKf0H7c1M
+9hdOdaT6qzJ+nZj7aB81ETziINRmZa3qofElIccu2wSgFAQ7CSTZ5gwgX+MgXVrk
+arVGXQp3skVfrMFCRl7jKZAAtjzJwZJokWPgZIIzvWXEupLtdquqVXs=
+-----END CERTIFICATE-----

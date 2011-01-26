@@ -1,7 +1,7 @@
 #!/bin/ash
 #
 # OpenWISP Firmware
-# Copyright (C) 2010 CASPUR (Davide Guerri d.guerri@caspur.it)
+# Copyright (C) 2010 CASPUR
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,19 +29,21 @@ HOME_PATH="/etc/owispmanager/"
 # Output:       retrieving command line
 # Returns:      0 on success, 1 on error
 # Notes:
-configurationRetrieveCommand() {
-  if [ -x "`which curl`" ]; then
-    eval "$1=\"curl -L --cert $CLIENT_CERTIFICATES_FILE --cert-type PEM --key $CLIENT_CERTIFICATES_FILE --key-type PEM --cacert $CA_CERTIFICATE_FILE -o\""
-    return 0
-  fi
-  if [ "`wget -V 2>&1 | head -1 | cut -d' ' -f1`" == "GNU" ]; then
-    eval "$1=\"wget --certificate=$CLIENT_CERTIFICATES_FILE --certificate-type=PEM --private-key=$CLIENT_CERTIFICATES_FILE --private-key-type=PEM --ca-certificate=$CA_CERTIFICATE_FILE -O\""
-    return 0
-  fi
+configurationRetrieveCommand() {                                                          
   
-  echo "* ERROR: cannot retrieve configuration! Please install cur or GNU wget!!"
-  return 1
-}
+  if [ -x "`which wget`" ]; then                                                
+    eval "$1=\"wget -O\""
+    return 0                                                                     
+  fi                                                                                  
+  if [ -x "`which curl`" ]; then                                                    
+    eval "$1=\"curl -L -o\""                                                                                                                                    
+    return 0                                                                  
+  fi                                         
+
+  echo "* ERROR: cannot retrieve configuration! Please install curl or wget!!"               
+  return 1                                                                            
+
+}            
 
 # -------
 # Function:     configurationRetrieve
@@ -53,11 +55,36 @@ configurationRetrieveCommand() {
 configurationRetrieve() {
   openStatusLogResults
   
+  STATUS_OK="0"
+
+  # If VPN is not started is useless to retrieve configuration
+  # Check for that and try to restart the service if needed 
+  # In order to modify or customize check and restart command 
+  # please view "common.sh" file
+  eval $VPN_CHECK_CMD
+
+  if [ "$?" -ne "0" ]; then 
+    echo "* VPN May be down trying to restart"
+    eval $VPN_RESTART_CMD
+    sleep 3 # This is useful to avoid problem when restarting
+    eval $VPN_CHECK_CMD
+    
+    if [ "$?" -ne "0" ]; then
+      echo "* Cannot start VPN"
+      closeStatusLogResults
+      return 1
+    fi
+  else 
+    $STATUS_OK="1"
+  fi
+
+  #VPN Seems to be up try to (w)get configuration 
+
   echo "Retrieving configuration..."
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$1" -eq "0" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE https://`echo \"$CONFIG_home_address\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL"
+  if [ "$1" -eq "0" ] && [ "$SATUS_OK" -eq "1" ]; then
+    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://`echo \"$INNER_SERVER\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL"
   else
     return 2
   fi
@@ -87,7 +114,7 @@ configurationChanged() {
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
   if [ "$1" -eq "0" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp https://$CONFIG_home_address/$CONFIGURATION_TARGZ_MD5_REMOTE_URL"
+    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL"
   else
     echo "* BUG: shouldn't be here"
     return 0 # Assume configuration isn't changed!
@@ -366,7 +393,7 @@ do
       # Uci configuration completed and remote configuration applied
       if [ "$upkeep_timer" -eq "0" ]; then
         upkeep
-      fi 
+      fi
       if [ "$configuration_check_timer" -eq "0" ]; then
         configurationChanged
         if [ "$?" -eq "1" ]; then

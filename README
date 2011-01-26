@@ -1,0 +1,62 @@
+                                   =>=>=>=>=>=>=>=>=>=
+                                  =>=>=>=>=>=>=>=>=>=>=>
+                                  =>=>=>=>=>=>=>=>=>=>=>
+                                  =>=>=>=>=>=>=>=>=>=>=>
+                                  =>=>=>=>    =>=>=>=>=>
+                                  =>=>=>=>    =>=>=>=>=>
+                                  =>=>=>=>    =>=>=>=>=>
+                                  =>=>=>=>
+                                  =>=>=>=>
+                                  =>=>=>=>=>=>=>=>=>=>=>   
+                                  =>=>=>=>=>=>=>=>=>=>=>  
+                                   =>=>=>=>=>=>=>=>=>=
+################################| http://spider.caspur.it |############################ 
+
+#TODO: Make inner server configurable
+
+The openwrt supported platfrom are: 
+adm5120
+ar7
+ar71xx
+atheros heavely tested
+au1000
+avr32
+brcm-2.4
+brcm47xx
+ifxmips
+ixp4xx
+magicbox
+ppc40x
+ppc44x
+rb532
+rdc
+x86
+
+If you have some troubles please read our wiki.
+In order to run deployment script you have to configure you server (sample configuration 
+in server folder) if you don't have an atheros platform please change it in the 
+configwrt.minimal file. Or compile it yourself and only use our scripts. 
+
+The deployment script installs a cgi-bin configuration service, a custom version of htpdate 
+configuration file and a custom vpn for management and configuration purposes. 
+You can customize this script with your parameters but in this case you must read our 
+code to fully understand it.
+
+In order to change the default WPA-PSK key you have to change 
+DEFAULT_WPAPSK=""
+directive in "common.sh"
+our default key is set to "owm-Ohz6ohngei"
+
+In order to configure an AP via web you can reach it at http://172.22.33.1:8080/
+or via ssh doing ssh -l root 172.22.33.1 but the web way is higly recomended.
+
+Default ssh password will be "ciaociao" 
+
+If you want to customize the firmware you have to modify common.sh file, 
+you can change VPN certificates by replace the old one in the vpn folder.
+
+If HIDE_SERVER_PAGE is set to 1 the server setting menu tab will be hidden
+
+Usage Example:
+
+./deploy-firmware.sh ~/codes/kamikaze atheros  

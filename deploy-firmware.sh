@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # OpenWISP Firmware
-# Copyright (C) 2010 CASPUR (Davide Guerri d.guerri@caspur.it)
+# Copyright (C) 2010 CASPUR
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,29 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#     our ROOTFS will be $BUILDROOT/build_dir/arch/root-*/
-#     arch will be one of i386, mips, ....
-
-
-TOOLS='.'
-
 if [ -z "$1" ]; then
   echo "Usage: $0 <openwrt sources path> <platform>"
   echo "Read the README file for more instruction "
   exit 1
 fi
 
-REPO=http://downloads.openwrt.org/kamikaze/8.09.2/$PLATFORM/packages/
+if [ -z "$2" ]; then
+  echo "Setting default platform to atheros"
+  PLATFORM="atheros"
+else 
+  echo "please make sure you have configured a correct platform in configwrt.minimal or .config file"
+  PLATFORM=$2
+fi
 
-PLATFORM=$2
 BUILDROOT=$1
+TOOLS='.'
+REPO=http://downloads.openwrt.org/kamikaze/8.09.2/$PLATFORM/packages/
 
 if [ -z "$BUILDROOT" ] || [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
   echo "Invalid openwrt sources path"
   exit 1
 fi
 
-if [ ! -x $BUILDROOT/build_dir/root-* ]; then 
+if [ ! -x $BUILDROOT/build_dir/linux-* ]; then 
   echo "You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 else
@@ -50,7 +51,6 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
   echo "Building images..."
   cp configwrt.minimal $BUILDROOT/.config
-  #echo $1
   pushd $1
   make package/symlinks
   make oldconfig
@@ -77,15 +77,15 @@ if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
 fi
 
 #Copy custom file to target os 
-
-echo $ROOTFS 
 echo "Copying file..."
 mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
+mkdir $ROOTFS/etc/openvpn 2>/dev/null
+cp -R $TOOLS/openvpn/* $ROOTFS/etc/openvpn/ 2>/dev/null
 find $ROOTFS/etc/owispmanager -iname "*.svn" -exec rm -Rf {} \; 2>/dev/null
-chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh 
-cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
+chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh
 cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate
+cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
 if [ "$?" -ne "0" ]; then
  echo "Failed to copy files..."
  exit 2
@@ -112,10 +112,32 @@ rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dn
 echo "* Enabling needed services"
 pushd $ROOTFS
 ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate
+ln -sf /etc/init.d/openvpn /etc/rc.d/S95openvpn
 ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate
 popd 
 
 #You can put here your configuration if needed
+echo "* Configuring OpenVPN settings"
+cat << EOF > $ROOTFS/etc/config/openvpn
+config 'openvpn' 'client_config'
+        option 'enable' '1'
+        option 'client' '1'
+        option 'proto' 'tcp'
+        option 'remote' '$VPN_REMOTE'
+        option 'nobind' ''
+        option 'resolv_retry' 'infinite'
+        option 'persist_key' ''
+        option 'persist_tun' ''
+        option 'ca' '/etc/openvpn/ca.crt'
+        option 'cert' '/etc/openvpn/client.crt'
+        option 'key' '/etc/openvpn/client.key'
+        option 'tls_auth' '/etc/openvpn/ta.key 1'
+        option 'cipher' 'BF-CBC'
+        option 'comp_lzo' '1'
+        option 'dev' 'setup00'
+        option 'dev_type' 'tun'
+        option 'verb' '2' 
+EOF
 
 echo "* Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
@@ -163,11 +185,9 @@ if [ "$?" -ne "0" ]; then
 fi
 
 echo "Rebuilding images..."
-echo $BUILDROOT
 pushd $BUILDROOT
 make target/install
 make package/index
 popd
 
 echo "Done."
-

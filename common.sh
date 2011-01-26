@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2010 CASPUR (Davide Guerri d.guerri@caspur.it)
+# Copyright (C) 2010 CASPUR
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -43,8 +43,6 @@ CONFIGURATIONS_PATH="$TMP_PATH/owispmanager/"
 CONFIGURATION_TARGZ_FILE="$CONFIGURATIONS_PATH/configuration.tar.gz"
 CONFIGURATION_TARGZ_MD5_FILE="$CONFIGURATIONS_PATH/configuration.tar.gz.md5"
 CONFIGURATIONS_ACTIVE_FILE="$CONFIGURATIONS_PATH/active"
-CLIENT_CERTIFICATES_FILE="$HOME_PATH/certificates.pem"
-CA_CERTIFICATE_FILE="$HOME_PATH/ca.pem"
 HOSTAPD_FILE="$TMP_PATH/configuration.hostapd"
 HOSTAPD_PIDFILE="$TMP_PATH/configuration-hostapd.pid"
 HTTPD_PIDFILE="$TMP_PATH/configuration-httpd.pid"
@@ -57,12 +55,22 @@ POST_INSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/post_install.sh"
 UPKEEP_SCRIPT_FILE="$CONFIGURATIONS_PATH/upkeep.sh"
 PRE_UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/pre_unistall.sh"
 UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/uninstall.sh"
+#openVPN
+HIDE_SERVER_PAGE="0"
+VPN_IFACE="setup00"
+VPN_CHECK_CMD="route -n|grep $VPN_IFACE"
+VPN_RESTART_CMD="/etc/init.d/openvpn restart"
+CLIENT_CERTIFICATES_FILE="/etc/openvpn/client.crt"
+CA_CERTIFICATE_FILE="/etc/openvpn/ca.crt"
+INNER_SERVER="10.8.0.1"
+INNER_SERVER_PORT="80"
+VPN_REMOTE=""
 # Status
 STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
 _APP_NAME="open WISP Manager"
-_APP_VERS="1.1"
+_APP_VERS="1.7"
 
 # -------
 # Function:     checkPrereq
@@ -114,29 +122,29 @@ checkPrereq() {
   # The following ar not "fatal"
 
   # ntpclient
-  if [ -x "`which ntpdate`" ] || [ -x "`which htpdate` "]; then
+  if [ -x "`which ntpdate`" ] || [ -x "`which htpdate`" ]; then
     echo "Time synchronization daemon is present"
   else
     if [ "$__ret" -lt "2" ]; then
       __ret="1"
     fi
-    echo "Time syncronization daemon is missing!"
+    echo "Time synchronization daemon is missing!"
   fi
 
-  # Curl / GNU Wget
-#  if [ -x "`which curl`" ]; then
-#    echo "Curl is present (`curl -V 2>&1 | head -1`)"
-#  else
-    if [ "`wget -V 2>&1 | head -1 | cut -d' ' -f1`" == "GNU" ]; then
-      echo "GNU wget is present (`wget -V 2>&1 | head -1`)"
+#  curl or wget
+  if [ -x "`which curl`" ]; then
+    echo "Curl is present (`curl -V 2>&1 | head -1`)"
+  else
+    if [ -x "`which wget `"  ]; then
+      echo "Wget is present"
     else
       if [ "$__ret" -lt "2" ]; then
         __ret="1"
       fi
-#      echo "Curl and GNU wget are missing!"
-      echo "GNU wget is missing!"
+      echo "Curl or wget are missing!"
+      echo "wget is missing!"
     fi
-#  fi
+  fi
 
   # GNU netcat
   if [ -x "`which nc`" ]; then
