@@ -191,3 +191,7 @@ make package/index
 popd
 
 echo "Done."
+
+echo "Moving Compiled Images into \"builds\" directory"
+cp $BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma ./builds/
+echo "Your system is ready." 
