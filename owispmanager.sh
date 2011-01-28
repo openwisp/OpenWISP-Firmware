@@ -75,7 +75,7 @@ configurationRetrieve() {
       return 1
     fi
   else 
-    $STATUS_OK="1"
+    STATUS_OK="1"
   fi
 
   #VPN Seems to be up try to (w)get configuration 
