@@ -123,16 +123,15 @@ echo "* Disabling unneeded services"
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo "* Disabling iptables"
   rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
-  mkdir $ROOTFS/etc/modules.d/disabled
+  mkdir $ROOTFS/etc/modules.d/disabled 2>/dev/null
   mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
 fi
 
 echo "* Enabling needed services"
 pushd $ROOTFS
-ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate
-ln -sf /etc/init.d/openvpn /etc/rc.d/S95openvpn
-ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate
-echo "*/5 * * * * /etc/init.d/ntpdate start" >> /etc/crontabs/root
+ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate 2>/dev/null
+ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate 2>/dev/null
+echo "*/5 * * * * /etc/init.d/ntpdate start" >> ./etc/crontabs/root
 popd
 
 echo "* Deploying initial wireless configuration"
