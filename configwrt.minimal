@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Kamikaze (r18961)
-# Wed Jan 26 11:17:00 2011
+# Mon Jan 31 11:59:17 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -175,9 +175,9 @@ CONFIG_GCC_VERSION="4.1.2"
 CONFIG_UCLIBC_VERSION="0.9.29"
 # CONFIG_IB is not set
 # CONFIG_SDK is not set
-# CONFIG_UCI_PRECONFIG is not set
+CONFIG_UCI_PRECONFIG=y
 CONFIG_UCI_PRECONFIG_network_lan_dns=""
-CONFIG_UCI_PRECONFIG_network_lan_proto="static"
+CONFIG_UCI_PRECONFIG_network_lan_proto="dhcp"
 CONFIG_UCI_PRECONFIG_network_lan_gateway=""
 CONFIG_UCI_PRECONFIG_network_lan_netmask="255.255.255.0"
 CONFIG_UCI_PRECONFIG_network_lan_ipaddr="192.168.1.1"
