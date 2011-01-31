@@ -29,21 +29,51 @@ HOME_PATH="/etc/owispmanager/"
 # Output:       retrieving command line
 # Returns:      0 on success, 1 on error
 # Notes:
-configurationRetrieveCommand() {                                                          
-  
-  if [ -x "`which wget`" ]; then                                                
+configurationRetrieveCommand() {
+
+  if [ -x "`which wget`" ]; then
     eval "$1=\"wget -O\""
-    return 0                                                                     
-  fi                                                                                  
-  if [ -x "`which curl`" ]; then                                                    
+    return 0
+  fi
+  if [ -x "`which curl`" ]; then
     eval "$1=\"curl -L -o\""                                                                                                                                    
-    return 0                                                                  
-  fi                                         
+    return 0
+  fi
 
-  echo "* ERROR: cannot retrieve configuration! Please install curl or wget!!"               
-  return 1                                                                            
+  echo "* ERROR: cannot retrieve configuration! Please install curl or wget!!"
+  return 1
 
-}            
+}
+
+# -------
+# Function:     checkVPN
+# Description:  Check Setup VPN status and restart it if necessary
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success (VPN is up and running) !0 otherwise
+# Notes:
+checkVPN() {
+  
+  # In order to modify or customize check and restart command 
+  # please view "common.sh" file
+  eval $VPN_CHECK_CMD
+
+  if [ "$?" -ne "0" ]; then
+    openStatusLogResults
+    echo "* VPN is down, trying to restart it"
+    eval $VPN_RESTART_CMD
+    sleep 3 # This is useful to avoid problem when restarting
+    eval $VPN_CHECK_CMD
+
+    if [ "$?" -ne "0" ]; then
+      echo "* Cannot start VPN"
+      closeStatusLogResults
+      return 1
+    fi
+  fi
+  
+  return 0
+}
 
 # -------
 # Function:     configurationRetrieve
@@ -55,36 +85,11 @@ configurationRetrieveCommand() {
 configurationRetrieve() {
   openStatusLogResults
   
-  STATUS_OK="0"
-
-  # If VPN is not started is useless to retrieve configuration
-  # Check for that and try to restart the service if needed 
-  # In order to modify or customize check and restart command 
-  # please view "common.sh" file
-  eval $VPN_CHECK_CMD
-
-  if [ "$?" -ne "0" ]; then 
-    echo "* VPN May be down trying to restart"
-    eval $VPN_RESTART_CMD
-    sleep 3 # This is useful to avoid problem when restarting
-    eval $VPN_CHECK_CMD
-    
-    if [ "$?" -ne "0" ]; then
-      echo "* Cannot start VPN"
-      closeStatusLogResults
-      return 1
-    fi
-  else 
-    STATUS_OK="1"
-  fi
-
-  #VPN Seems to be up try to (w)get configuration 
-
   echo "Retrieving configuration..."
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$1" -eq "0" ] && [ "$STATUS_OK" -eq "1" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://`echo \"$INNER_SERVER\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL"
+  if [ "$?" -eq "0" ]; then
+    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://`echo \"$INNER_SERVER\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1"
   else
     closeStatusLogResults
     return 2
@@ -110,14 +115,15 @@ configurationRetrieve() {
 # Returns:      1 configuration changed, 0 configuration unchanged (or an error occurred)
 # Notes:
 configurationChanged() {
-  openStatusLogResults
-  
+
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$1" -eq "0" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL"
+  if [ "$?" -eq "0" ]; then
+    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1"
   else
+    openStatusLogResults
     echo "* BUG: shouldn't be here"
+    closeStatusLogResults
     return 0 # Assume configuration isn't changed!
   fi
 
@@ -125,19 +131,21 @@ configurationChanged() {
   if [ "$?" -eq "0" ]; then
     # Validates md5 format
     if [ -z "`head -1 $CONFIGURATION_TARGZ_MD5_FILE.tmp | egrep -e \"^[0-9a-z]{32}$\"`" ]; then
+      openStatusLogResults
       echo "* ERROR: Server send us garbage!"
       closeStatusLogResults
       return 0 # Assume configuration isn't changed!
     fi
     if [ "`cat $CONFIGURATION_TARGZ_MD5_FILE.tmp`" == "`cat $CONFIGURATION_TARGZ_MD5_FILE`" ]; then
-      closeStatusLogResults
       return 0
     else
+      openStatusLogResults
       echo "* Configuration changed!"
       closeStatusLogResults
       return 1
     fi
   else
+    openStatusLogResults
     echo "* WARNING: Cannot retrieve configuration md5 from server!"
     closeStatusLogResults
     return 0 # Assume configuration isn't changed!
@@ -280,7 +288,9 @@ configurationInstall() {
   fi
   eval $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
-    eval $POST_INSTALL_SCRIPT_FILE
+    if [ -f "$POST_INSTALL_SCRIPT_FILE" ]; then
+      eval $POST_INSTALL_SCRIPT_FILE
+    fi
   else
     eval $UNINSTALL_SCRIPT_FILE
     closeStatusLogResults
@@ -301,8 +311,10 @@ configurationInstall() {
 # Returns:      nothing
 # Notes:
 upkeep() {
-  cd $CONFIGURATIONS_PATH
-  eval $UPKEEP_SCRIPT_FILE
+  if [ -f "$UPKEEP_SCRIPT_FILE" ]; then
+    cd $CONFIGURATIONS_PATiH
+    eval $UPKEEP_SCRIPT_FILE
+  fi
 }
 
 openStatusLogResults() {
@@ -388,7 +400,9 @@ do
   
   upkeep_timer=`expr \( $upkeep_timer + 1 \) % $UPKEEP_TIME_UNITS`
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
-  
+
+  checkVPN ; VPN_STATUS="$?"
+
   if [ "$CONFIG_home_status" == "$STATE_CONFIGURED" ]; then
     if [ -f $CONFIGURATIONS_ACTIVE_FILE ]; then
       # Uci configuration completed and remote configuration applied
@@ -396,31 +410,42 @@ do
         upkeep
       fi
       if [ "$configuration_check_timer" -eq "0" ]; then
-        configurationChanged
-        if [ "$?" -eq "1" ]; then
-          configurationUninstall
-          # If the following fails is likely to be a temporary problem.
-          # $CONFIGURATIONS_ACTIVE_FILE was deleted by configurationUninstall() so
-          # next itaration we're going to enter in "setup" state...
-          configurationRetrieve
-          if [ "$?" -eq "0" ]; then
+        if [ "$VPN_STATUS" -eq "0" ]; then
+          configurationChanged
+          if [ "$?" -eq "1" ]; then
+            configurationUninstall
             # If the following fails is likely to be a temporary problem.
             # $CONFIGURATIONS_ACTIVE_FILE was deleted by configurationUninstall() so
             # next itaration we're going to enter in "setup" state...
-            configurationInstall
+            configurationRetrieve
+            if [ "$?" -eq "0" ]; then
+              # If the following fails is likely to be a temporary problem.
+              # $CONFIGURATIONS_ACTIVE_FILE was deleted by configurationUninstall() so
+              # next itaration we're going to enter in "setup" state...
+              configurationInstall
+            fi
           fi
         fi
       fi
     else
       # Uci configuration completed but non yet applied (setup state)
-      configurationRetrieve
-      if [ "$?" -eq "0" ]; then
-        configurationInstall
+      RET="0"
+      if [ "$VPN_STATUS" -eq "0" ]; then
+        configurationRetrieve
         if [ "$?" -eq "0" ]; then
-          stopConfigurationServices
+          configurationInstall
+          if [ "$?" -ne "0" ]; then
+            RET="1"
+          fi
         else
-          startConfigurationServices
+          RET="1"
         fi
+      else
+        RET="1"
+      fi
+      
+      if [ "$RET" -eq "0" ]; then
+        stopConfigurationServices
       else
         startConfigurationServices
       fi

@@ -30,6 +30,18 @@ else
   PLATFORM=$2
 fi
 
+DISABLE_IPTABLES="no"
+if [ "$PLATFORM" == "atheros" ]; then
+  DISABLE_IPTABLES="yes"
+fi
+
+if [ -z "$3" ]; then
+  echo "Setting void owispmanager vpn server"
+  VPN_REMOTE=""
+else 
+  VPN_REMOTE=$3
+fi
+
 BUILDROOT=$1
 TOOLS='.'
 REPO=http://downloads.openwrt.org/kamikaze/8.09.2/$PLATFORM/packages/
@@ -106,38 +118,22 @@ if [ "$?" -ne "0" ]; then
 fi
 
 echo "Configuring openwrt default firmware:"
+
 echo "* Disabling unneeded services"
-rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+if [ "$DISABLE_IPTABLES" == "yes" ]; then
+  echo "* Disabling iptables"
+  rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+  mkdir $ROOTFS/etc/modules.d/disabled
+  mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
+fi
 
 echo "* Enabling needed services"
 pushd $ROOTFS
 ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate
 ln -sf /etc/init.d/openvpn /etc/rc.d/S95openvpn
 ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate
-popd 
-
-#You can put here your configuration if needed
-echo "* Configuring OpenVPN settings"
-cat << EOF > $ROOTFS/etc/config/openvpn
-config 'openvpn' 'client_config'
-        option 'enable' '1'
-        option 'client' '1'
-        option 'proto' 'tcp'
-        option 'remote' '$VPN_REMOTE'
-        option 'nobind' ''
-        option 'resolv_retry' 'infinite'
-        option 'persist_key' ''
-        option 'persist_tun' ''
-        option 'ca' '/etc/openvpn/ca.crt'
-        option 'cert' '/etc/openvpn/client.crt'
-        option 'key' '/etc/openvpn/client.key'
-        option 'tls_auth' '/etc/openvpn/ta.key 1'
-        option 'cipher' 'BF-CBC'
-        option 'comp_lzo' '1'
-        option 'dev' 'setup00'
-        option 'dev_type' 'tun'
-        option 'verb' '2' 
-EOF
+echo "*/5 * * * * /etc/init.d/ntpdate start" >> /etc/crontabs/root
+popd
 
 echo "* Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
@@ -150,6 +146,13 @@ config wifi-device  wifi1
        option type     atheros
        option channel  auto
        option disabled 1
+EOF
+
+echo "* Configuring owispmanager settings"
+cat << EOF > $ROOTFS/etc/config/owispmanager
+config 'server' 'home'
+  option 'address' '$VPN_REMOTE'
+  option 'status' 'unconfigured'
 EOF
 
 echo "* Configuring password timezone and hostname"
@@ -169,6 +172,8 @@ sed -i 's/root:\!:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9C
 if [ "$?" -ne "0" ]; then
  echo "Failed to set root password"
  exit 2
+else
+ echo "Root password is 'ciaociao'"
 fi
 
 echo "* Installing repository"

@@ -58,13 +58,15 @@ UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/uninstall.sh"
 #openVPN
 HIDE_SERVER_PAGE="0"
 VPN_IFACE="setup00"
-VPN_CHECK_CMD="route -n|grep $VPN_IFACE"
-VPN_RESTART_CMD="/etc/init.d/openvpn restart"
-CLIENT_CERTIFICATES_FILE="/etc/openvpn/client.crt"
+VPN_FILE="$TMP_PATH/owispmanager.ovpn"
+VPN_PIDFILE="$TMP_PATH/owispmanager-ovpn.pid"
+CLIENT_KEY_FILE="/etc/openvpn/client.key"
+CLIENT_CERTIFICATE_FILE="/etc/openvpn/client.crt"
+CLIENT_TA_FILE="/etc/openvpn/ta.key"
 CA_CERTIFICATE_FILE="/etc/openvpn/ca.crt"
 INNER_SERVER="10.8.0.1"
 INNER_SERVER_PORT="80"
-VPN_REMOTE=""
+
 # Status
 STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
@@ -253,6 +255,9 @@ loadStartupConfig() {
   HOSTAPD_STOP="start-stop-daemon -K -p $HOSTAPD_PIDFILE >/dev/null 2>&1"
   DNSMASQ_START="dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h"
   DNSMASQ_STOP="start-stop-daemon -K -p $DNSMASQ_PIDFILE >/dev/null 2>&1"
-
+  VPN_CHECK_CMD="(route -n|grep $VPN_IFACE) >/dev/null 2>&1"
+  VPN_START="openvpn --daemon --syslog openvpn_setup --writepid $VPN_PIDFILE --client --comp-lzo --ca $CA_CERTIFICATE_FILE --cert $CLIENT_CERTIFICATE_FILE --key $CLIENT_KEY_FILE --cipher BF-CBC --dev $VPN_IFACE --dev-type tun  --proto tcp --remote $CONFIG_home_address $CONFIG_home_port --resolv-retry infinite --tls-auth $CLIENT_TA_FILE 1 --verb 1"
+  VPN_STOP="(kill -9 `cat $VPN_PIDFILE` ; rm -f $VPN_PIDFILE) >/dev/null 2>&1"
+  VPN_RESTART_CMD="$VPN_STOP ; sleep 3 ; $VPN_START"
 }
 
