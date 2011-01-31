@@ -29,14 +29,14 @@ load_current_configuration() {
   CURRENT_GW="$CONFIG_lan_gateway"
   CURRENT_DNS="$CONFIG_lan_dns"
   CURRENT_SERVER="$CONFIG_home_address"
-  HIDE_SEVER_PAGE="$CONFIG_hide_server_page"
+  HIDE_SERVER_PAGE="$CONFIG_hide_server_page"
 
-  if [ -f $CLIENT_CERTIFICATES_FILE ] && [ "`cat $CLIENT_CERTIFICATES_FILE`" != "" ]; then
+  if [ -f $CLIENT_CERTIFICATE_FILE ] && [ ! -z "`cat $CLIENT_CERTIFICATE_FILE`" ]; then
     CURRENT_CLIENT_CERTS="Present but not showed..."
   else
     CURRENT_CLIENT_CERTS="Please copy-paste your authentication certificates here..."
   fi
-  if [ -f $CA_CERTIFICATE_FILE ] && [ "`cat $CA_CERTIFICATE_FILE`" != "" ]; then
+  if [ -f $CA_CERTIFICATE_FILE ] && [ ! -z "`cat $CA_CERTIFICATE_FILE`" ]; then
     CURRENT_CA_CERT="Present but not showed..."
   else
     CURRENT_CA_CERT="Please copy-paste your authentication certificates here..."
