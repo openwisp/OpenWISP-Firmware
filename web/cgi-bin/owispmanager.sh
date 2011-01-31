@@ -381,13 +381,6 @@ test_configuration_retrieve() {
     return 0
   fi
 
-  #local server="`echo $CONFIG_home_address | cut -d':' -f1`"
-  #local port="`echo $CONFIG_home_address | cut -s -d':' -f2`"
-  
-  #if [ -z "$port" ]; then
-  #  port="443"
-  #fi
-  
   # Fixes vpn up control and server functionality
   eval $VPN_CHECK_CMD
   if [ "$?" -eq "0" ]; then   
