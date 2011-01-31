@@ -148,10 +148,18 @@ config wifi-device  wifi1
 EOF
 
 echo "* Configuring owispmanager settings"
+if [ -z "$VPN_REMOTE" ] && [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
+  STATUS="unconfigured"
+  HIDE_SERVER_PAGE="0"
+else
+  STATUS="configured"
+  HIDE_SERVER_PAGE="1"
+fi
 cat << EOF > $ROOTFS/etc/config/owispmanager
 config 'server' 'home'
   option 'address' '$VPN_REMOTE'
-  option 'status' 'unconfigured'
+  option 'status' '$STATUS'
+  option 'hide_server_page' '$HIDE_SERVER_PAGE'
 EOF
 
 echo "* Configuring password timezone and hostname"
@@ -172,7 +180,7 @@ if [ "$?" -ne "0" ]; then
  echo "Failed to set root password"
  exit 2
 else
- echo "Root password is 'ciaociao'"
+ echo "Root password set"
 fi
 
 echo "* Installing repository"
