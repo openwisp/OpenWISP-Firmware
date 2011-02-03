@@ -216,17 +216,17 @@ loadStartupConfig() {
   # Set "local" configuration variables
   # If there are uci keys defined, use them...
   WPAPSK=$DEFAULT_WPAPSK
-  if [ ! -z "$CONFIG_local_wpa_psk" ]; then
+  if [ ! -z "$CONFIG_local_setup_wpa_psk" ]; then
      WPAPSK=$CONFIG_local_wpapsk
   fi
 
   WIFIDEV=$DEFAULT_WIFIDEV
-  if [ ! -z "$CONFIG_local_wifi_dev" ]; then
+  if [ ! -z "$CONFIG_local_setup_wifi_dev" ]; then
      WIFIDEV=$CONFIG_local_wifidev
   fi
 
   HTTPD_PORT=$DEFAULT_HTTPD_PORT
-  if [ ! -z "$CONFIG_local_httpd_port" ]; then
+  if [ ! -z "$CONFIG_local_setup_httpd_port" ]; then
      HTTPD_PORT=$CONFIG_local_httpdport
   fi
 
@@ -236,12 +236,12 @@ loadStartupConfig() {
   fi
 
   INNER_SERVER=$DEFAULT_INNER_SERVER
-  if [ ! -z "$CONFIG_local_inner_server" ]; then
+  if [ ! -z "$CONFIG_home_inner_server" ]; then
      INNER_SERVER=$CONFIG_local_inner_server
   fi
 
   INNER_SERVER_PORT=$DEFAULT_INNER_SERVER_PORT
-  if [ ! -z "$CONFIG_local_inner_server_port" ]; then
+  if [ ! -z "$CONFIG_home_inner_server_port" ]; then
      INNER_SERVER_PORT=$CONFIG_local_inner_server_port
   fi
 
@@ -249,11 +249,11 @@ loadStartupConfig() {
   CONFIGURATION_NMASK=$DEFAULT_CONFIGURATION_NMASK
   CONFIGURATION_IP_RANGE_START=$DEFAULT_CONFIGURATION_IP_RANGE_START
   CONFIGURATION_IP_RANGE_END=$DEFAULT_CONFIGURATION_IP_RANGE_END
-  if [ ! -z "$CONFIG_local_ip" ] && [ ! -z "$CONFIG_local_nmask" ] && [ ! -z "$CONFIG_local_range_ip_start" ] && [ ! -z "$CONFIG_local_range_ip_end" ]; then
-     CONFIGURATION_IP=$CONFIG_local_ip
-     CONFIGURATION_NMASK=$CONFIG_local_nmask
-     CONFIGURATION_IP_RANGE_START=$CONFIG_local_range_ip_start
-     CONFIGURATION_IP_RANGE_END=$CONFIG_local_range_ip_end
+  if [ ! -z "$CONFIG_local_setup_ip" ] && [ ! -z "$CONFIG_local_setup_netmask" ] && [ ! -z "$CONFIG_local_setup_range_ip_start" ] && [ ! -z "$CONFIG_local_setup_range_ip_end" ]; then
+     CONFIGURATION_IP=$CONFIG_local_setup_ip
+     CONFIGURATION_NMASK=$CONFIG_local_setup_netmask
+     CONFIGURATION_IP_RANGE_START=$CONFIG_local_setup_range_ip_start
+     CONFIGURATION_IP_RANGE_END=$CONFIG_local_setup_range_ip_end
   fi
 
 }

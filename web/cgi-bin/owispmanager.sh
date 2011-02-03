@@ -29,7 +29,7 @@ load_current_configuration() {
   CURRENT_GW="$CONFIG_lan_gateway"
   CURRENT_DNS="$CONFIG_lan_dns"
   CURRENT_SERVER="$CONFIG_home_address"
-  HIDE_SERVER_PAGE="$CONFIG_home_hide_server_page"
+  HIDE_SERVER_PAGE="$CONFIG_local_hide_server_page"
 
   if [ -f $CLIENT_CERTIFICATE_FILE ] && [ ! -z "`cat $CLIENT_CERTIFICATE_FILE`" ]; then
     CURRENT_CLIENT_CERTS="Present but not showed..."

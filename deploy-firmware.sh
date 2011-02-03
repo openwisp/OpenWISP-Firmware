@@ -159,7 +159,19 @@ cat << EOF > $ROOTFS/etc/config/owispmanager
 config 'server' 'home'
   option 'address' '$VPN_REMOTE'
   option 'status' '$STATUS'
+  option 'inner_server' ''
+  option 'inner_server_port' ''
+
+config 'server' 'local'
   option 'hide_server_page' '$HIDE_SERVER_PAGE'
+  option 'setup_wpa_psk' ''
+  option 'setup_wifi_dev' ''
+  option 'setup_httpd_port' ''
+  option 'setup_ssid' ''
+  option 'setup_ip' ''
+  option 'setup_netmask' ''
+  option 'setup_range_ip_start' ''
+  option 'setup_range_ip_end' ''
 EOF
 
 echo "* Configuring password timezone and hostname"
