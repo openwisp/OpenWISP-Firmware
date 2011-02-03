@@ -129,9 +129,7 @@ fi
 
 echo "* Enabling needed services"
 pushd $ROOTFS
-ln -sf /etc/init.d/ntpdate /etc/rc.d/S60ntpdate 2>/dev/null
-ln -sf /etc/init.d/htpdate /etc/rc.d/S49htpdate 2>/dev/null
-echo "*/5 * * * * /etc/init.d/ntpdate start" >> ./etc/crontabs/root
+echo "*/5 * * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
 popd
 
 echo "* Deploying initial wireless configuration"
