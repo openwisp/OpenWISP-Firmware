@@ -22,7 +22,6 @@ CONFCHECK_TIME_UNITS=12
 CONFIGURATION_DOMAIN="owispmanager-setup"
 IFACE="setup99"
 STATUS_FILE_MAXLINES=1000
-
 DEFAULT_CONFIGURATION_IP="172.22.33.1"
 DEFAULT_CONFIGURATION_IP_RANGE_START="172.22.33.2"
 DEFAULT_CONFIGURATION_IP_RANGE_END="172.22.33.10"
@@ -55,16 +54,18 @@ POST_INSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/post_install.sh"
 UPKEEP_SCRIPT_FILE="$CONFIGURATIONS_PATH/upkeep.sh"
 PRE_UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/pre_unistall.sh"
 UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/uninstall.sh"
-#openVPN
-VPN_IFACE="setup00"
+# openVPN
 VPN_FILE="$TMP_PATH/owispmanager.ovpn"
 VPN_PIDFILE="$TMP_PATH/owispmanager-ovpn.pid"
 CLIENT_KEY_FILE="/etc/openvpn/client.key"
 CLIENT_CERTIFICATE_FILE="/etc/openvpn/client.crt"
 CLIENT_TA_FILE="/etc/openvpn/ta.key"
 CA_CERTIFICATE_FILE="/etc/openvpn/ca.crt"
-INNER_SERVER="10.8.0.1"
-INNER_SERVER_PORT="80"
+VPN_IFACE="setup00"
+DEFAULT_INNER_SERVER="10.8.0.1"
+DEFAULT_INNER_SERVER_PORT="80"
+
+# See loadStartupConfig() for runtime-defined variables
 
 # Status
 STATE_UNCONFIGURED="unconfigured"
@@ -132,7 +133,7 @@ checkPrereq() {
     echo "Time synchronization daemon is missing!"
   fi
 
-#  curl or wget
+  # curl or wget
   if [ -x "`which curl`" ]; then
     echo "Curl is present (`curl -V 2>&1 | head -1`)"
   else
@@ -201,22 +202,31 @@ createUCIConfig() {
   fi
 }
 
+# -------
+# Function:     loadStartupConfig
+# Description:  Loads current confguration and sets up the global variables 
+#               used by configuration services
+# Input:        nothing
+# Output:       nothing
+# Returns:      nothing
+# Notes:
 loadStartupConfig() {
   uci_load "owispmanager"
   
   # Set "local" configuration variables
+  # If there are uci keys defined, use them...
   WPAPSK=$DEFAULT_WPAPSK
-  if [ ! -z "$CONFIG_local_wpapsk" ]; then
+  if [ ! -z "$CONFIG_local_wpa_psk" ]; then
      WPAPSK=$CONFIG_local_wpapsk
   fi
 
   WIFIDEV=$DEFAULT_WIFIDEV
-  if [ ! -z "$CONFIG_local_wifidev" ]; then
+  if [ ! -z "$CONFIG_local_wifi_dev" ]; then
      WIFIDEV=$CONFIG_local_wifidev
   fi
 
   HTTPD_PORT=$DEFAULT_HTTPD_PORT
-  if [ ! -z "$CONFIG_local_httpdport" ]; then
+  if [ ! -z "$CONFIG_local_httpd_port" ]; then
      HTTPD_PORT=$CONFIG_local_httpdport
   fi
 
@@ -225,38 +235,25 @@ loadStartupConfig() {
      SSID=$CONFIG_local_ssid
   fi
 
+  INNER_SERVER=$DEFAULT_INNER_SERVER
+  if [ ! -z "$CONFIG_local_inner_server" ]; then
+     INNER_SERVER=$CONFIG_local_inner_server
+  fi
+
+  INNER_SERVER_PORT=$DEFAULT_INNER_SERVER_PORT
+  if [ ! -z "$CONFIG_local_inner_server_port" ]; then
+     INNER_SERVER_PORT=$CONFIG_local_inner_server_port
+  fi
+
   CONFIGURATION_IP=$DEFAULT_CONFIGURATION_IP
   CONFIGURATION_NMASK=$DEFAULT_CONFIGURATION_NMASK
   CONFIGURATION_IP_RANGE_START=$DEFAULT_CONFIGURATION_IP_RANGE_START
   CONFIGURATION_IP_RANGE_END=$DEFAULT_CONFIGURATION_IP_RANGE_END
-  if [ ! -z "$CONFIG_local_ip" ] && [ ! -z "$CONFIG_local_nmask" ] && [ ! -z "$CONFIG_local_rangeipstart" ] && [ ! -z "$CONFIG_local_rangeipend" ]; then
+  if [ ! -z "$CONFIG_local_ip" ] && [ ! -z "$CONFIG_local_nmask" ] && [ ! -z "$CONFIG_local_range_ip_start" ] && [ ! -z "$CONFIG_local_range_ip_end" ]; then
      CONFIGURATION_IP=$CONFIG_local_ip
      CONFIGURATION_NMASK=$CONFIG_local_nmask
-     CONFIGURATION_IP_RANGE_START=$CONFIG_local_rangeipstart
-     CONFIGURATION_IP_RANGE_END=$CONFIG_local_rangeipend
+     CONFIGURATION_IP_RANGE_START=$CONFIG_local_range_ip_start
+     CONFIGURATION_IP_RANGE_END=$CONFIG_local_range_ip_end
   fi
 
-  # Uncomment for mac80211
-  # MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
-  # MADWIFI_CONFIGURATION_UP="wlanconfig $IFACE create wlandev $WIFIDEV wlanmode ap"
-  # MADWIFI_CONFIGURATION_DOWN="wlanconfig $IFACE destroy"
-  # MADWIFI_CONFIGURATION_CHAN="iwconfig $IFACE channel 1"
-  # Uncomment for madwifi-ng
-  MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
-  MADWIFI_CONFIGURATION_UP="wlanconfig $IFACE create wlandev $WIFIDEV wlanmode ap"
-  MADWIFI_CONFIGURATION_DOWN="wlanconfig $IFACE destroy"
-  MADWIFI_CONFIGURATION_CHAN="iwconfig $IFACE channel 1"
-
-  # Shell commands
-  HTTPD_START="start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a httpd -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r owispmanager"
-  HTTPD_STOP="start-stop-daemon -K -p $HTTPD_PIDFILE >/dev/null 2>&1"
-  HOSTAPD_START="hostapd -P $HOSTAPD_PIDFILE -B $HOSTAPD_FILE"
-  HOSTAPD_STOP="start-stop-daemon -K -p $HOSTAPD_PIDFILE >/dev/null 2>&1"
-  DNSMASQ_START="dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h"
-  DNSMASQ_STOP="start-stop-daemon -K -p $DNSMASQ_PIDFILE >/dev/null 2>&1"
-  VPN_CHECK_CMD="(route -n|grep $VPN_IFACE) >/dev/null 2>&1"
-  VPN_START="openvpn --daemon --syslog openvpn_setup --writepid $VPN_PIDFILE --client --comp-lzo --ca $CA_CERTIFICATE_FILE --cert $CLIENT_CERTIFICATE_FILE --key $CLIENT_KEY_FILE --cipher BF-CBC --dev $VPN_IFACE --dev-type tun  --proto tcp --remote $CONFIG_home_address $CONFIG_home_port --resolv-retry infinite --tls-auth $CLIENT_TA_FILE 1 --verb 1"
-  VPN_STOP="(kill -9 `cat $VPN_PIDFILE` ; rm -f $VPN_PIDFILE) >/dev/null 2>&1"
-  VPN_RESTART_CMD="$VPN_STOP ; sleep 3 ; $VPN_START"
 }
-

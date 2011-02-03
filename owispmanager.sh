@@ -22,15 +22,266 @@ HOME_PATH="/etc/owispmanager/"
 
 . $PKG_INSTROOT/etc/functions.sh
 
+
+# -------
+# Function:     execWithTimeout
+# Description:  Executes a command with timeout
+# Input:        A command, a timeout (>5)
+# Output:       nothing
+# Returns:      Command return value on success, 1 on error
+# Notes:
+execWithTimeout() {
+  local COMMAND=$1
+  local TIMEOUT=$2
+  
+  if [ -z "$COMMAND" ]; then
+    return 1
+  fi
+  
+  if [ -z "$TIMEOUT" ]; then
+      TIMEOUT=10
+  else
+    if [ "$TIMEOUT" -lt "5" ]; then
+      echo "* WARNING execWithTimeout(): timeout is too small, setting it to 5 seconds"
+      TIMEOUT=5
+    fi
+  fi
+  
+  eval "$COMMAND &" 
+  local PID="$!"
+  
+  while [ "$TIMEOUT" -gt "1" ]; do
+    kill -0 $PID >/dev/null 2>&1
+    if [ "$?" -eq "0" ]; then
+      sleep 1
+      TIMEOUT=`expr \( $TIMEOUT - 1 \)`
+    else
+      wait $PID >/dev/null 2>&1
+      return $?
+    fi
+  done
+  
+  kill $PID >/dev/null 2>&1
+  sleep 1
+  kill -0 $PID >/dev/null 2>&1
+  if [ "$?" -eq "0" ]; then
+    kill -9 $PID >/dev/null 2>&1
+  fi
+    
+  echo "* Command prematurely aborted"
+  
+  return 1
+}
+
+# -------
+# Function:     startHttpd
+# Description:  Starts HTTPD daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success, !0 otherwise
+# Notes:
+startHttpd() {
+  start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a httpd -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r $CONFIGURATION_DOMAIN
+  return $?
+}
+
+# -------
+# Function:     stopHttpd
+# Description:  Stops http daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+stopHttpd() {
+  start-stop-daemon -K -p $HTTPD_PIDFILE >/dev/null 2>&1
+  return 0
+}
+
+# -------
+# Function:     startHostapd
+# Description:  Starts HostAP daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success, !0 otherwise
+# Notes:
+startHostapd() {
+  echo "
+logger_syslog=-1
+logger_syslog_level=2
+logger_stdout=-1
+logger_stdout_level=2
+driver=madwifi
+interface=$IFACE
+ssid=$SSID
+debug=0
+wpa=1
+wpa_pairwise=TKIP
+wpa_passphrase=$WPAPSK" > $HOSTAPD_FILE
+  
+  hostapd -P $HOSTAPD_PIDFILE -B $HOSTAPD_FILE
+  return $?
+}
+
+# -------
+# Function:     stopHostapd
+# Description:  Stops HostAP daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+stopHostapd() {
+  start-stop-daemon -K -p $HOSTAPD_PIDFILE >/dev/null 2>&1
+  return 0
+}
+
+# -------
+# Function:     startDnsmasq
+# Description:  Starts dnsmasq daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success, !0 otherwise
+# Notes:
+startDnsmasq() {
+  echo "
+  nameserver $CONFIGURATION_IP
+  search $CONFIGURATION_DOMAIN
+  " > $DNSMASQ_RESOLV_FILE
+  
+  touch $DNSMASQ_LEASE_FILE
+  
+  dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN \
+          -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE \
+          --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h
+          
+  return $?
+}
+
+# -------
+# Function:     stopDnsmasq
+# Description:  Stops dnsmasq daemon
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+stopDnsmasq() {
+  start-stop-daemon -K -p $DNSMASQ_PIDFILE >/dev/null 2>&1
+  return 0
+}
+
+# -------
+# Function:     checkVpnStatus
+# Description:  Checks setup vpn status
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 if the vpn is up and runnng, !0 otherwise
+# Notes:
+checkVpnStatus() {
+  (route -n|grep $VPN_IFACE) >/dev/null 2>&1
+  return $?
+}
+
+# -------
+# Function:     startVpn
+# Description:  Starts the setup vpn
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 if success, !0 otherwise
+# Notes:
+startVpn() {
+  openvpn --daemon --syslog openvpn_setup --writepid $VPN_PIDFILE --client --comp-lzo --nobind \
+          --ca $CA_CERTIFICATE_FILE --cert $CLIENT_CERTIFICATE_FILE --key $CLIENT_KEY_FILE \
+          --cipher BF-CBC --dev $VPN_IFACE --dev-type tun  --proto tcp --remote $CONFIG_home_address $CONFIG_home_port \
+          --resolv-retry infinite --tls-auth $CLIENT_TA_FILE 1 --verb 1
+  return $?
+}
+
+# -------
+# Function:     stopVpn
+# Description:  Stops the setup vpn
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+stopVpn() {
+  VPN_PID="`cat $VPN_PIDFILE 2>/dev/null`"
+  if [ ! -z "$VPN_PID" ]; then
+    kill $VPN_PID
+    sleep 1
+    while [ ! -z "`(cat /proc/$VPN_PID/cmdline|grep openvpn) 2>/dev/null`" ]; do
+      kill -9 $VPN_PID 2>/dev/null
+    done
+  fi
+  return 0
+}
+
+# -------
+# Function:     restartVpn
+# Description:  Restarts the setup vpn
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+restartVpn() {
+  stopVpn
+  startVpn
+  if [ "$?" -eq "0" ]; then
+    sleep 1
+    checkVpnStatus
+    return $?
+  else
+    return $?
+  fi
+}
+
+# -------
+# Function:     createWiFiInterface
+# Description:  Creates the wifi setup interface
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+createWiFiInterface() {
+  if [ -z "$1" ]; then
+    CHAN="1"
+  else
+    CHAN="$1"
+  fi
+  wlanconfig $IFACE create wlandev $WIFIDEV wlanmode ap
+  if [ "$?" -ne "0" ]; then
+    return 1
+  fi
+  iwconfig $IFACE channel $CHAN
+  if [ "$?" -ne "0" ]; then
+    return 1
+  fi
+  ifconfig $IFACE $CONFIGURATION_IP netmask $CONFIGURATION_NMASK up
+  if [ "$?" -ne "0" ]; then
+    return 1
+  fi
+  return 0
+}
+
+# -------
+# Function:     destroyWiFiInterface
+# Description:  Destroys the wifi setup interface
+# Input:        nothing
+# Output:       nothing
+# Returns:      0
+# Notes:
+destroyWiFiInterface() {
+  ifconfig $IFACE down 2>/dev/null
+  wlanconfig $IFACE destroy 2>/dev/null
+  return 0
+}
+
 # -------
 # Function:     configurationRetrieveTool
 # Description:  Determines which tool should be used to retrieve configuration from server
-# Input:        nothing
+# Input:        configuration command env variable name
 # Output:       retrieving command line
 # Returns:      0 on success, 1 on error
 # Notes:
 configurationRetrieveCommand() {
-
   if [ -x "`which wget`" ]; then
     eval "$1=\"wget -O\""
     return 0
@@ -46,33 +297,30 @@ configurationRetrieveCommand() {
 }
 
 # -------
-# Function:     checkVPN
+# Function:     vpnWatchdog
 # Description:  Check Setup VPN status and restart it if necessary
 # Input:        nothing
 # Output:       nothing
 # Returns:      0 on success (VPN is up and running) !0 otherwise
 # Notes:
-checkVPN() {
-  
-  # In order to modify or customize check and restart command 
-  # please view "common.sh" file
-  eval $VPN_CHECK_CMD
-
-  if [ "$?" -ne "0" ]; then
+vpnWatchdog() {
+  checkVpnStatus
+  if [ "$?" -eq "0" ]; then
+    return 0
+  else
     openStatusLogResults
     echo "* VPN is down, trying to restart it"
-    eval $VPN_RESTART_CMD
-    sleep 3 # This is useful to avoid problem when restarting
-    eval $VPN_CHECK_CMD
-
-    if [ "$?" -ne "0" ]; then
+    
+    restartVpn
+    if [ "$?" -eq "0" ]; then
+      closeStatusLogResults
+      return 0
+    else
       echo "* Cannot start VPN"
       closeStatusLogResults
       return 1
     fi
   fi
-  
-  return 0
 }
 
 # -------
@@ -88,14 +336,14 @@ configurationRetrieve() {
   echo "Retrieving configuration..."
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$?" -eq "0" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://`echo \"$INNER_SERVER\" | sed 's/[^0-9\.\:a-zA-Z-]//g'`/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1"
-  else
+  if [ "$?" -ne "0" ]; then
     closeStatusLogResults
     return 2
   fi
   
-  eval $RETRIEVE_CMD
+  # Retrieve the configuration
+  execWithTimeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
+  
   if [ "$?" -eq "0" ]; then
     md5sum $CONFIGURATION_TARGZ_FILE | cut -d' ' -f1 > $CONFIGURATION_TARGZ_MD5_FILE
   else
@@ -115,19 +363,16 @@ configurationRetrieve() {
 # Returns:      1 configuration changed, 0 configuration unchanged (or an error occurred)
 # Notes:
 configurationChanged() {
-
   RETRIEVE_CMD=""
   configurationRetrieveCommand RETRIEVE_CMD
-  if [ "$?" -eq "0" ]; then
-    RETRIEVE_CMD="$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1"
-  else
+  if [ "$?" -ne "0" ]; then
     openStatusLogResults
     echo "* BUG: shouldn't be here"
     closeStatusLogResults
     return 0 # Assume configuration isn't changed!
   fi
 
-  eval $RETRIEVE_CMD
+  execWithTimeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1" 15
   if [ "$?" -eq "0" ]; then
     # Validates md5 format
     if [ -z "`head -1 $CONFIGURATION_TARGZ_MD5_FILE.tmp | egrep -e \"^[0-9a-z]{32}$\"`" ]; then
@@ -163,12 +408,11 @@ stopConfigurationServices() {
   openStatusLogResults
   echo "* Stopping configuration services"
 
-  eval $DNSMASQ_STOP 2>/dev/null
-  eval $HTTPD_STOP 2>/dev/null
-  eval $HOSTAPD_STOP 2>/dev/null
-  ifconfig $IFACE down 2>/dev/null
-  eval $MADWIFI_CONFIGURATION_DOWN 2>/dev/null
-  rm -f $HOSTAPD_FILE $DNSMASQ_RESOLV_FILE 2>/dev/null
+  stopDnsmasq
+  stopHttpd
+  stopHostapd
+  
+  destroyWiFiInterface
 
   closeStatusLogResults
 }
@@ -188,53 +432,29 @@ startConfigurationServices() {
     
     openStatusLogResults
     echo "* Starting configuration services"
-    
-    echo "
-logger_syslog=-1
-logger_syslog_level=2
-logger_stdout=-1
-logger_stdout_level=2
-driver=madwifi
-interface=$IFACE
-ssid=$SSID
-debug=0
-wpa=1
-wpa_pairwise=TKIP
-wpa_passphrase=$WPAPSK
-" > $HOSTAPD_FILE
 
-    echo "
-nameserver $CONFIGURATION_IP
-search $CONFIGURATION_DOMAIN
-" > $DNSMASQ_RESOLV_FILE
-    touch $DNSMASQ_LEASE_FILE
-
-
-    eval $MADWIFI_CONFIGURATION_UP
-    if [ "$?" -eq "0" ]; then
-      eval $MADWIFI_CONFIGURATION_CHAN
-      ifconfig $IFACE $CONFIGURATION_IP netmask $CONFIGURATION_NMASK up
-    else
-      echo "* BUG: ifconfig failed!"
+    createWiFiInterface 1
+    if [ "$?" -ne "0" ]; then
+      echo "* BUG: createWiFiInterface failed!"
       stopConfigurationServices
       return 1
     fi
     if [ "$?" -eq "0" ]; then
-      eval $HOSTAPD_START
+      startHostapd
     else
       echo "* BUG: Cannot start hostapd!"
       stopConfigurationServices
       return 1
     fi
     if [ "$?" -eq "0" ]; then
-      eval $HTTPD_START
+      startHttpd
     else
       echo "* BUG: Cannot start httpd!"
       stopConfigurationServices
       return 1
     fi
     if [ "$?" -eq "0" ]; then
-      eval $DNSMASQ_START
+      startDnsmasq
     else
       echo "* BUG: Cannot start dnsmasq!"
       stopConfigurationServices
@@ -259,8 +479,8 @@ configurationUninstall() {
 
   cd $CONFIGURATIONS_PATH
 
-  eval $PRE_UNINSTALL_SCRIPT_FILE
-  eval $UNINSTALL_SCRIPT_FILE
+  $PRE_UNINSTALL_SCRIPT_FILE
+  $UNINSTALL_SCRIPT_FILE
 
   rm -Rf $CONFIGURATIONS_PATH/*
 
@@ -286,13 +506,13 @@ configurationInstall() {
     closeStatusLogResults
     return 1
   fi
-  eval $INSTALL_SCRIPT_FILE
+  $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
     if [ -f "$POST_INSTALL_SCRIPT_FILE" ]; then
-      eval $POST_INSTALL_SCRIPT_FILE
+      $POST_INSTALL_SCRIPT_FILE
     fi
   else
-    eval $UNINSTALL_SCRIPT_FILE
+    $UNINSTALL_SCRIPT_FILE
     closeStatusLogResults
     return 1
   fi
@@ -312,8 +532,8 @@ configurationInstall() {
 # Notes:
 upkeep() {
   if [ -f "$UPKEEP_SCRIPT_FILE" ]; then
-    cd $CONFIGURATIONS_PATiH
-    eval $UPKEEP_SCRIPT_FILE
+    cd $CONFIGURATIONS_PATH
+    $UPKEEP_SCRIPT_FILE
   fi
 }
 
@@ -401,7 +621,7 @@ do
   upkeep_timer=`expr \( $upkeep_timer + 1 \) % $UPKEEP_TIME_UNITS`
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
 
-  checkVPN ; VPN_STATUS="$?"
+  vpnWatchdog ; VPN_STATUS="$?"
 
   if [ "$CONFIG_home_status" == "$STATE_CONFIGURED" ]; then
     if [ -f $CONFIGURATIONS_ACTIVE_FILE ]; then
@@ -457,4 +677,3 @@ do
   sleep $SLEEP_TIME
   
 done
-
