@@ -129,7 +129,7 @@ fi
 
 echo "* Enabling needed services"
 pushd $ROOTFS
-echo "*/5 * * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
+echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
 popd
 
 echo "* Deploying initial wireless configuration"

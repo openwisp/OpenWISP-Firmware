@@ -31,41 +31,41 @@ HOME_PATH="/etc/owispmanager/"
 # Returns:      Command return value on success, 1 on error
 # Notes:
 execWithTimeout() {
-  local COMMAND=$1
-  local TIMEOUT=$2
+  local __command=$1
+  local __timeout=$2
   
-  if [ -z "$COMMAND" ]; then
+  if [ -z "$__command" ]; then
     return 1
   fi
   
-  if [ -z "$TIMEOUT" ]; then
-      TIMEOUT=10
+  if [ -z "$__timeout" ]; then
+      __timeout=10
   else
-    if [ "$TIMEOUT" -lt "5" ]; then
+    if [ "$__timeout" -lt "5" ]; then
       echo "* WARNING execWithTimeout(): timeout is too small, setting it to 5 seconds"
-      TIMEOUT=5
+      __timeout=5
     fi
   fi
   
-  eval "$COMMAND &" 
-  local PID="$!"
+  eval "$__command &" 
+  local __pid="$!"
   
-  while [ "$TIMEOUT" -gt "1" ]; do
-    kill -0 $PID >/dev/null 2>&1
+  while [ "$__timeout" -gt "1" ]; do
+    kill -0 $__pid >/dev/null 2>&1
     if [ "$?" -eq "0" ]; then
       sleep 1
-      TIMEOUT=`expr \( $TIMEOUT - 1 \)`
+      __timeout=`expr \( $__timeout - 1 \)`
     else
-      wait $PID >/dev/null 2>&1
+      wait $__pid >/dev/null 2>&1
       return $?
     fi
   done
   
-  kill $PID >/dev/null 2>&1
+  kill $__pid >/dev/null 2>&1
   sleep 1
-  kill -0 $PID >/dev/null 2>&1
+  kill -0 $__pid >/dev/null 2>&1
   if [ "$?" -eq "0" ]; then
-    kill -9 $PID >/dev/null 2>&1
+    kill -9 $__pid >/dev/null 2>&1
   fi
     
   echo "* Command prematurely aborted"
@@ -297,6 +297,30 @@ configurationRetrieveCommand() {
 }
 
 # -------
+# Function:     updateDate
+# Description:  Tries hard to update time
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success (date/time updated) !0 otherwise
+# Notes:
+updateDate() {
+  local __ret=1
+  
+  if [ -x "`which ntpdate`" ]; then
+    ntpdate -s -b -u -t 5 ntp.ien.it
+    __ret=$?
+  fi
+  if [ "$__ret" -ne "0" ] && [ -x "`which htpdate`" ]; then
+    execWithTimeout "htpdate -s -t www.google.com | grep 'No time correction
+    needed'" 5
+    __ret= [ "$?" -ne "0" ] # Bad htpdate bug!
+  fi
+  
+  return $__ret
+
+}
+
+# -------
 # Function:     vpnWatchdog
 # Description:  Check Setup VPN status and restart it if necessary
 # Input:        nothing
@@ -311,12 +335,23 @@ vpnWatchdog() {
     openStatusLogResults
     echo "* VPN is down, trying to restart it"
     
+    if [ "`date -I | cut -d'-' -f1`" -eq "1970" ]; then
+      echo "* Wrong date... I'll try to update it"
+      updateDate
+      if [ "$?" -eq "0" ]; then
+        echo "* Date/time correctly updated!"
+      else
+        echo "** Can't update date/time: check network configuration, DNS and NTP and/or HTTP connectivity **"
+      fi
+    fi
+    
     restartVpn
     if [ "$?" -eq "0" ]; then
+      echo "* VPN correctly started"
       closeStatusLogResults
       return 0
     else
-      echo "* Cannot start VPN"
+      echo "* Can't start VPN"
       closeStatusLogResults
       return 1
     fi
@@ -553,11 +588,39 @@ closeStatusLogResults() {
   fi
 }
 
+checkReset() {
+  if   [ ! -z "`cat /proc/cpuinfo|grep AR2317`" ]; then
+    # Atherso SoC AR2317
+    gpioctl dirin 6 > /dev/null
+    gpioctl get 6 > /dev/null
+    if [ "$?" -eq "64" ]; then
+      openStatusLogResults
+      echo "* Reset button pressed..."
+      echo "** Erasing rootfs_data **"
+      mtd -r erase mtd3
+      closeStatusLogResults
+      sleep 100
+      exit 1
+    fi
+  #elif 
+  # TODO: other hardware
+  fi
+}
+
+
 # ------------------- MAIN
+
+# Check and serve reset botton
+checkReset
+
 cleanUp() {
   echo "* Cleaning up..."
-  echo ""
+  echo "* Uninstalling runtime configuration"
+  configurationUninstall
+  echo "* Stopping configuration services"  
   stopConfigurationServices
+  echo "* Goodbye!"  
+  echo ""
 }
 
 # Signals handling
@@ -621,7 +684,8 @@ do
   upkeep_timer=`expr \( $upkeep_timer + 1 \) % $UPKEEP_TIME_UNITS`
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
 
-  vpnWatchdog ; VPN_STATUS="$?"
+  vpnWatchdog
+  local __vpn_status="$?"
 
   if [ "$CONFIG_home_status" == "$STATE_CONFIGURED" ]; then
     if [ -f $CONFIGURATIONS_ACTIVE_FILE ]; then
@@ -630,7 +694,7 @@ do
         upkeep
       fi
       if [ "$configuration_check_timer" -eq "0" ]; then
-        if [ "$VPN_STATUS" -eq "0" ]; then
+        if [ "$__vpn_status" -eq "0" ]; then
           configurationChanged
           if [ "$?" -eq "1" ]; then
             configurationUninstall
@@ -649,22 +713,22 @@ do
       fi
     else
       # Uci configuration completed but non yet applied (setup state)
-      RET="0"
-      if [ "$VPN_STATUS" -eq "0" ]; then
+      local __ret="0"
+      if [ "$__vpn_status" -eq "0" ]; then
         configurationRetrieve
         if [ "$?" -eq "0" ]; then
           configurationInstall
           if [ "$?" -ne "0" ]; then
-            RET="1"
+            __ret="1"
           fi
         else
-          RET="1"
+          __ret="1"
         fi
       else
-        RET="1"
+        __ret="1"
       fi
       
-      if [ "$RET" -eq "0" ]; then
+      if [ "$__ret" -eq "0" ]; then
         stopConfigurationServices
       else
         startConfigurationServices
