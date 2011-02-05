@@ -717,25 +717,30 @@ do
       if [ "$__vpn_status" -eq "0" ]; then
         configurationRetrieve
         if [ "$?" -eq "0" ]; then
+          # Free resources ASAP for low-end devices
+          stopConfigurationServices
+          # Install the configuration
           configurationInstall
           if [ "$?" -ne "0" ]; then
+            configurationUninstall
             __ret="1"
           fi
         else
+          # oops, something went wrong: restart configuration services in a moment
           __ret="1"
         fi
       else
+        # oops, something went wrong: restart configuration services in a moment
         __ret="1"
       fi
       
-      if [ "$__ret" -eq "0" ]; then
-        stopConfigurationServices
-      else
+      if [ "$__ret" -ne "0" ]; then
+        # Restart configuration services
         startConfigurationServices
       fi
     fi
   else #  $CONFIG_home_status == $STATE_UNCONFIGURED or $CONFIG_home_status == ""
-    # Uci configuration missing
+    # Uci configuration missing... restart configuration services
     startConfigurationServices
   fi
   sleep $SLEEP_TIME
