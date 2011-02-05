@@ -217,22 +217,22 @@ loadStartupConfig() {
   # If there are uci keys defined, use them...
   WPAPSK=$DEFAULT_WPAPSK
   if [ ! -z "$CONFIG_local_setup_wpa_psk" ]; then
-     WPAPSK=$CONFIG_local_wpapsk
+     WPAPSK=$CONFIG_local_setup_wpa_psk
   fi
 
   WIFIDEV=$DEFAULT_WIFIDEV
   if [ ! -z "$CONFIG_local_setup_wifi_dev" ]; then
-     WIFIDEV=$CONFIG_local_wifidev
+     WIFIDEV=$CONFIG_local_setup_wifi_dev
   fi
 
   HTTPD_PORT=$DEFAULT_HTTPD_PORT
   if [ ! -z "$CONFIG_local_setup_httpd_port" ]; then
-     HTTPD_PORT=$CONFIG_local_httpdport
+     HTTPD_PORT=$CONFIG_local_setup_httpd_port
   fi
 
   SSID=$DEFAULT_SSID
-  if [ ! -z "$CONFIG_local_ssid" ]; then
-     SSID=$CONFIG_local_ssid
+  if [ ! -z "$CONFIG_local_setup_ssid" ]; then
+     SSID=$CONFIG_local_setup_ssid
   fi
 
   INNER_SERVER=$DEFAULT_INNER_SERVER
