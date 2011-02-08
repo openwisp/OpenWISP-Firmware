@@ -121,3 +121,7 @@ table#branding tr td {
   margin:0;
   border:0;
 }
+
+.code {
+  text-align:left;
+}

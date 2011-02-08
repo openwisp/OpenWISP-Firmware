@@ -98,6 +98,7 @@ render_page() {
 
     <div class="grid_12">
       <ul class="nav main">
+        <li><a href="?page=access_point">Access Point Information</a></li>
         <li><a href="?page=connectivity">Connectivity settings</a></li>
         $SERVER_PAGE
         <li>
@@ -402,6 +403,45 @@ test_configuration_retrieve() {
   fi
 }
 
+render_access_point_page() {
+  local __cpu="`cat /proc/cpuinfo`"
+  local __upt="`uptime`"
+  
+  local __content=$(cat << EOC
+<div class="grid_8 prefix_2 suffix_2">
+  <div class="box">
+    <div class="block" id="access_point-block">
+      <fieldset id="_status_fieldset">
+        <legend id="_status_legend">
+          Access Point Informations
+        </legend>
+        <table>
+          <tbody>
+            <tr>
+              <td><em>Ethernet (eth0) mac address</em></td>
+              <td class="code"><big>$ETH0_MAC</big></td>
+            </tr>
+            <tr>
+              <td><em>CPU Info</em></td>
+              <td class="code"><pre>$__cpu</pre></td>
+            </tr>
+            <tr>
+              <td><em>Uptime</em></td>
+              <td class="code"><pre>$__upt</pre></td>
+            </tr>
+          </tbody>
+        </table>
+      </fieldset>
+    </div>
+  </div>
+</div>
+EOC
+)
+
+  render_page "$__content" "/" "240"
+  return 0
+}
+
 render_site_test_page() {
   local gw
   local gw_mac
@@ -639,6 +679,9 @@ parse_parameters
 
 load_current_configuration
 case $F_page in
+  access_point)
+    render_access_point_page
+    ;;
   connectivity)
     if [ "${REQUEST_METHOD}" = "POST" ]; then
       if [ "$F_addressing_mode" == "static" ]; then
