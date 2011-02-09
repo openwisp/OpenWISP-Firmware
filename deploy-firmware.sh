@@ -16,40 +16,63 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <openwrt sources path> <platform>"
-  echo "Read the README file for more instruction "
-  exit 1
-fi
+#Prints Usage
+usage() {
+cat << EOU
+  usage: $0 -s /path/to/sources -r owrtRelease -p platform -o remote_vpn_server_ip 
+  Read the README.txt file for more instructions
+  Options:
+    -s: OpenWrt sources path
+    -r: OpenWrt release
+    -p: Platform
+    -o: OpenVpn remote server
+EOU
+}
 
-if [ -z "$2" ]; then
-  echo "Setting default platform to atheros"
-  PLATFORM="atheros"
-else 
-  echo "please make sure you have configured a correct platform in configwrt.minimal or .config file"
-  PLATFORM=$2
-fi
-
+#Define variables to be set with getopt 
+PLATFORM="atheros"
+VPN_REMOTE=""
+BUILDROOT=""
+RELEASE=""
+TOOLS="."
 DISABLE_IPTABLES="no"
-if [ "$PLATFORM" == "atheros" ]; then
-  DISABLE_IPTABLES="yes"
+
+while getopts "hs:r:p:o:" OPTION
+do
+  case $OPTION in
+    h) 
+      usage
+      exit 1
+      ;;
+    s)
+      BUILDROOT=$OPTARG
+      ;;
+    r)
+      RELEASE=$OPTARG
+      ;;
+    p)
+      PLATFORM=$OPTARG
+      ;;
+    o)
+      VPN_REMOTE=$OPTARG
+      ;;
+    ?)
+      usage
+      exit 1 
+      ;;
+  esac
+done
+
+if [ -z "$BUILDROOT" ]||[ -z "$RELEASE" ]; then
+  usage
+  exit 1 
 fi
 
-if [ -z "$3" ]; then
-  echo "Setting void owispmanager vpn server"
-  VPN_REMOTE=""
-else 
-  VPN_REMOTE=$3
-fi
-
-BUILDROOT=$1
-TOOLS='.'
-REPO=http://downloads.openwrt.org/kamikaze/8.09.2/$PLATFORM/packages/
-
-if [ -z "$BUILDROOT" ] || [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
+if [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
   echo "Invalid openwrt sources path"
   exit 1
 fi
+
 
 if [ ! -x $BUILDROOT/build_dir/linux-* ]; then 
   echo "You don't have an already compiled system, I'll build a minimal one for you "
@@ -60,11 +83,22 @@ else
 fi
 
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
-  # Configure and compile a minimal owrt system
+  # Configure and compile a minimal owrt system and also sets the repository
   echo "Building images..."
   cp configwrt.minimal $BUILDROOT/.config
-  pushd $1
-  make package/symlinks
+  pushd $BUILDROOT
+  if [ "$RELEASE" = "kamikaze" ]; then
+    make package/symlinks
+    REPO=http://downloads.openwrt.org/$RELEASE/8.09.2/$PLATFORM/packages/
+  elif [ $RELEASE = "backfire" ]; then
+    ./script/feeds update -a 
+    ./script/feeds install -a
+    REPO=http://downloads.openwrt.org/$RELEASE/10.03/$PLATFORM/packages/
+  else 
+    echo "Invalid Release. Please choose from kamikaze or backfire"
+    usage
+    exit 1
+  fi
   make oldconfig
   make
   popd
@@ -72,23 +106,15 @@ else
   echo "Assuming No"
 fi
 
-# Assume that the script will be launched in the same dir  
-
-if [ -z "$TOOLS" ] || [ ! -x "$TOOLS" ]; then
-	echo "You must run this script in the openwisp manager tools directory"
-  exit 1
-fi
-
-# By default the buildroot is a bit difficult to find :)
-
-ROOTFS=$(find $BUILDROOT/build_dir -name root-*)
-
+#Sets ROOTFS smartly
+ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
+  
 if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
   echo "Invalid openwrt rootfs path"
   exit 1
 fi
 
-#Copy custom file to target os 
+#Copy custom file to target os
 echo "Copying file..."
 mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
@@ -215,5 +241,9 @@ popd
 echo "Done."
 
 echo "Moving Compiled Images into \"builds\" directory"
-cp $BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma ./builds/
+if [ "$RELEASE" = "backfire" ]; then 
+  cp $BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin ./builds/
+else
+  cp $BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin ./builds/
+fi
 echo "Your system is ready." 
