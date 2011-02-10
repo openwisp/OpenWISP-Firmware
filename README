@@ -57,6 +57,6 @@ you can change VPN certificates by replace the old one in the vpn folder.
 
 If HIDE_SERVER_PAGE is set to 1 the server setting menu tab will be hidden
 
-Usage Example:
+./deploy-firmware -s /path/to/sources -r openwrtRelease -p platform -o remote_vpn_server_ip
 
-./deploy-firmware.sh ~/codes/kamikaze atheros  
+We current support only kamikaze release 
