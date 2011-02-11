@@ -68,9 +68,12 @@ if [ -z "$BUILDROOT" ]||[ -z "$RELEASE" ]; then
   exit 1 
 fi
 
-if [ -f "$TOOLS/openvpn/ca.crt" ]; then
-  echo "You must specify the OpenVPN remote server with -o option"
-  echo "If you put your certs on the openvpn folder server configuration page will be hidden"
+if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
+  echo ""
+  echo " ** HINT **"
+  echo " ** You must specify the OpenVPN remote server with -o option"
+  echo " ** If you put your certs on the openvpn folder server configuration page will be hidden"
+  echo ""
   usage
   exit 1 
 fi
@@ -179,7 +182,7 @@ config wifi-device  wifi1
 EOF
 
 echo "* Configuring owispmanager settings"
-if [ -z "$VPN_REMOTE" ] && [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
+if [ -z "$VPN_REMOTE" ] || [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
   STATUS="unconfigured"
   HIDE_SERVER_PAGE="0"
 else
