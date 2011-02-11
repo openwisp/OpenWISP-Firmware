@@ -53,10 +53,9 @@ or via ssh doing ssh -l root 172.22.33.1 but the web way is higly recomended.
 Default ssh password will be "ciaociao" 
 
 If you want to customize the firmware you have to modify common.sh file, 
-you can change VPN certificates by replace the old one in the vpn folder.
+you can put your own VPN certificates openvpn folder. If certs are present 
+during the deploy the server configurarion page will be hidden. 
 
-If HIDE_SERVER_PAGE is set to 1 the server setting menu tab will be hidden
+Usage Example:
 
-./deploy-firmware -s /path/to/sources -r openwrtRelease -p platform -o remote_vpn_server_ip
-
-We current support only kamikaze release 
+./deploy-firmware.sh ~/codes/kamikaze atheros  

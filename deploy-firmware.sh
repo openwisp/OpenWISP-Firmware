@@ -68,6 +68,13 @@ if [ -z "$BUILDROOT" ]||[ -z "$RELEASE" ]; then
   exit 1 
 fi
 
+if [ -f "$TOOLS/openvpn/ca.crt" ]; then
+  echo "You must specify the OpenVPN remote server with -o option"
+  echo "If you put your certs on the openvpn folder server configuration page will be hidden"
+  usage
+  exit 1 
+fi
+
 if [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
   echo "Invalid openwrt sources path"
   exit 1
@@ -91,8 +98,8 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
     make package/symlinks
     REPO=http://downloads.openwrt.org/$RELEASE/8.09.2/$PLATFORM/packages/
   elif [ $RELEASE = "backfire" ]; then
-    ./script/feeds update -a 
-    ./script/feeds install -a
+    ./scripts/feeds update -a 
+    ./scripts/feeds install -a
     REPO=http://downloads.openwrt.org/$RELEASE/10.03/$PLATFORM/packages/
   else 
     echo "Invalid Release. Please choose from kamikaze or backfire"
@@ -148,7 +155,7 @@ echo "Configuring openwrt default firmware:"
 echo "* Disabling unneeded services"
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo "* Disabling iptables"
-  rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+  rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
   mkdir $ROOTFS/etc/modules.d/disabled 2>/dev/null
   mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
 fi
