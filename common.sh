@@ -237,12 +237,12 @@ loadStartupConfig() {
 
   INNER_SERVER=$DEFAULT_INNER_SERVER
   if [ ! -z "$CONFIG_home_inner_server" ]; then
-     INNER_SERVER=$CONFIG_local_inner_server
+     INNER_SERVER=$CONFIG_home_inner_server
   fi
 
   INNER_SERVER_PORT=$DEFAULT_INNER_SERVER_PORT
   if [ ! -z "$CONFIG_home_inner_server_port" ]; then
-     INNER_SERVER_PORT=$CONFIG_local_inner_server_port
+     INNER_SERVER_PORT=$CONFIG_home_inner_server_port
   fi
 
   CONFIGURATION_IP=$DEFAULT_CONFIGURATION_IP
