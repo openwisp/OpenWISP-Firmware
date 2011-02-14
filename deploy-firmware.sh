@@ -158,10 +158,12 @@ echo "Configuring openwrt default firmware:"
 echo "* Disabling unneeded services"
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo "* Disabling iptables"
-  rm $ROOTFS/etc/rc.d/S45firewall $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+  rm $ROOTFS/etc/rc.d/S45firewall 2>/dev/null 
   mkdir $ROOTFS/etc/modules.d/disabled 2>/dev/null
   mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
 fi
+
+$ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
 
 echo "* Enabling needed services"
 pushd $ROOTFS
