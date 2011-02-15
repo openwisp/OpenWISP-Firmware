@@ -35,7 +35,7 @@ VPN_REMOTE=""
 BUILDROOT=""
 RELEASE=""
 TOOLS="."
-DISABLE_IPTABLES="no"
+DISABLE_IPTABLES="yes"
 
 while getopts "hs:r:p:o:" OPTION
 do
