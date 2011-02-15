@@ -223,7 +223,7 @@ if [ "$?" -ne "0" ]; then
  exit 2
 fi
 
-sed -i 's/root:\!:0:0:root:\/root:\/bin\/ash/root:\$1\$4SX4QQOo\$g2ugvWDvkzcYGguIH0v6v\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
+sed -i 's/root:\!:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9CUrYCHF\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
 if [ "$?" -ne "0" ]; then
  echo "Failed to set root password"
  exit 2

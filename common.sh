@@ -29,7 +29,7 @@ DEFAULT_CONFIGURATION_NMASK="255.255.255.0"
 DEFAULT_HTTPD_PORT="8080"
 #DEFAULT_WPAPSK="owm-`ifconfig eth0 | grep HWaddr | cut -d':' -f2- | cut -d' ' -f4 | sed 's/://g'`"
 DEFAULT_SSID="$CONFIGURATION_DOMAIN"
-DEFAULT_WPAPSK="owm-ahVi4IuhEI"
+DEFAULT_WPAPSK="owm-Ohz6ohngei"
 DEFAULT_WIFIDEV="wifi0"
 MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
 # URIs and Paths
