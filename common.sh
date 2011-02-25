@@ -93,24 +93,34 @@ checkPrereq() {
   fi
 
   # Httpd
-  if [ -x "`which httpd`" ]; then
-    if [ "`httpd --help 2>&1 | head -1 | cut -d' ' -f1`" != "BusyBox" ]; then
-      __ret=`expr $__ret + 1`
-      echo "busyBox httpd is missing!"
-    else
-      echo "busyBox httpd is present (`httpd --help 2>&1 | head -1`)"
-    fi
+  # By default kamikaze uses busybox httpd, backfire uses uhttpd so we need to check
+  # wich daemon is installed 
+
+  if [ -x "`which uhttpd`" ]; then
+    echo "uHTTP Daemon is present!"
+    HTTPD="uhttpd"
+  elif [ -x "`which httpd`" ]; then
+    echo "busybox HTTP Daemon is present "
+    HTTPD="httpd"
   else
     __ret="2"
-    echo "busyBox httpd is missing!"
+    echo "HTTPD Daemon is missing"
   fi
 
+	
   # Hostapd
   if [ -x "`which hostapd`" ]; then
     echo "hostapd is present (`hostapd -v 2>&1 | head -1`)"
   else
     __ret="2"
     echo "hostapd is missing!"
+  fi
+
+  if [ -x "`which openvpn`" ]; then
+    echo "OpenVPN is present" 
+  else
+    __ret="2"
+    echo "OpenVPN is missing!"
   fi
 
   # Dnsmasq
@@ -144,7 +154,6 @@ checkPrereq() {
         __ret="1"
       fi
       echo "Curl or wget are missing!"
-      echo "wget is missing!"
     fi
   fi
 
@@ -255,5 +264,5 @@ loadStartupConfig() {
      CONFIGURATION_IP_RANGE_START=$CONFIG_local_setup_range_ip_start
      CONFIGURATION_IP_RANGE_END=$CONFIG_local_setup_range_ip_end
   fi
-
+  
 }

@@ -14,43 +14,43 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-└── owf_nossl
-    ├── Makefile
-    ├── README
-    ├── README.license
-    ├── common.sh
-    ├── configwrt.minimal
-    ├── deploy-firmware.sh
-    ├── gpl.txt
-    ├── htpdate
-    │   ├── htpdate.default
-    │   └── htpdate.init
-    ├── openvpn
-    │   ├── ca.crt
-    │   ├── client.crt
-    │   ├── client.key
-    │   └── ta.key
-    ├── owispmanager.sh
-    └── web
-        ├── cgi-bin
-        │   └── owispmanager.sh
-        ├── images
-        │   ├── logo_caspur.png
-        │   ├── spinner.gif
-        │   └── switch_minus.gif
-        ├── index.html
-        ├── javascripts
-        │   ├── fluid16.js
-        │   ├── jquery-ui.js
-        │   └── jquery.js
-        └── stylesheets
-            ├── custom.css
-            └── fluid960
-                ├── 960.css
-                ├── grid.css
-                ├── ie.css
-                ├── ie6.css
-                ├── layout.css
-                ├── nav.css
-                ├── reset.css
-                └── text.css
+|-- Makefile
+|-- README
+|-- README.license
+|-- builds
+|-- common.sh
+|-- configwrt.minimal
+|-- deploy-firmware.sh
+|-- gpl.txt
+|-- htpdate
+|   |-- htpdate.default
+|   `-- htpdate.init
+|-- openvpn
+|-- owispmanager.sh
+|-- utils
+|   `-- pw.pl
+`-- web
+    |-- cgi-bin
+    |   `-- owispmanager.sh
+    |-- images
+    |   |-- logo_caspur.png
+    |   |-- spinner.gif
+    |   `-- switch_minus.gif
+    |-- index.html
+    |-- javascripts
+    |   |-- fluid16.js
+    |   |-- jquery-ui.js
+    |   `-- jquery.js
+    `-- stylesheets
+        |-- custom.css
+        `-- fluid960
+            |-- 960.css
+            |-- grid.css
+            |-- ie.css
+            |-- ie6.css
+            |-- layout.css
+            |-- nav.css
+            |-- reset.css
+            `-- text.css
+
+10 directories, 28 files

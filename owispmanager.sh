@@ -81,7 +81,7 @@ execWithTimeout() {
 # Returns:      0 on success, !0 otherwise
 # Notes:
 startHttpd() {
-  start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a httpd -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r $CONFIGURATION_DOMAIN
+  start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a $HTTPD -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r $CONFIGURATION_DOMAIN
   return $?
 }
 

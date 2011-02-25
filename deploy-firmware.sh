@@ -19,25 +19,50 @@
 #Prints Usage
 usage() {
 cat << EOU
-  usage: $0 -s /path/to/sources -r owrtRelease -p platform -o remote_vpn_server_ip 
+
+  OpenWisp Firmware deployer V 1.2, OpenWisp suite (c) caspur http://spider.caspur.it
+
+  usage: $0 -s /path/to/sources -a arch [OPTION]  
+  
   Read the README.txt file for more instructions
+
   Options:
-    -s: OpenWrt sources path
-    -r: OpenWrt release
-    -p: Platform
-    -o: OpenVpn remote server
+  -h: Print this help and exit
+  -s: OpenWrt sources path
+  -a: Architecture (e.g. atheros)
+  -v: Vpn server
+  -w: Default wpa-psk
+  -e: Configuration essid
+  -i: Inner server 
+  -p: Inner server port
+  -P: Root password
 EOU
+}
+
+#check if INNER_SERVER is a valid ip 
+#TODO: pass inner server variable. 
+
+is_valid_ip() {
+
+  echo "$INNER_SERVER" | awk -F '[.]' 'function ok(n) {return (n ~ /^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/)}{exit (ok($1) && ok($2) && ok($3) && ok($4))}'
+  echo $?
+
 }
 
 #Define variables to be set with getopt 
 PLATFORM="atheros"
 VPN_REMOTE=""
 BUILDROOT=""
-RELEASE=""
 TOOLS="."
 DISABLE_IPTABLES="yes"
+WPA_PSK=""
+WPA_SSID=""
+DEFAULT_IP=""
+INNER_SERVER=""
+INNER_SERVER_PORT=""
+PASSWORD=""
 
-while getopts "hs:r:p:o:" OPTION
+while getopts "hs:a:v:w:e:i:p:P:" OPTION
 do
   case $OPTION in
     h) 
@@ -47,25 +72,42 @@ do
     s)
       BUILDROOT=$OPTARG
       ;;
-    r)
-      RELEASE=$OPTARG
-      ;;
-    p)
+    a)
       PLATFORM=$OPTARG
       ;;
-    o)
+    v)
       VPN_REMOTE=$OPTARG
       ;;
+    w)
+      WPA_PSK=$OPTARG
+      ;;
+    e)
+      WPA_SSID=$OPTARG
+      ;;
+    i)
+      INNER_SERVER_PORT=$OPTARG
+      ;;
+    p)
+      INNER_SERVER=$OPTARG
+      ;;
+    P)
+      PASSWORD=$OPTARG
+      ;;
     ?)
+      echo "Invalid argument"
       usage
       exit 1 
       ;;
   esac
 done
 
-if [ -z "$BUILDROOT" ]||[ -z "$RELEASE" ]; then
+if [ -z "$BUILDROOT" ]; then
   usage
   exit 1 
+fi
+
+if [ -n "$PASSWORD" ]; then 
+  ENC_PWD=`perl $TOOLS/utils/pw.pl $PASSWORD`
 fi
 
 if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
@@ -78,12 +120,69 @@ if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   exit 1 
 fi
 
+if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
+  echo "WPA-PSK problem:"
+  echo "** HINT **"
+  echo "WPA-PSK key must be 14 character lenght"
+  usage
+  exit 1
+elif [ -z "$WPA_PSK" ]; then
+  echo "WPA-PSK will be owm-Ohz6ohngei"
+fi
+
+if [ -n "$INNER_SERVER_PORT" ] && [ ! $(echo "$INNER_SERVER_PORT" | grep -E "^[0-9]+$") ]; then
+  echo ""
+  echo "** HINT **"
+  echo "Inner server port must be an integer"
+  usage
+  exit 1
+fi
+
+if [ -n "$INNER_SERVER" ] && [ `is_valid_ip` == 1 ]; then
+  echo "Default OpenVPN INNER SERVER will be $INNER_SERVER"
+elif [ -z "$INNER_SERVER" ]; then 
+  "OpenVPN Inner Sever not changed"
+else
+  echo "Inner server error"
+  echo "${INNER_SERVER} is not a valid IP address!"
+  usage
+  exit 1
+fi
+
 if [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
   echo "Invalid openwrt sources path"
   exit 1
 fi
 
 
+#Sets ROOTFS smartly
+
+ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
+if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
+  echo "Invalid openwrt rootfs path"
+  exit 1
+fi
+
+#All version-dependent variables will be setted here
+if [ `cat $ROOTFS/etc/openwrt_version` == "8.09" ]; then
+  CODENAME="kamikaze"
+  RELEASE="8.09"
+  PKG_CMD="make package/symlinks"
+  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin"
+elif [ `cat $ROOTFS/etc/openwrt_version` == "10.03" ]; then
+  CODENAME="backfire"
+  RELEASE="10.03"
+  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin" 
+  PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
+else 
+  echo "Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
+  exit 1
+fi
+
+echo "OpenWRT $RELEASE a.k.a. $CODENAME detected"
+REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
+
+# Check for an existing pre-compilated system
 if [ ! -x $BUILDROOT/build_dir/linux-* ]; then 
   echo "You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
@@ -93,35 +192,17 @@ else
 fi
 
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
-  # Configure and compile a minimal owrt system and also sets the repository
+  # Configure and compile a minimal owrt system
   echo "Building images..."
-  cp configwrt.minimal $BUILDROOT/.config
+  
+  cp config.$CODENAME $BUILDROOT/.config
   pushd $BUILDROOT
-  if [ "$RELEASE" = "kamikaze" ]; then
-    make package/symlinks
-    REPO=http://downloads.openwrt.org/$RELEASE/8.09.2/$PLATFORM/packages/
-  elif [ $RELEASE = "backfire" ]; then
-    ./scripts/feeds update -a 
-    ./scripts/feeds install -a
-    REPO=http://downloads.openwrt.org/$RELEASE/10.03/$PLATFORM/packages/
-  else 
-    echo "Invalid Release. Please choose from kamikaze or backfire"
-    usage
-    exit 1
-  fi
+  eval $PKG_CMD
   make oldconfig
   make
   popd
 else 
   echo "Assuming No"
-fi
-
-#Sets ROOTFS smartly
-ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
-  
-if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
-  echo "Invalid openwrt rootfs path"
-  exit 1
 fi
 
 #Copy custom file to target os
@@ -135,8 +216,8 @@ chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh
 cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate
 cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
 if [ "$?" -ne "0" ]; then
- echo "Failed to copy files..."
- exit 2
+  echo "Failed to copy files..."
+  exit 2
 fi
 
 echo "Installing boot script"
@@ -149,8 +230,8 @@ tty1::askfirst:/bin/ash --login
 ::respawn:/etc/owispmanager/owispmanager.sh
 EOF
 if [ "$?" -ne "0" ]; then
- echo "Failed to install inittab"
- exit 2
+  echo "Failed to install inittab"
+  exit 2
 fi
 
 echo "Configuring openwrt default firmware:"
@@ -173,14 +254,14 @@ popd
 echo "* Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
 config wifi-device  wifi0
-       option type     atheros
-       option channel  auto
-       option disabled 1
+option type     atheros
+option channel  auto
+option disabled 1
 
 config wifi-device  wifi1
-       option type     atheros
-       option channel  auto
-       option disabled 1
+option type     atheros
+option channel  auto
+option disabled 1
 EOF
 
 echo "* Configuring owispmanager settings"
@@ -193,45 +274,58 @@ else
 fi
 cat << EOF > $ROOTFS/etc/config/owispmanager
 config 'server' 'home'
-  option 'address' '$VPN_REMOTE'
-  option 'status' '$STATUS'
-  option 'inner_server' ''
-  option 'inner_server_port' ''
+option 'address' '$VPN_REMOTE'
+option 'status' '$STATUS'
+option 'inner_server' '$INNER_SERVER'
+option 'inner_server_port' '$INNER_SERVER_PORT'
 
 config 'server' 'local'
-  option 'hide_server_page' '$HIDE_SERVER_PAGE'
-  option 'setup_wpa_psk' ''
-  option 'setup_wifi_dev' ''
-  option 'setup_httpd_port' ''
-  option 'setup_ssid' ''
-  option 'setup_ip' ''
-  option 'setup_netmask' ''
-  option 'setup_range_ip_start' ''
-  option 'setup_range_ip_end' ''
+option 'hide_server_page' '$HIDE_SERVER_PAGE'
+option 'setup_wpa_psk' '$WPA_PSK'
+option 'setup_wifi_dev' ''
+option 'setup_httpd_port' ''
+option 'setup_ssid' '$WPA_SSID'
+option 'setup_ip' ''
+option 'setup_netmask' ''
+option 'setup_range_ip_start' ''
+option 'setup_range_ip_end' ''
 EOF
 
 echo "* Configuring password timezone and hostname"
 sed -i 's/option\ hostname\ OpenWrt/option\ hostname\ Unconfigured/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
- echo "Failed to set default hostname"
- exit 2
+  echo "Failed to set default hostname"
+  exit 2
 fi
 
 sed -i 's/option\ timezone\ UTC/option\ timezone\ \"CET-1CEST-2,M3\.5\.0\/02:00:00,M10\.5\.0\/03:00:00\"/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
- echo "Failed to set timezone"
- exit 2
+  echo "Failed to set timezone"
+  exit 2
 fi
 
-sed -i 's/root:.*:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9CUrYCHF\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
-if [ "$?" -ne "0" ]; then
- echo "Failed to set root password"
- exit 2
+if [ -n "$ENC_PWD" ]; then
+  # Rewrite passwd file entirely
+cat << EOF > $ROOTFS/etc/passwd
+$ENC_PWD
+nobody:*:65534:65534:nobody:/var:/bin/false
+daemon:*:65534:65534:daemon:/var:/bin/false
+EOF
+
 else
- echo "Root password set"
+  echo "Root password will be ciaociao"
+  sed -i 's/root:.*:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9CUrYCHF\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
+fi
+
+if [ "$?" -ne "0" ]; then
+  echo "Failed to set root password"
+  exit 2
+else
+  echo "Root password set"
 fi
 
 echo "* Installing repository"
+
 cat << EOF > $ROOTFS/etc/opkg.conf
 src/gz snapshots $REPO
 dest root /
@@ -239,9 +333,10 @@ dest ram /tmp
 lists_dir ext /var/opkg-lists
 option overlay_root /jffs
 EOF
+
 if [ "$?" -ne "0" ]; then
- echo "Failed to set opkg repository"
- exit 2
+  echo "Failed to set opkg repository"
+  exit 2
 fi
 
 echo "Rebuilding images..."
@@ -253,9 +348,5 @@ popd
 echo "Done."
 
 echo "Moving Compiled Images into \"builds\" directory"
-if [ "$RELEASE" = "backfire" ]; then 
-  cp $BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin ./builds/
-else
-  cp $BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin ./builds/
-fi
+cp $BINARIES ./builds/
 echo "Your system is ready." 
