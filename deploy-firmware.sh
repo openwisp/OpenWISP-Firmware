@@ -141,7 +141,7 @@ fi
 if [ -n "$INNER_SERVER" ] && [ `is_valid_ip` == 1 ]; then
   echo "Default OpenVPN INNER SERVER will be $INNER_SERVER"
 elif [ -z "$INNER_SERVER" ]; then 
-  "OpenVPN Inner Sever not changed"
+  echo "OpenVPN Inner Sever not changed"
 else
   echo "Inner server error"
   echo "${INNER_SERVER} is not a valid IP address!"
