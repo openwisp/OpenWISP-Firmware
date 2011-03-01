@@ -63,4 +63,7 @@ Options explained:
     is 10.8.0.1
 -p: Inner server http port default is 80
 -P: Root password root account must have a password if you want do disable telnet and enable ssh access. the default 
-   one is ciaociao, and it is extremely weak. We suggest to chage it when deploy
+   one is ciaociao, and it is extremely weak. We suggest to chage it when deploy.
+
+If you want to flash an abocom via telnet and redboot you can use utils/flash_abocom.exp expect script 
+Just launch ./utils/flash_abocom.exp and power on your abocom
