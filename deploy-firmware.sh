@@ -183,7 +183,7 @@ echo "OpenWRT $RELEASE a.k.a. $CODENAME detected"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
-if [ ! -x $BUILDROOT/build_dir/linux-* ]; then 
+if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM ]; then 
   echo "You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 else
