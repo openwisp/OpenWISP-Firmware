@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Adds some colored output
+
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+BLUE="\033[0;34m"
+
 #Prints Usage
 usage() {
 cat << EOU
@@ -141,25 +148,24 @@ fi
 if [ -n "$INNER_SERVER" ] && [ `is_valid_ip` == 1 ]; then
   echo "Default OpenVPN INNER SERVER will be $INNER_SERVER"
 elif [ -z "$INNER_SERVER" ]; then 
-  echo "OpenVPN Inner Sever not changed"
+  echo -e "$GREEN OpenVPN Inner Sever not changed"
 else
-  echo "Inner server error"
-  echo "${INNER_SERVER} is not a valid IP address!"
+  echo -e "$RED Inner server error"
+  echo -e "$RED ${INNER_SERVER} is not a valid IP address!"
   usage
   exit 1
 fi
 
 if [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
-  echo "Invalid openwrt sources path"
+  echo -e "$RED Invalid openwrt sources path"
   exit 1
 fi
-
 
 #Sets ROOTFS smartly
 
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
 if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
-  echo "Invalid openwrt rootfs path"
+  echo -e "$RED Invalid openwrt rootfs path"
   exit 1
 fi
 
@@ -168,14 +174,14 @@ if [ `cat $ROOTFS/etc/openwrt_version` == "8.09" ]; then
   CODENAME="kamikaze"
   RELEASE="8.09"
   PKG_CMD="make package/symlinks"
-  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin"
+  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image"
 elif [ `cat $ROOTFS/etc/openwrt_version` == "10.03" ]; then
   CODENAME="backfire"
   RELEASE="10.03"
-  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin" 
+  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-squashfs.image"
   PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 else 
-  echo "Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
+  echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
   exit 1
 fi
 
@@ -184,29 +190,39 @@ REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
 if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM ]; then 
-  echo "You don't have an already compiled system, I'll build a minimal one for you "
+  echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 else
-  echo "Do you want to build a minimal OpenWRT system?[y/n]"
+  echo -e "$GREEN Do you want to build a minimal OpenWRT system?[y/n]"
   read REPLAY
 fi
 
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
-  echo "Building images..."
+  echo -e "$GREEN Building images..."
   
-  cp config.$CODENAME $BUILDROOT/.config
+  cp $TOOLFS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
+  
+  if [ "$?" -ne "0" ]; then 
+    echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
+    echo -e "$YELLOW Please create a config file by yourself"
+    exit 2
+  fi
+
   pushd $BUILDROOT
   eval $PKG_CMD
-  make oldconfig
-  make
+  echo -e "$GREEN Setting up OpenWRT configuration"
+  make oldconfig 2>/dev/null
+  echo -e "$GREEN Compiling OpenWrt"
+  make 2>$TOOLS/compile.log
   popd
+
 else 
   echo "Assuming No"
 fi
 
 #Copy custom file to target os
-echo "Copying file..."
+echo -e "$GREEN Copying file..."
 mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
 mkdir $ROOTFS/etc/openvpn 2>/dev/null
@@ -216,11 +232,11 @@ chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh
 cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate
 cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
 if [ "$?" -ne "0" ]; then
-  echo "Failed to copy files..."
+  echo -e "$RED Failed to copy files..."
   exit 2
 fi
 
-echo "Installing boot script"
+echo -e "$GREEN Installing boot script"
 cat << EOF > $ROOTFS/etc/inittab
 ::sysinit:/etc/init.d/rcS S boot
 ::shutdown:/etc/init.d/rcS K stop
@@ -230,15 +246,15 @@ tty1::askfirst:/bin/ash --login
 ::respawn:/etc/owispmanager/owispmanager.sh
 EOF
 if [ "$?" -ne "0" ]; then
-  echo "Failed to install inittab"
+  echo -e "$RED Failed to install inittab"
   exit 2
 fi
 
-echo "Configuring openwrt default firmware:"
+echo -e "$GREEN Configuring openwrt default firmware:"
 
-echo "* Disabling unneeded services"
+echo -e "$BLUE * Disabling unneeded services"
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
-  echo "* Disabling iptables"
+  echo -e "$YELLOW * Disabling iptables"
   rm $ROOTFS/etc/rc.d/S45firewall 2>/dev/null 
   mkdir $ROOTFS/etc/modules.d/disabled 2>/dev/null
   mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
@@ -246,12 +262,12 @@ fi
 
 rm $ROOTFS/etc/rc.d/S49htpdate $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
 
-echo "* Enabling needed services"
+echo -e "$BLUE * Enabling needed services"
 pushd $ROOTFS
 echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
 popd
 
-echo "* Deploying initial wireless configuration"
+echo "$BLUE * Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
 config wifi-device  wifi0
 option type     atheros
@@ -264,7 +280,7 @@ option channel  auto
 option disabled 1
 EOF
 
-echo "* Configuring owispmanager settings"
+echo -e "$BLUE * Configuring owispmanager settings"
 if [ -z "$VPN_REMOTE" ] || [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
   STATUS="unconfigured"
   HIDE_SERVER_PAGE="0"
@@ -291,16 +307,16 @@ option 'setup_range_ip_start' ''
 option 'setup_range_ip_end' ''
 EOF
 
-echo "* Configuring password timezone and hostname"
+echo -e "$BLUE * Configuring password timezone and hostname"
 sed -i 's/option\ hostname\ OpenWrt/option\ hostname\ Unconfigured/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
-  echo "Failed to set default hostname"
+  echo -e "$RED Failed to set default hostname"
   exit 2
 fi
 
 sed -i 's/option\ timezone\ UTC/option\ timezone\ \"CET-1CEST-2,M3\.5\.0\/02:00:00,M10\.5\.0\/03:00:00\"/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
-  echo "Failed to set timezone"
+  echo -e "$RED Failed to set timezone"
   exit 2
 fi
 
@@ -313,18 +329,18 @@ daemon:*:65534:65534:daemon:/var:/bin/false
 EOF
 
 else
-  echo "Root password will be ciaociao"
+  echo -e "$YELLOW Root password will be ciaociao"
   sed -i 's/root:.*:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9CUrYCHF\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
 fi
 
 if [ "$?" -ne "0" ]; then
-  echo "Failed to set root password"
+  echo -e "$RED Failed to set root password"
   exit 2
 else
-  echo "Root password set"
+  echo -e "$GREEN Root password set"
 fi
 
-echo "* Installing repository"
+echo -e "$BLUE * Installing repository"
 
 cat << EOF > $ROOTFS/etc/opkg.conf
 src/gz snapshots $REPO
@@ -335,18 +351,24 @@ option overlay_root /jffs
 EOF
 
 if [ "$?" -ne "0" ]; then
-  echo "Failed to set opkg repository"
+  echo -e "$RED Failed to set opkg repository"
   exit 2
 fi
 
-echo "Rebuilding images..."
+echo -e "$BLUE * Rebuilding images..."
 pushd $BUILDROOT
 make target/install
 make package/index
 popd
 
-echo "Done."
+echo -e "$GREEN Done."
 
-echo "Moving Compiled Images into \"builds\" directory"
+echo -e "$GREEN Moving Compiled Images into \"builds\" directory"
 cp $BINARIES ./builds/
-echo "Your system is ready." 
+
+if [ "$?" -ne "0"  ]; then
+  echo -e "$RED Complilation was ok but I Cannot copy binaries in "build" directory"
+  echo -e "$RED please copy them from the buildroot"
+fi
+
+echo -e "$GREEN Your system is ready." 
