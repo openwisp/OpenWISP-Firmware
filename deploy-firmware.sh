@@ -22,6 +22,7 @@ RED="\033[0;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
 BLUE="\033[0;34m"
+WHITE="\[\033[1;37m\]"
 
 #Prints Usage
 usage() {
@@ -193,13 +194,13 @@ if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM ]; then
   echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 else
-  echo -e "$GREEN Do you want to build a minimal OpenWRT system?[y/n]"
+  echo -e "$GREEN Do you want to build a minimal OpenWRT system?[y/n]$WHITE"
   read REPLAY
 fi
 
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
-  echo -e "$GREEN Building images..."
+  echo -e "$GREEN Building images... $WHITE"
   
   cp $TOOLFS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
   
@@ -211,18 +212,18 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
 
   pushd $BUILDROOT
   eval $PKG_CMD
-  echo -e "$GREEN Setting up OpenWRT configuration"
+  echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
   make oldconfig > /dev/null
   echo -e "$GREEN Compiling OpenWrt"
   make > $TOOLS/compile.log
   popd
 
 else 
-  echo "Assuming No"
+  echo -e "$GRENN Assuming No"
 fi
 
 #Copy custom file to target os
-echo -e "$GREEN Copying file..."
+echo -e "$GREEN Copying file...$WHITE"
 mkdir $ROOTFS/etc/owispmanager 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
 mkdir $ROOTFS/etc/openvpn 2>/dev/null
@@ -252,7 +253,7 @@ fi
 
 echo -e "$GREEN Configuring openwrt default firmware:"
 
-echo -e "$BLUE * Disabling unneeded services"
+echo -e "$YELLOW * Disabling unneeded services"
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo -e "$YELLOW * Disabling iptables"
   rm $ROOTFS/etc/rc.d/S45firewall 2>/dev/null 
@@ -262,12 +263,12 @@ fi
 
 rm $ROOTFS/etc/rc.d/S49htpdate $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
 
-echo -e "$BLUE * Enabling needed services"
+echo -e "$YELLOW * Enabling needed services"
 pushd $ROOTFS
 echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
 popd
 
-echo "$BLUE * Deploying initial wireless configuration"
+echo -e "$YELLOW * Deploying initial wireless configuration"
 cat << EOF > $ROOTFS/etc/config/wireless
 config wifi-device  wifi0
 option type     atheros
@@ -280,7 +281,7 @@ option channel  auto
 option disabled 1
 EOF
 
-echo -e "$BLUE * Configuring owispmanager settings"
+echo -e "$YELLOW * Configuring owispmanager settings"
 if [ -z "$VPN_REMOTE" ] || [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
   STATUS="unconfigured"
   HIDE_SERVER_PAGE="0"
@@ -307,7 +308,7 @@ option 'setup_range_ip_start' ''
 option 'setup_range_ip_end' ''
 EOF
 
-echo -e "$BLUE * Configuring password timezone and hostname"
+echo -e "$YELLOW * Configuring password timezone and hostname"
 sed -i 's/option\ hostname\ OpenWrt/option\ hostname\ Unconfigured/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
   echo -e "$RED Failed to set default hostname"
@@ -355,20 +356,20 @@ if [ "$?" -ne "0" ]; then
   exit 2
 fi
 
-echo -e "$BLUE * Rebuilding images..."
+echo -e "$YELLOW * Rebuilding images..."
 pushd $BUILDROOT
 make target/install
 make package/index
 popd
 
-echo -e "$GREEN Done."
+echo -e "$YELLOW Done. $WHITE"
 
-echo -e "$GREEN Moving Compiled Images into \"builds\" directory"
-cp $BINARIES ./builds/
+echo -e "$GREEN Moving Compiled Images into \"builds\" directory $WHITE"
+cp $BINARIES ./builds/ 2>/dev/null
 
 if [ "$?" -ne "0"  ]; then
   echo -e "$RED Complilation was ok but I Cannot copy binaries in "build" directory"
   echo -e "$RED please copy them from the buildroot"
 fi
 
-echo -e "$GREEN Your system is ready." 
+echo -e "$GREEN Your system is ready. $WHITE" 
