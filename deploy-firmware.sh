@@ -22,7 +22,7 @@ RED="\033[0;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
 BLUE="\033[0;34m"
-WHITE="\[\033[1;37m\]"
+WHITE="\033[1;37m"
 
 #Prints Usage
 usage() {
@@ -135,13 +135,13 @@ if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
   usage
   exit 1
 elif [ -z "$WPA_PSK" ]; then
-  echo -e"$YELLOW WPA-PSK will be owm-Ohz6ohngei"
+  echo -e "$YELLOW WPA-PSK will be owm-Ohz6ohngei"
 fi
 
 if [ -n "$INNER_SERVER_PORT" ] && [ ! $(echo "$INNER_SERVER_PORT" | grep -E "^[0-9]+$") ]; then
   echo ""
-  echo "$RED ** $BLUE HINT $RED **"
-  echo "$BLUE Inner server port must be an integer"
+  echo -e "$RED ** $BLUE HINT $RED **"
+  echo -e "$BLUE Inner server port must be an integer"
   usage
   exit 1
 fi
@@ -210,16 +210,17 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
     exit 2
   fi
 
-  pushd $BUILDROOT
+  echo -e " $YELLOW * Jumpin in:"
+  pushd $BUILDROOT  
   eval $PKG_CMD
   echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
   make oldconfig > /dev/null
-  echo -e "$GREEN Compiling OpenWrt"
+  echo -e "$GREEN Compiling OpenWrt... $WHITE"
   make > $TOOLS/compile.log
   popd
 
 else 
-  echo -e "$GRENN Assuming No"
+  echo -e "$GREEN Assuming No"
 fi
 
 #Copy custom file to target os
@@ -263,12 +264,12 @@ fi
 
 rm $ROOTFS/etc/rc.d/S49htpdate $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
 
-echo -e "$YELLOW * Enabling needed services"
+echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
 echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
 popd
 
-echo -e "$YELLOW * Deploying initial wireless configuration"
+echo -e "$YELLOW * Deploying initial wireless configuration $WHITE"
 cat << EOF > $ROOTFS/etc/config/wireless
 config wifi-device  wifi0
 option type     atheros
@@ -281,7 +282,7 @@ option channel  auto
 option disabled 1
 EOF
 
-echo -e "$YELLOW * Configuring owispmanager settings"
+echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
 if [ -z "$VPN_REMOTE" ] || [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
   STATUS="unconfigured"
   HIDE_SERVER_PAGE="0"
@@ -308,7 +309,7 @@ option 'setup_range_ip_start' ''
 option 'setup_range_ip_end' ''
 EOF
 
-echo -e "$YELLOW * Configuring password timezone and hostname"
+echo -e "$YELLOW * Configuring password timezone and hostname $WHITE"
 sed -i 's/option\ hostname\ OpenWrt/option\ hostname\ Unconfigured/' $ROOTFS/etc/config/system
 if [ "$?" -ne "0" ]; then
   echo -e "$RED Failed to set default hostname"
@@ -338,10 +339,10 @@ if [ "$?" -ne "0" ]; then
   echo -e "$RED Failed to set root password"
   exit 2
 else
-  echo -e "$GREEN Root password set"
+  echo -e "$GREEN Root password set $WHITE"
 fi
 
-echo -e "$BLUE * Installing repository"
+echo -e "$YELLOW * Installing repository $WHITE"
 
 cat << EOF > $ROOTFS/etc/opkg.conf
 src/gz snapshots $REPO
@@ -352,7 +353,7 @@ option overlay_root /jffs
 EOF
 
 if [ "$?" -ne "0" ]; then
-  echo -e "$RED Failed to set opkg repository"
+  echo -e "$RED Failed to set opkg repository $WHITE"
   exit 2
 fi
 
@@ -369,7 +370,7 @@ cp $BINARIES ./builds/ 2>/dev/null
 
 if [ "$?" -ne "0"  ]; then
   echo -e "$RED Complilation was ok but I Cannot copy binaries in "build" directory"
-  echo -e "$RED please copy them from the buildroot"
+  echo -e "$RED please copy them from the buildroot $WHITE"
 fi
 
 echo -e "$GREEN Your system is ready. $WHITE" 
