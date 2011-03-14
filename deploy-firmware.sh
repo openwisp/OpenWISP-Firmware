@@ -210,7 +210,7 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
     exit 2
   fi
 
-  echo -e " $YELLOW * Jumpin in:"
+  echo -e " $YELLOW * Jumpin in:$WHITE"
   pushd $BUILDROOT  
   eval $PKG_CMD
   echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
@@ -364,13 +364,11 @@ make package/index
 popd
 
 echo -e "$YELLOW Done. $WHITE"
-
-echo -e "$GREEN Moving Compiled Images into \"builds\" directory $WHITE"
-cp $BINARIES ./builds/ 2>/dev/null
-
-if [ "$?" -ne "0"  ]; then
-  echo -e "$RED Complilation was ok but I Cannot copy binaries in "build" directory"
-  echo -e "$RED please copy them from the buildroot $WHITE"
+if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ]; then 
+  echo -e "$GREEN Moving Compiled Images into \"builds\" directory $WHITE"
+  cp $BINARIES ./builds/ 2>/dev/null
+else 
+  echo -e "$RED Search your binaries in $BUILDROOT your platform is not tested right now"
 fi
 
 echo -e "$GREEN Your system is ready. $WHITE" 
