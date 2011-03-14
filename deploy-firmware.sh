@@ -101,7 +101,7 @@ do
       PASSWORD=$OPTARG
       ;;
     ?)
-      echo "Invalid argument"
+      echo -e "$RED Invalid argument"
       usage
       exit 1 
       ;;
@@ -119,34 +119,34 @@ fi
 
 if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   echo ""
-  echo " ** HINT **"
-  echo " ** You must specify the OpenVPN remote server with -o option"
-  echo " ** If you put your certs on the openvpn folder server configuration page will be hidden"
+  echo -e "$RED ** $BLUE HINT $RED **"
+  echo -e "$RED ** $BLUE You must specify the OpenVPN remote server with -o option"
+  echo -e "$RED ** $BLUE If you put your certs on the openvpn folder server configuration page will be hidden"
   echo ""
   usage
   exit 1 
 fi
 
 if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
-  echo "WPA-PSK problem:"
-  echo "** HINT **"
-  echo "WPA-PSK key must be 14 character lenght"
+  echo -e "$RED WPA-PSK problem:"
+  echo -e "$RED ** $BLUE HINT $RED**"
+  echo -e "$BLUE WPA-PSK key must be 14 character lenght"
   usage
   exit 1
 elif [ -z "$WPA_PSK" ]; then
-  echo "WPA-PSK will be owm-Ohz6ohngei"
+  echo -e"$YELLOW WPA-PSK will be owm-Ohz6ohngei"
 fi
 
 if [ -n "$INNER_SERVER_PORT" ] && [ ! $(echo "$INNER_SERVER_PORT" | grep -E "^[0-9]+$") ]; then
   echo ""
-  echo "** HINT **"
-  echo "Inner server port must be an integer"
+  echo "$RED ** $BLUE HINT $RED **"
+  echo "$BLUE Inner server port must be an integer"
   usage
   exit 1
 fi
 
 if [ -n "$INNER_SERVER" ] && [ `is_valid_ip` == 1 ]; then
-  echo "Default OpenVPN INNER SERVER will be $INNER_SERVER"
+  echo -e "$YELLOW Default OpenVPN INNER SERVER will be $INNER_SERVER"
 elif [ -z "$INNER_SERVER" ]; then 
   echo -e "$GREEN OpenVPN Inner Sever not changed"
 else
@@ -212,9 +212,9 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   pushd $BUILDROOT
   eval $PKG_CMD
   echo -e "$GREEN Setting up OpenWRT configuration"
-  make oldconfig 2>/dev/null
+  make oldconfig > /dev/null
   echo -e "$GREEN Compiling OpenWrt"
-  make 2>$TOOLS/compile.log
+  make > $TOOLS/compile.log
   popd
 
 else 
