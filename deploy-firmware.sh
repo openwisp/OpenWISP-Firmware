@@ -157,7 +157,7 @@ else
   exit 1
 fi
 
-if [ ! -f "$BUILDROOT/scripts/getver.sh" ] ; then
+if [ ! -x "$BUILDROOT/scripts/getver.sh" ] ; then
   echo -e "$RED Invalid openwrt sources path"
   exit 1
 fi
@@ -179,7 +179,7 @@ if [ `cat $ROOTFS/etc/openwrt_version` == "8.09" ]; then
 elif [ `cat $ROOTFS/etc/openwrt_version` == "10.03" ]; then
   CODENAME="backfire"
   RELEASE="10.03"
-  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-squashfs.image"
+  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img"
   PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 else 
   echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
@@ -190,7 +190,7 @@ echo "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
-if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM ]; then 
+if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM* ]; then 
   echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 else
@@ -202,7 +202,7 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
   echo -e "$GREEN Building images... $WHITE"
   
-  cp $TOOLFS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
+  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
   
   if [ "$?" -ne "0" ]; then 
     echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
