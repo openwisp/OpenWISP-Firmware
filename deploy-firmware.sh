@@ -186,7 +186,7 @@ else
   exit 1
 fi
 
-echo "OpenWRT $RELEASE a.k.a. $CODENAME detected"
+echo "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
