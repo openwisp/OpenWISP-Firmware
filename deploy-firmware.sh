@@ -266,7 +266,7 @@ rm $ROOTFS/etc/rc.d/S49htpdate $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uht
 
 echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
-echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >>  ./etc/crontabs/root
+echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >  ./etc/crontabs/root
 popd
 
 echo -e "$YELLOW * Deploying initial wireless configuration $WHITE"
