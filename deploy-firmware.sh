@@ -120,9 +120,9 @@ fi
 
 if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   echo ""
-  echo -e "$RED ** $BLUE HINT $RED **"
-  echo -e "$RED ** $BLUE You must specify the OpenVPN remote server with -o option"
-  echo -e "$RED ** $BLUE If you put your certs on the openvpn folder server configuration page will be hidden"
+  echo -e "$RED ** $YELLOW HINT $RED **"
+  echo -e "$RED ** $WHITE You must specify the OpenVPN remote server with -v option"
+  echo -e "$RED ** $WHITE If you put your certs on the openvpn folder server configuration page will be hidden"
   echo ""
   usage
   exit 1 
@@ -130,8 +130,8 @@ fi
 
 if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
   echo -e "$RED WPA-PSK problem:"
-  echo -e "$RED ** $BLUE HINT $RED**"
-  echo -e "$BLUE WPA-PSK key must be 14 character lenght"
+  echo -e "$RED ** $YELLOW HINT $RED**"
+  echo -e "$YELLOW WPA-PSK key must be 14 character lenght"
   usage
   exit 1
 elif [ -z "$WPA_PSK" ]; then
@@ -157,33 +157,29 @@ else
   exit 1
 fi
 
+# Check for a valid BUILDROOT, sets release-specific settings in order to create
+# a valid ROOTFS
+
 if [ ! -x "$BUILDROOT/scripts/getver.sh" ] ; then
   echo -e "$RED Invalid openwrt sources path"
   exit 1
-fi
-
-#Sets ROOTFS smartly
-
-ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
-if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
-  echo -e "$RED Invalid openwrt rootfs path"
-  exit 1
-fi
-
-#All version-dependent variables will be setted here
-if [ `cat $ROOTFS/etc/openwrt_version` == "8.09" ]; then
-  CODENAME="kamikaze"
-  RELEASE="8.09"
-  PKG_CMD="make package/symlinks"
-  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image"
-elif [ `cat $ROOTFS/etc/openwrt_version` == "10.03" ]; then
-  CODENAME="backfire"
-  RELEASE="10.03"
-  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img"
-  PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
-else 
-  echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
-  exit 1
+else
+  cat $BUILDROOT/package/base-files/files/etc/banner | grep -i kamikaze >> /dev/null
+  RET=$?
+  if [ "$RET" == "0" ]; then
+    CODENAME="kamikaze"
+    RELEASE="8.09"
+    PKG_CMD="make package/symlinks"
+    BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image"
+  elif [ "$RET" == "1" ]; then
+    CODENAME="backfire"
+    RELEASE="10.03"
+    BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img"
+    PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
+  else 
+    echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
+    exit 1
+  fi
 fi
 
 echo "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
@@ -201,9 +197,9 @@ fi
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
   echo -e "$GREEN Building images... $WHITE"
-  
+
   cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
-  
+
   if [ "$?" -ne "0" ]; then 
     echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
     echo -e "$YELLOW Please create a config file by yourself"
@@ -211,16 +207,22 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   fi
 
   echo -e " $YELLOW * Jumpin in:$WHITE"
-  pushd $BUILDROOT  
+  pushd $BUILDROOT
   eval $PKG_CMD
   echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
   make oldconfig > /dev/null
   echo -e "$GREEN Compiling OpenWrt... $WHITE"
-  make > $TOOLS/compile.log
+  make
   popd
 
-else 
+else
   echo -e "$GREEN Assuming No"
+fi
+
+ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
+if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
+  echo -e "$RED Invalid openwrt rootfs path"
+  exit 1
 fi
 
 #Copy custom file to target os
