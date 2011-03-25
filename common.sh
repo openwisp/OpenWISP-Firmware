@@ -17,8 +17,8 @@
 # Base parameters
 ETH0_MAC=`ifconfig eth0 | grep HWaddr | cut -d':' -f2- | cut -d' ' -f4`
 SLEEP_TIME=5
-UPKEEP_TIME_UNITS=6
-CONFCHECK_TIME_UNITS=12
+UPKEEP_TIME_UNITS=12
+CONFCHECK_TIME_UNITS=24
 CONFIGURATION_DOMAIN="owispmanager-setup"
 IFACE="setup99"
 STATUS_FILE_MAXLINES=1000
