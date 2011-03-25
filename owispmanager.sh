@@ -685,7 +685,7 @@ do
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
 
   vpnWatchdog
-  local __vpn_status="$?"
+  __vpn_status="$?"
 
   if [ "$CONFIG_home_status" == "$STATE_CONFIGURED" ]; then
     if [ -f $CONFIGURATIONS_ACTIVE_FILE ]; then
@@ -713,7 +713,7 @@ do
       fi
     else
       # Uci configuration completed but non yet applied (setup state)
-      local __ret="0"
+      __ret="0"
       if [ "$__vpn_status" -eq "0" ]; then
         configurationRetrieve
         if [ "$?" -eq "0" ]; then
