@@ -182,7 +182,7 @@ else
   fi
 fi
 
-echo "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
+echo -e "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected $WHITE"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
