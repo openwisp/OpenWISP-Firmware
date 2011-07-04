@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash  
 #
 # OpenWISP Firmware
-# Copyright (C) 2010 CASPUR
+# Copyright (C) 2010-2011 CASPUR
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ WHITE="\033[1;37m"
 usage() {
 cat << EOU
 
-  OpenWisp Firmware deployer V 1.2, OpenWisp suite (c) caspur http://spider.caspur.it
+  OpenWisp Firmware deployer V 1.2, OpenWisp suite (c) caspur http://openwisp.caspur.it
 
   usage: $0 -s /path/to/sources -a arch [OPTION]  
   
@@ -44,6 +44,8 @@ cat << EOU
   -i: Inner server 
   -p: Inner server port
   -P: Root password
+  -u: Enable UMTS
+  -m: Enable OLSR mesh
 EOU
 }
 
@@ -61,7 +63,7 @@ is_valid_ip() {
 PLATFORM="atheros"
 VPN_REMOTE=""
 BUILDROOT=""
-TOOLS="."
+TOOLS=$(cd `dirname $0` && pwd)
 DISABLE_IPTABLES="yes"
 WPA_PSK=""
 WPA_SSID=""
@@ -69,8 +71,14 @@ DEFAULT_IP=""
 INNER_SERVER=""
 INNER_SERVER_PORT=""
 PASSWORD=""
+UMTS_ENABLE="0"
+MESH_ENABLE="0"
+HIDE_UMTS_PAGE="1"
+HIDE_MESH_PAGE="1"
+AUTOGEN_PWD="0"
+WEIGHT="thin"
 
-while getopts "hs:a:v:w:e:i:p:P:" OPTION
+while getopts "muhs:a:v:w:e:i:p:P:G:" OPTION
 do
   case $OPTION in
     h) 
@@ -101,6 +109,22 @@ do
     P)
       PASSWORD=$OPTARG
       ;;
+    m)
+      MESH_ENABLE="1"
+      HIDE_MESH_PAGE="0"
+      WEIGHT="full"
+      ;;
+    u)
+      UMTS_ENABLE="1"
+      HIDE_UMTS_PAGE="0"
+      WEIGHT="full"
+      ;;
+    G)
+      AUTOGEN_PWD="1"
+      WPA_PSK=owm-`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`
+      PASSWORD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8`
+      WEIGHT="full"
+      ;;
     ?)
       echo -e "$RED Invalid argument"
       usage
@@ -114,9 +138,22 @@ if [ -z "$BUILDROOT" ]; then
   exit 1 
 fi
 
-if [ -n "$PASSWORD" ]; then 
-  ENC_PWD=`perl $TOOLS/utils/pw.pl $PASSWORD`
+if [ "$PLATFORM" == "avr32" ]; then
+  PLATFORM="rb535"
 fi
+
+
+if [ "$WEIGHT" == "full" ]; then 
+  DISABLE_IPTABLES="no"
+fi
+
+echo -e "$RED ********* $YELLOW Deploying Started $RED ********* $WHITE"
+
+if [ -z "$PASSWORD" ]; then
+  PASSWORD="ciaociao"
+fi
+
+ENC_PWD=`perl $TOOLS/utils/pw.pl $PASSWORD`
 
 if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   echo ""
@@ -126,6 +163,12 @@ if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   echo ""
   usage
   exit 1 
+elif [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
+  STATUS="unconfigured"
+  HIDE_SERVER_PAGE="0"
+else
+  STATUS="configured"
+  HIDE_SERVER_PAGE="1"
 fi
 
 if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
@@ -134,9 +177,7 @@ if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
   echo -e "$YELLOW WPA-PSK key must be 14 character lenght"
   usage
   exit 1
-elif [ -z "$WPA_PSK" ]; then
-  echo -e "$YELLOW WPA-PSK will be owm-Ohz6ohngei"
-fi
+fi 
 
 if [ -n "$INNER_SERVER_PORT" ] && [ ! $(echo "$INNER_SERVER_PORT" | grep -E "^[0-9]+$") ]; then
   echo ""
@@ -163,32 +204,45 @@ fi
 if [ ! -x "$BUILDROOT/scripts/getver.sh" ] ; then
   echo -e "$RED Invalid openwrt sources path"
   exit 1
-else
-  cat $BUILDROOT/package/base-files/files/etc/banner | grep -i kamikaze >> /dev/null
-  RET=$?
-  if [ "$RET" == "0" ]; then
-    CODENAME="kamikaze"
-    RELEASE="8.09"
-    PKG_CMD="make package/symlinks"
-    BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image"
-  elif [ "$RET" == "1" ]; then
-    CODENAME="backfire"
-    RELEASE="10.03"
-    BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img"
-    PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
-  else 
-    echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
-    exit 1
-  fi
 fi
 
-echo -e "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected $WHITE"
+
+cat $BUILDROOT/package/base-files/files/etc/banner | grep -i kamikaze >> /dev/null
+RET=$?
+
+if [ "$RET" == "0" ]; then
+  CODENAME="kamikaze"
+  RELEASE="8.09"
+  PKG_CMD="make package/symlinks"
+  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image $BUILDROOT/bin/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin"
+  OVERLAY_OPT="option overlay_root /jffs"
+elif [ "$RET" == "1" ]; then
+  CODENAME="backfire"
+  RELEASE="10.03"
+  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin"
+  PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
+  OVERLAY_OPT="option overlay_root /overlay"
+else 
+  echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
+  exit 1
+fi
+
+echo -e "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
 # Check for an existing pre-compilated system
-if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM* ]; then 
+if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM* ]; then
   echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
+elif [ "$MESH_ENABLE" == "1" ]; then
+    echo -e "$RED In order to get mesh interface working I will patch you system....$WHITE"
+    pushd $BUILDROOT > /dev/null
+    echo -e "$YELLOW"
+    patch -p0 < $TOOLS/patches/ibss_wpa-none.patch
+    svn up -r25544 $BUILDROOT/package/hostapd/ > /dev/null
+    echo -e "$WHITE"
+    REPLAY="Y"
+    popd >/dev/null
 else
   echo -e "$GREEN Do you want to build a minimal OpenWRT system?[y/n]$WHITE"
   read REPLAY
@@ -198,78 +252,107 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
   echo -e "$GREEN Building images... $WHITE"
 
-  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME $BUILDROOT/.config 2>/dev/null
-
   if [ "$?" -ne "0" ]; then 
     echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
     echo -e "$YELLOW Please create a config file by yourself"
     exit 2
   fi
 
-  echo -e " $YELLOW * Jumpin in:$WHITE"
-  pushd $BUILDROOT
-  eval $PKG_CMD
+  pushd $BUILDROOT > /dev/null
   echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
-  make oldconfig > /dev/null
-  echo -e "$GREEN Compiling OpenWrt... $WHITE"
-  make
-  popd
+  echo -e "$YELLOW Compiling OpenWrt...THIS MAY TAKE SO LONG TIME $WHITE"
+  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME-$WEIGHT $BUILDROOT/.config 2>/dev/null
+  eval $PKG_CMD >/dev/null
+  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME-$WEIGHT $BUILDROOT/.config 2>/dev/null
+  make 
+  popd > /dev/null
 
 else
   echo -e "$GREEN Assuming No"
 fi
+ 
+ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
 
-ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM)
-if [ -z "$ROOTFS" ] || [ ! -x "$ROOTFS" ]; then
-  echo -e "$RED Invalid openwrt rootfs path"
-  exit 1
+if [ "$CODENAME" == "backfire" ]; then 
+  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/*-ipt-nathelper $ROOTFS/etc/modules.d/disabled/"
+  UCI_DEFAULT_DIR="uci-defaults"
+elif [ "$CODENAME" == "kamikaze" ]; then 
+  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/ ; mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null"
+  UCI_DEFAULT_DIR="default"
 fi
 
+echo -e "$RED *********$YELLOW Configuring OpenWisp firmware: $RED*********$WHITE"
+
 #Copy custom file to target os
-echo -e "$GREEN Copying file...$WHITE"
-mkdir $ROOTFS/etc/owispmanager 2>/dev/null
+echo -e "$YELLOW * Copying OWF file...$WHITE"
+mkdir -p $ROOTFS/etc/owispmanager/tools 2>/dev/null
 cp -R $TOOLS/common.sh $TOOLS/owispmanager.sh $TOOLS/web $ROOTFS/etc/owispmanager 2>/dev/null
+cp -R $TOOLS/tools/*.sh $ROOTFS/etc/owispmanager/tools 2>/dev/null
 mkdir $ROOTFS/etc/openvpn 2>/dev/null
 cp -R $TOOLS/openvpn/* $ROOTFS/etc/openvpn/ 2>/dev/null
 find $ROOTFS/etc/owispmanager -iname "*.svn" -exec rm -Rf {} \; 2>/dev/null
-chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh
-cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate
-cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/default/htpdate
+chmod +x $ROOTFS/etc/owispmanager/owispmanager.sh 2>/dev/null
+cp $TOOLS/htpdate/htpdate.init $ROOTFS/etc/init.d/htpdate 2>/dev/null
+cp $TOOLS/htpdate/htpdate.default $ROOTFS/etc/$UCI_DEFAULT_DIR/htpdate 2>/dev/null
+
 if [ "$?" -ne "0" ]; then
-  echo -e "$RED Failed to copy files..."
+ echo -e "$RED Failed to copy files..."
   exit 2
 fi
 
-echo -e "$GREEN Installing boot script"
+echo -e "$YELLOW * Installing boot script"
 cat << EOF > $ROOTFS/etc/inittab
 ::sysinit:/etc/init.d/rcS S boot
 ::shutdown:/etc/init.d/rcS K stop
-tts/0::askfirst:/bin/ash --login
-ttyS0::askfirst:/bin/ash --login
-tty1::askfirst:/bin/ash --login
+tts/0::askfirst:/bin/login
+ttyS0::askfirst:/bin/login
+tty1::askfirst:/bin/login
 ::respawn:/etc/owispmanager/owispmanager.sh
 EOF
+
+cat << EOF >> $ROOTFS/etc/shells
+/bin/login
+EOF
+
 if [ "$?" -ne "0" ]; then
   echo -e "$RED Failed to install inittab"
   exit 2
 fi
 
-echo -e "$GREEN Configuring openwrt default firmware:"
-
 echo -e "$YELLOW * Disabling unneeded services"
+
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo -e "$YELLOW * Disabling iptables"
-  rm $ROOTFS/etc/rc.d/S45firewall 2>/dev/null 
-  mkdir $ROOTFS/etc/modules.d/disabled 2>/dev/null
-  mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null
+  rm $ROOTFS/etc/rc.d/S*firewall 2>/dev/null 
+  eval $DISABLE_FW_MODULES
+elif [ "$DISABLE_IPTABLES" == "no" ]; then 
+  echo -e "$YELLOW * Enabling iptables"
+  cat << EOF > $ROOTFS/etc/config/firewall
+config defaults
+  option input            ACCEPT
+  option output           ACCEPT
+  option forward          DROP
+  option disable_ipv6     1
+
+config 'zone' 'owisp_mesh'
+  option 'name' 'mesh'
+  option 'network' 'mesh'
+  option 'input' 'ACCEPT'
+  option 'output' 'ACCEPT'
+  option 'forward' 'DROP'
+
+config 'forwarding' 'owisp_mesh2mesh'
+  option 'src' 'mesh'
+  option 'dest' 'mesh'
+EOF
 fi
 
-rm $ROOTFS/etc/rc.d/S49htpdate $ROOTFS/etc/rc.d/S50httpd $ROOTFS/etc/rc.d/S50uhttpd $ROOTFS/etc/rc.d/S60dnsmasq 2>/dev/null 
+rm $ROOTFS/etc/rc.d/S*htpdate $ROOTFS/etc/rc.d/S*ntpdate $ROOTFS/etc/rc.d/S*httpd $ROOTFS/etc/rc.d/S*uhttpd $ROOTFS/etc/rc.d/S*dnsmasq 2>/dev/null 
 
 echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
 echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >  ./etc/crontabs/root
-popd
+  popd
 
 echo -e "$YELLOW * Deploying initial wireless configuration $WHITE"
 cat << EOF > $ROOTFS/etc/config/wireless
@@ -285,63 +368,115 @@ option disabled 1
 EOF
 
 echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
-if [ -z "$VPN_REMOTE" ] || [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
-  STATUS="unconfigured"
-  HIDE_SERVER_PAGE="0"
-else
-  STATUS="configured"
-  HIDE_SERVER_PAGE="1"
-fi
+
 cat << EOF > $ROOTFS/etc/config/owispmanager
 config 'server' 'home'
-option 'address' '$VPN_REMOTE'
-option 'status' '$STATUS'
-option 'inner_server' '$INNER_SERVER'
-option 'inner_server_port' '$INNER_SERVER_PORT'
+  option 'address' '$VPN_REMOTE'
+  option 'status' '$STATUS'
+  option 'inner_server' '$INNER_SERVER'
+  option 'inner_server_port' '$INNER_SERVER_PORT'
 
 config 'server' 'local'
-option 'hide_server_page' '$HIDE_SERVER_PAGE'
-option 'setup_wpa_psk' '$WPA_PSK'
-option 'setup_wifi_dev' ''
-option 'setup_httpd_port' ''
-option 'setup_ssid' '$WPA_SSID'
-option 'setup_ip' ''
-option 'setup_netmask' ''
-option 'setup_range_ip_start' ''
-option 'setup_range_ip_end' ''
+  option 'hide_server_page' '$HIDE_SERVER_PAGE'
+  option 'setup_wpa_psk' '$WPA_PSK'
+  option 'setup_wifi_dev' ''
+  option 'setup_httpd_port' ''
+  option 'setup_ssid' '$WPA_SSID'
+  option 'setup_ip' ''
+  option 'setup_netmask' ''
+  option 'setup_range_ip_start' ''
+  option 'setup_range_ip_end' ''
+  option 'hide_umts_page' '$HIDE_UMTS_PAGE'
+  option 'hide_mesh_page' '$HIDE_MESH_PAGE'
+  option 'hide_ethernet_page' '0'
+  option 'ethernet_device' 'eth0'
+  option 'ethernet_enable' '0'
 EOF
 
+if [ "$UMTS_ENABLE" == "1" ]; then
+
+  echo -e "$YELLOW * Configuring UMTS support  $WHITE"
+
+  cat << EOF >> $ROOTFS/etc/config/owispmanager
+  option 'umts_device' '$UMTS_DEVICE'
+  option 'umts_enable' '0'
+EOF
+
+  cat << EOF > $ROOTFS/etc/modules.d/60-usb-serial
+usbserial vendor=0x12d1 product=0x1464
+EOF
+
+  cp $TOOLS/utils/usb-modeswitch.conf $ROOTFS/etc/usb-modeswitch.conf
+  cp -R $TOOLS/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh
+  cp -R $TOOLS/ppp/ip-up.d/add_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
+  chmod +x $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
+
+  echo -e "$YELLOW * Configuring UMTS init script $WHITE"
+
+  cp $TOOLS/utils/umts.sh $ROOTFS/etc/owispmanager/umts.sh
+  chmod +x $ROOTFS/etc/owispmanager/umts.sh  
+
+  cat << EOF >> $ROOTFS/etc/inittab
+::respawn:/etc/owispmanager/umts.sh
+EOF
+
+
+fi
+
+if [ "$MESH_ENABLE" == "1" ]; then 
+  cat << EOF >> $ROOTFS/etc/config/owispmanager
+ option 'mesh_device' 'wifi1'
+ option 'mesh_enable' '0'
+EOF
+
+  echo << EOF > $ROOTFS/etc/config/olsrd
+EOF
+
+#Disable olsrd key by default USE IT AT YOUR OWN RISK
+
+  echo << EOF > $ROOTFS/etc/olsrd.d/olsrd_secure_key
+EOF
+fi
+
+if [ "$UMTS_ENABLE" == "1" -o "$MESH_ENABLE" == "1" ]; then
+
+  echo -e "$YELLOW * Configuring failover script $WHITE"
+
+  cp -R $TOOLS/utils/failover.sh $ROOTFS/etc/owispmanager/failover.sh
+  chmod +x $ROOTFS/etc/owispmanager/failover.sh
+
+  cat << EOF >> $ROOTFS/etc/inittab
+::respawn:/etc/owispmanager/failover.sh
+EOF
+
+fi
+
 echo -e "$YELLOW * Configuring password timezone and hostname $WHITE"
-sed -i 's/option\ hostname\ OpenWrt/option\ hostname\ Unconfigured/' $ROOTFS/etc/config/system
-if [ "$?" -ne "0" ]; then
-  echo -e "$RED Failed to set default hostname"
-  exit 2
-fi
 
-sed -i 's/option\ timezone\ UTC/option\ timezone\ \"CET-1CEST-2,M3\.5\.0\/02:00:00,M10\.5\.0\/03:00:00\"/' $ROOTFS/etc/config/system
-if [ "$?" -ne "0" ]; then
-  echo -e "$RED Failed to set timezone"
-  exit 2
-fi
-
-if [ -n "$ENC_PWD" ]; then
-  # Rewrite passwd file entirely
+# Rewrite passwd file entirely
 cat << EOF > $ROOTFS/etc/passwd
 $ENC_PWD
 nobody:*:65534:65534:nobody:/var:/bin/false
 daemon:*:65534:65534:daemon:/var:/bin/false
 EOF
 
-else
-  echo -e "$YELLOW Root password will be ciaociao"
-  sed -i 's/root:.*:0:0:root:\/root:\/bin\/ash/root:\$1\$1.OBJgX7\$4VwOsIlaEDcmq9CUrYCHF\/:0:0:root:\/root:\/bin\/ash/' $ROOTFS/etc/passwd
-fi
-
 if [ "$?" -ne "0" ]; then
   echo -e "$RED Failed to set root password"
   exit 2
 else
   echo -e "$GREEN Root password set $WHITE"
+fi
+
+sed -i 's/option[ \t]hostname[ \t].*$/option hostname Unconfigured/' $ROOTFS/etc/config/system
+if [ "$?" -ne "0" ]; then
+  echo -e "$RED Failed to set default hostname"
+  exit 2
+fi
+
+sed -i 's/option[ \t]timezone[ \t].*$/option timezone \"CET-1CEST-2,M3\.5\.0\/02:00:00,M10\.5\.0\/03:00:00\"/' $ROOTFS/etc/config/system
+if [ "$?" -ne "0" ]; then
+  echo -e "$RED Failed to set timezone"
+  exit 2
 fi
 
 echo -e "$YELLOW * Installing repository $WHITE"
@@ -351,7 +486,7 @@ src/gz snapshots $REPO
 dest root /
 dest ram /tmp
 lists_dir ext /var/opkg-lists
-option overlay_root /jffs
+$OVERLAY_OPT
 EOF
 
 if [ "$?" -ne "0" ]; then
@@ -360,17 +495,29 @@ if [ "$?" -ne "0" ]; then
 fi
 
 echo -e "$YELLOW * Rebuilding images..."
-pushd $BUILDROOT
-make target/install
-make package/index
-popd
+pushd $BUILDROOT > /dev/null
+make target/install >/dev/null
+make package/index  >/dev/null
+popd  >/dev/null
 
-echo -e "$YELLOW Done. $WHITE"
-if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ]; then 
-  echo -e "$GREEN Moving Compiled Images into \"builds\" directory $WHITE"
-  cp $BINARIES ./builds/ 2>/dev/null
+echo -e "$GREEN Done. $WHITE"
+if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ]; then 
+  echo -e "$RED ********* $YELLOW Moving Compiled Images into \"builds\" directory $WHITE"
+  BIN_DIR="$TOOLS/builds/$CODENAME/$PLATFORM/`date '+%d-%m-%y-%H%M%S'`"
+  mkdir -p $BIN_DIR
+  cp $BINARIES $BIN_DIR 2>/dev/null
 else 
   echo -e "$RED Search your binaries in $BUILDROOT your platform is not tested right now"
 fi
 
 echo -e "$GREEN Your system is ready. $WHITE" 
+echo -e "$YELLOW ==================================$GREEN Summary $YELLOW================================== $WHITE"
+echo -e "|-> Your root password is $RED $PASSWORD $WHITE"
+
+if [ -z "$WPA_PSK" ]; then
+  echo -e "|-> Your WPA-PSK key is $RED owm-Ohz6ohngei $WHITE"
+else
+  echo -e "|-> Your WPA-PSK key is $RED $WPA_PSK $WHITE"
+fi
+
+echo -e "|-> You can find your binaries in $RED $BIN_DIR"

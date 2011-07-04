@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2010 CASPUR
+# Copyright (C) 2010-2011 CASPUR
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -27,10 +27,15 @@ DEFAULT_CONFIGURATION_IP_RANGE_START="172.22.33.2"
 DEFAULT_CONFIGURATION_IP_RANGE_END="172.22.33.10"
 DEFAULT_CONFIGURATION_NMASK="255.255.255.0"
 DEFAULT_HTTPD_PORT="8080"
+DATE_UPDATE_TIMEOUT=10
+DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
+DATE_UPDATE_SERVERS_HTTP="www.google.it"
+VPN_RESTART_SLEEP_TIME=10
 #DEFAULT_WPAPSK="owm-`ifconfig eth0 | grep HWaddr | cut -d':' -f2- | cut -d' ' -f4 | sed 's/://g'`"
-DEFAULT_SSID="$CONFIGURATION_DOMAIN"
+DEFAULT_SSID="owf-$ETH0_MAC"
 DEFAULT_WPAPSK="owm-Ohz6ohngei"
 DEFAULT_WIFIDEV="wifi0"
+DEFAULT_PHYDEV="phy0"
 MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
 # URIs and Paths
 CONFIGURATION_TARGZ_REMOTE_URL="get_config/$ETH0_MAC"
@@ -57,15 +62,18 @@ UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/uninstall.sh"
 # openVPN
 VPN_FILE="$TMP_PATH/owispmanager.ovpn"
 VPN_PIDFILE="$TMP_PATH/owispmanager-ovpn.pid"
-CLIENT_KEY_FILE="/etc/openvpn/client.key"
-CLIENT_CERTIFICATE_FILE="/etc/openvpn/client.crt"
-CLIENT_TA_FILE="/etc/openvpn/ta.key"
-CA_CERTIFICATE_FILE="/etc/openvpn/ca.crt"
+OPENVPN_TA_FILE="/etc/openvpn/ta.key"
+OPENVPN_CA_FILE="/etc/openvpn/ca.crt"
+OPENVPN_CLIENT_FILE="/etc/openvpn/client.crt"
 VPN_IFACE="setup00"
 DEFAULT_INNER_SERVER="10.8.0.1"
 DEFAULT_INNER_SERVER_PORT="80"
+# Misc
+OLSRD_TXTINFO_PORT="8281"
+DEFAULT_MESH_ESSID="OpenWISP-Mesh"
+DEFAULT_MESH_CHANNEL="36"
 
-# See loadStartupConfig() for runtime-defined variables
+# See load_startup_config() for runtime-defined variables
 
 # Status
 STATE_UNCONFIGURED="unconfigured"
@@ -75,13 +83,13 @@ _APP_NAME="open WISP Firmware"
 _APP_VERS="1.0"
 
 # -------
-# Function:     checkPrereq
+# Function:     check_prerequisites
 # Description:  Check for presence of the tools needed to run
 # Input:        nothing
 # Output:       nothing
 # Returns:      0 on success, 1 on non fatal error, > 1 on fatal error
 # Notes:
-checkPrereq() {
+check_prerequisites() {
   local __ret="0"
 
   # Madwifi-ng tools
@@ -178,30 +186,35 @@ checkPrereq() {
 }
 
 # -------
-# Function:     checkMadwifi
+# Function:     check_driver
 # Description:  Check for presence of $WIFIDEV interface
 # Input:        nothing
 # Output:       nothing
-# Returns:      0 if $WIFIDEV is present, > 0 otherwise
+# Returns:      0 if wifi iface is not present
+#               1 if madwifi iface is present
+#               2 if ath9k iface is present
 # Notes:
-checkMadwifi() {
-  if [ -z "`grep $WIFIDEV /proc/net/dev`" ]; then
-    echo "$WIFIDEV not found..."
+check_driver() {
+  if [ ! -z "`grep $WIFIDEV /proc/net/dev`" ]; then
+    echo "$WIFIDEV up and running"
     return 1
+  elif [ -d "/sys/class/ieee80211/$PHYDEV" ]; then
+    echo "$PHYDEV up and running"
+    return 2
   else
-    echo "$WIFIDEV up and running!"
+    echo "device not found"
     return 0
   fi
 }
 
 # -------
-# Function:     createUCIConfig
+# Function:     create_uci_config
 # Description:  Create OWISPMANAGER_UCI_FILE if doesn't exists
 # Input:        nothing
 # Output:       nothing
 # Returns:      nothing
 # Notes:
-createUCIConfig() {
+create_uci_config() {
   touch $OWISPMANAGER_UCI_FILE
   uci show owispmanager.home >/dev/null 2>&1
   if [ "$?" -ne "0" ]; then
@@ -212,47 +225,26 @@ createUCIConfig() {
 }
 
 # -------
-# Function:     loadStartupConfig
+# Function:     load_startup_config
 # Description:  Loads current confguration and sets up the global variables 
 #               used by configuration services
 # Input:        nothing
 # Output:       nothing
 # Returns:      nothing
 # Notes:
-loadStartupConfig() {
+load_startup_config() {
   uci_load "owispmanager"
   
   # Set "local" configuration variables
   # If there are uci keys defined, use them...
-  WPAPSK=$DEFAULT_WPAPSK
-  if [ ! -z "$CONFIG_local_setup_wpa_psk" ]; then
-     WPAPSK=$CONFIG_local_setup_wpa_psk
-  fi
 
-  WIFIDEV=$DEFAULT_WIFIDEV
-  if [ ! -z "$CONFIG_local_setup_wifi_dev" ]; then
-     WIFIDEV=$CONFIG_local_setup_wifi_dev
-  fi
-
-  HTTPD_PORT=$DEFAULT_HTTPD_PORT
-  if [ ! -z "$CONFIG_local_setup_httpd_port" ]; then
-     HTTPD_PORT=$CONFIG_local_setup_httpd_port
-  fi
-
-  SSID=$DEFAULT_SSID
-  if [ ! -z "$CONFIG_local_setup_ssid" ]; then
-     SSID=$CONFIG_local_setup_ssid
-  fi
-
-  INNER_SERVER=$DEFAULT_INNER_SERVER
-  if [ ! -z "$CONFIG_home_inner_server" ]; then
-     INNER_SERVER=$CONFIG_home_inner_server
-  fi
-
-  INNER_SERVER_PORT=$DEFAULT_INNER_SERVER_PORT
-  if [ ! -z "$CONFIG_home_inner_server_port" ]; then
-     INNER_SERVER_PORT=$CONFIG_home_inner_server_port
-  fi
+  WPAPSK=${CONFIG_local_setup_wpa_psk:-$DEFAULT_WPAPSK}
+  WIFIDEV=${CONFIG_local_setup_wifi_dev:-$DEFAULT_WIFIDEV}
+  PHYDEV=${CONFIG_local_setup_wifi_dev:-$DEFAULT_PHYDEV}
+  HTTPD_PORT=${CONFIG_local_setup_httpd_port:-$DEFAULT_HTTPD_PORT}
+  SSID=${CONFIG_local_setup_ssid:-$DEFAULT_SSID}
+  INNER_SERVER=${CONFIG_home_inner_server:-$DEFAULT_INNER_SERVER}
+  INNER_SERVER_PORT=${CONFIG_home_inner_server_port:-$DEFAULT_INNER_SERVER_PORT}
 
   CONFIGURATION_IP=$DEFAULT_CONFIGURATION_IP
   CONFIGURATION_NMASK=$DEFAULT_CONFIGURATION_NMASK
@@ -265,4 +257,88 @@ loadStartupConfig() {
      CONFIGURATION_IP_RANGE_END=$CONFIG_local_setup_range_ip_end
   fi
   
+}
+
+# -------
+# Function:     exec_with_timeout
+# Description:  Executes a command with timeout
+# Input:        A command, a timeout (>5)
+# Output:       nothing
+# Returns:      Command return value on success, 1 on error
+# Notes:
+exec_with_timeout() {
+  local __command=$1
+  local __timeout=$2
+  
+  if [ -z "$__command" ]; then
+    return 1
+  fi
+  
+  if [ -z "$__timeout" ]; then
+      __timeout=10
+  else
+    if [ "$__timeout" -lt "5" ]; then
+      echo "* WARNING exec_with_timeout(): timeout is too small, setting it to 5 seconds"
+      __timeout=5
+    fi
+  fi
+  
+  eval "($__command) &" 
+  local __pid="$!"
+  
+  while [ "$__timeout" -gt "1" ]; do
+    kill -0 $__pid >/dev/null 2>&1
+    if [ "$?" -eq "0" ]; then
+      sleep 1
+      __timeout=`expr \( $__timeout - 1 \)`
+    else
+      wait $__pid >/dev/null 2>&1
+      return $?
+    fi
+  done
+  
+  kill $__pid >/dev/null 2>&1
+  sleep 1
+  kill -0 $__pid >/dev/null 2>&1
+  if [ "$?" -eq "0" ]; then
+    kill -9 $__pid >/dev/null 2>&1
+  fi
+    
+  echo "* Command prematurely aborted"
+  
+  return 1
+}
+
+# -------
+# Function:     check_vpn_status
+# Description:  Checks setup vpn status
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 if the vpn is up and runnng, !0 otherwise
+# Notes:
+check_vpn_status() {
+  (route -n|grep $VPN_IFACE) >/dev/null 2>&1
+  return $?
+}
+
+# -------
+# Function:     update_date
+# Description:  Tries hard to update time
+# Input:        nothing
+# Output:       nothing
+# Returns:      0 on success (date/time updated) !0 otherwise
+# Notes:
+update_date() {
+  local __ret=1
+  
+  if [ -x "`which ntpdate`" ]; then
+    ntpdate -s -b -u -t $DATE_UPDATE_TIMEOUT $DATE_UPDATE_SERVERS_NTP >/dev/null 2>&1
+    __ret=$?
+  fi
+  if [ "$__ret" -ne "0" -a -x "`which htpdate`" ]; then
+    exec_with_timeout "(htpdate -s -t $DATE_UPDATE_SERVERS_HTTP | grep 'No time correction needed') >/dev/null 2>&1" $DATE_UPDATE_TIMEOUT
+    __ret= [ "$?" -ne "0" ]
+  fi
+  
+  return $__ret
 }
