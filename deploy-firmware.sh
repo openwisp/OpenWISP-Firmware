@@ -357,14 +357,14 @@ echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t 
 echo -e "$YELLOW * Deploying initial wireless configuration $WHITE"
 cat << EOF > $ROOTFS/etc/config/wireless
 config wifi-device  wifi0
-option type     atheros
-option channel  auto
-option disabled 1
+  option type     atheros
+  option channel  auto
+  option disabled 1
 
 config wifi-device  wifi1
-option type     atheros
-option channel  auto
-option disabled 1
+  option type     atheros
+  option channel  auto
+  option disabled 1
 EOF
 
 echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
@@ -406,7 +406,6 @@ EOF
 usbserial vendor=0x12d1 product=0x1464
 EOF
 
-  cp $TOOLS/utils/usb-modeswitch.conf $ROOTFS/etc/usb-modeswitch.conf
   cp -R $TOOLS/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh
   cp -R $TOOLS/ppp/ip-up.d/add_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
   chmod +x $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
@@ -425,8 +424,8 @@ fi
 
 if [ "$MESH_ENABLE" == "1" ]; then 
   cat << EOF >> $ROOTFS/etc/config/owispmanager
- option 'mesh_device' 'wifi1'
- option 'mesh_enable' '0'
+  option 'mesh_device' 'wifi1'
+  option 'mesh_enable' '0'
 EOF
 
   echo << EOF > $ROOTFS/etc/config/olsrd

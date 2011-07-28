@@ -54,23 +54,23 @@ load_web_config() {
 
   if [ "$HIDE_UMTS_PAGE" -ne "1" ]; then
     CURRENT_UMTS_ENABLE="$CONFIG_local_umts_enable"
-    
+
     CURRENT_UMTS_APN="$CONFIG_umts_apn"
     CURRENT_UMTS_PIN="$CONFIG_umts_pincode"
     CURRENT_UMTS_DNS="$CONFIG_umts_dns"
   fi
-  
+
   if [ "$HIDE_MESH_PAGE" -ne "1" ]; then
     CURRENT_MESH_ENABLE="$CONFIG_local_mesh_enable"
     CURRENT_MESH_DEVICE="${CONFIG_local_mesh_device:-wifi1}"
-    
+
     CURRENT_MESH_ADDRESSING="$CONFIG_mesh_proto"
     CURRENT_MESH_IP="$CONFIG_mesh_ipaddr"
     CURRENT_MESH_NMASK="$CONFIG_mesh_netmask"
     CURRENT_MESH_DNS="$CONFIG_mesh_dns"
 
     uci_load "wireless"
-    
+
     eval CURRENT_MESH_CHANNEL="\$CONFIG_""$CURRENT_MESH_DEVICE""_channel"
     CURRENT_MESH_CHANNEL="${CURRENT_MESH_CHANNEL:-64}"
     CURRENT_MESH_ESSID="$CONFIG_mesh0_ssid"
@@ -118,7 +118,7 @@ render_select() {
   local value
   local description
   local index=1
-  
+
   echo "<select name=\"$name\" id=\"$id\">"
   while [ "$index" -le "$values_len" ]; do 
     value=`echo "$values" | cut -d',' -f$index`
@@ -139,32 +139,32 @@ render_page() {
   if [ ! -z "$2" ]; then
     if [ ! -z "$3" ]; then
       REDIRECT="<meta http-equiv=\"refresh\" content=\"$3; url=$2\">"
-    else  
+    else
       REDIRECT="<meta http-equiv=\"refresh\" content=\"1; url=$2\">"
     fi
   else
     REDIRECT=""
   fi
 
-  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then 
+  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then
     SERVER_PAGE=""
   else
     SERVER_PAGE="<li><a href=\"?page=server\">Home server</a></li>"
   fi
 
-  if [ "$HIDE_UMTS_PAGE" -eq "1" ]; then 
+  if [ "$HIDE_UMTS_PAGE" -eq "1" ]; then
     UMTS_PAGE=""
   else
     UMTS_PAGE="<li><a href=\"?page=umts_connectivity\">UMTS connectivity</a></li>"
   fi
 
-  if [ "$HIDE_MESH_PAGE" -eq "1" ]; then 
+  if [ "$HIDE_MESH_PAGE" -eq "1" ]; then
     MESH_PAGE=""
   else
     MESH_PAGE="<li><a href=\"?page=mesh_connectivity\">MESH connectivity</a></li>"
   fi
 
-  if [ "$HIDE_ETHERNET_PAGE" -eq "1" ]; then 
+  if [ "$HIDE_ETHERNET_PAGE" -eq "1" ]; then
     ETHERNET_PAGE=""
   else
     ETHERNET_PAGE="<li><a href=\"?page=ethernet_connectivity\">Ethernet connectivity</a></li>"
@@ -177,7 +177,7 @@ render_page() {
   $REDIRECT
   <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
   <title>$_APP_NAME configuration</title>
-  
+
   <link href="/stylesheets/fluid960/reset.css" media="screen" rel="stylesheet" type="text/css" />
   <link href="/stylesheets/fluid960/text.css" media="screen" rel="stylesheet" type="text/css" />
   <link href="/stylesheets/fluid960/grid.css" media="screen" rel="stylesheet" type="text/css" />
@@ -251,7 +251,7 @@ function SelectAll(id) {
   document.getElementById(id).select();
 }
 </script>
-  
+
 <form action="?page=server" class="server_settings" id="server_settings" enctype="multipart/form-data" method="post">
   <fieldset id="_server_fieldset">
     <legend id="_server_legend">
@@ -299,7 +299,7 @@ ethernet_connectivity_form() {
    addressing_mode_static_checked=""
    _address_display="display:none;"
   fi
-   
+
   local __form=$(cat << EOF
 <form action="?page=ethernet_connectivity" class="addressing_mode" id="addressing_mode" method="post">
   <fieldset id="_address_fieldset">
@@ -350,7 +350,7 @@ EOF
 )
 
   __form=$(echo $__form | sed 's/\"/\\"/g')
-  
+
   eval "$1=\"$__form\""
   return 0
 }
@@ -359,7 +359,7 @@ umts_connectivity_form() {
   local _umts_display
   local _umts_enable_checked
   _render_apn_select="`render_select "apn" "apn" "$_APN" "$_APN_DESCR" "$CURRENT_UMTS_APN"`"
-  
+
   if [ "$CURRENT_UMTS_ENABLE" -eq "1" ]; then
     _umts_enable_checked="checked=\"checked\""
     _umts_display=""
@@ -367,7 +367,7 @@ umts_connectivity_form() {
     _umts_enable_checked=""
     _umts_display="display:none;"
   fi
-  
+
   local __form=$(cat << EOF
 <script type="text/javascript">
   function _toggle_umts() {
@@ -418,7 +418,7 @@ EOF
 )
 
   __form=$(echo $__form | sed 's/\"/\\"/g')
-  
+
   eval "$1=\"$__form\""
   return 0
 }
@@ -428,9 +428,9 @@ mesh_connectivity_form() {
   local _mesh_enable_checked
   local mesh_addressing_mode_dynamic_checked
   local mesh_addressing_mode_static_checked
-  
+
   _render_mesh_channel_select="`render_select "channel" "channel" "$_WIFI_CHANNELS" "$_BG_CHANNELS_DESCR,$_A_CHANNELS_DESCR" "$CURRENT_MESH_CHANNEL"`"
-  
+
    mesh_addressing_mode_dynamic_checked=""
    mesh_addressing_mode_static_checked="checked=\"checked\""
    _address_display=""
@@ -487,7 +487,7 @@ mesh_connectivity_form() {
             <input $mesh_addressing_mode_static_checked id="mesh_addressing_mode_static" name="mesh_addressing_mode" onclick="document.getElementById('_address').style.display='';" type="radio" value="static" checked/> Manual Configuration
           </td>
         </tr>
-      </tbody> 
+      </tbody>
     </table>
 
     <div id="_address" style="$_address_display">
@@ -519,7 +519,7 @@ mesh_connectivity_form() {
     </p>
     <p>
       <label for="is_a_gateway">Mesh Gateway?</label><br />
-      <input $_olsrd_is_a_gateway_checked id="is_a_gateway" name="is_a_gateway" type="checkbox" /> 
+      <input $_olsrd_is_a_gateway_checked id="is_a_gateway" name="is_a_gateway" type="checkbox" />
     </p>
     <p>
       <label for="olsrd_psk">*EXPERIMENTAL* Mesh (OLSR) Key (<b>minimum 16 chars</b>)</label><br />
@@ -535,14 +535,14 @@ EOF
 )
 
   __form=$(echo $__form | sed 's/\"/\\"/g')
-  
+
   eval "$1=\"$__form\""
   return 0
 }
 
 render_ethernet_connectivity_page() {
   local __connectivity
-  
+
   ethernet_connectivity_form __connectivity
 
   local __content=$(cat << EOC
@@ -562,7 +562,7 @@ EOC
 
 render_umts_connectivity_page() {
   local __connectivity
-  
+
   umts_connectivity_form __connectivity
 
   local __content=$(cat << EOC
@@ -582,7 +582,7 @@ EOC
 
 render_mesh_connectivity_page() {
   local __connectivity
-  
+
   mesh_connectivity_form __connectivity
 
   local __content=$(cat << EOC
@@ -633,9 +633,9 @@ test_default_gw_present() {
 
 test_default_gw_arp() {
   local gw
-  
+
   test_default_gw_present gw
-  
+
   ping -c2 $gw >/dev/null 2>&1
   local result=$(cat /proc/net/arp | grep "^$gw" | sed 's/[\ ]*/ /g' | cut -d' ' -f 5)
 
@@ -652,7 +652,7 @@ test_dns() {
   local __ret="$?"
 
   eval "$1=\"$result\""
-  
+
   if [ "$__ret" -eq "0" -a "$result" != "" ]; then 
     return 1
   fi
@@ -675,7 +675,7 @@ test_trace_small() {
     return 1
   else
     return 0
-  fi  
+  fi
 }
 
 test_trace_big() {
@@ -685,15 +685,15 @@ test_trace_big() {
   fi
 
   local server="`echo $CONFIG_home_address | cut -d':' -f1`"
-  
+
   local result="`traceroute -w 2 -q 2 -m 5 -n -f2 $server 1460  2>&1`"
 
   eval "$1=\"$result\""
-  if [ "$result" != "" ]; then 
+  if [ "$result" != "" ]; then
     return 1
   else
     return 0
-  fi  
+  fi
 }
 
 test_configuration_retrieve() {
@@ -703,7 +703,7 @@ test_configuration_retrieve() {
   fi
 
   check_vpn_status
-  if [ "$?" -eq "0" ]; then   
+  if [ "$?" -eq "0" ]; then
      eval "$1=\"VPN is up\""
   else
     eval "$1=\"VPN is down\""
@@ -723,7 +723,7 @@ test_configuration_retrieve() {
 render_access_point_page() {
   local __cpu="`cat /proc/cpuinfo`"
   local __upt="`uptime`"
-  
+
   local __content=$(cat << EOC
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
@@ -767,9 +767,9 @@ render_site_test_page() {
   local trace_small
   local trace_big
   local configuration
-  
+
   local __content
-  
+
   local __chead=$(cat << EOH
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
@@ -829,7 +829,7 @@ EOH
         else
           __content="$__content <td><font style="color:red">No</font> Please check your server configuration, your firewall setting and your Internet connectivity! ( $configuration ) </td></tr>"
         fi
-      
+
         __content="$__content <tr><td><em>Traceroute with small packets</em></td>"
         test_trace_small trace_small
         __content="$__content <td><pre>$trace_small</pre></td></tr>"
@@ -845,7 +845,7 @@ EOH
   else
     __content="$__content <td><font style="color:red">No</font> Check your connectivity settings!</td></tr>"
   fi
-    
+
   local __cfoot=$(cat << EOF
          </tbody>
       </table>
@@ -881,17 +881,17 @@ EOC
 render_info_page() {
   local __prereq=""
 
-  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then 
+  if [ "$HIDE_SERVER_PAGE" -eq "1" ]; then
     SERVER_INFOS=""
   else
     SERVER_INFOS="<li><b>Server settings.</b> Configure "home" server and the certificates needed to communicate with it.</li>"
   fi
-  
+
   check_prerequisites >/dev/null 2>&1
   if [ "$?" -ne "0" ]; then
     __prereq="<p><font style=\"color:red\">Firmware problem: this system doesn't meet all the requisites needed to run $_APP_NAME...</font><br />Please check the status log.</p>"
   fi
-  
+
   local __content=$(cat << EOC
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
@@ -905,7 +905,7 @@ render_info_page() {
             <b>Connectivity settings.</b> Configure basic connectivity: IP address, Netmask, Default gateway and DNS server.
           </li>
           <li>
-            <b>Site test.</b> Performs some basic connectivity tests. 
+            <b>Site test.</b> Performs some basic connectivity tests.
           </li>
           $SERVER_INFOS
           <li>
@@ -970,7 +970,7 @@ EOU
 EOO
 )
   fi
-    
+
   local __content=$(cat << EOC
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
@@ -1009,7 +1009,7 @@ render_reboot_page() {
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
     <div class="block" id="reboot-block">
-      <h1>Rebooting... 
+      <h1>Rebooting...
         <img alt="please wait" border="0" class="spin" height="16" width="16" src="/images/spinner.gif" />
       </h1>
       This will take about 2 minutes... If your browser doesn't redirect you to the home page, click <a href="/">here</a>.
@@ -1039,9 +1039,9 @@ parse_parameters() {
         local _parameter_name=`echo "$_block" | sed -n '1!d;s/\(.* name=\"\)\([^\"]*\)\".*$/\2/;p'`
         local _parameter_type=`echo "$_block" | grep "^Content-Type" | cut -d' ' -f2 | sed -e 's/[^ -~]//g'`
         local _parameter_value="`echo "$_block" | sed -e 's/[^ -~]//g' | sed '1,/^$/d;$d'`"
-        
+
         eval "F_${_parameter_name}=\"`echo "${_parameter_value}"`\""
-    
+
         _i=`expr $_i + $_block_len`
       done
     fi
@@ -1116,9 +1116,9 @@ case $F_page in
         uci_set "network" "umts" "dns" "`echo \"$F_dns\" | sed 's/[^0-9\.\s]//g'`"
         uci_set "network" "umts" "device" "$CONFIG_local_umts_device"
         uci_set "network" "umts" "peerdns" "0"
-        uci_set "network" "umts" "defaultroute" "0"        
-        uci_set "network" "umts" "keepalive" "5"        
- 
+        uci_set "network" "umts" "defaultroute" "0"
+        uci_set "network" "umts" "keepalive" "5"
+
         uci_commit "network"
 
         ifdown umts >/dev/null 2>&1
@@ -1126,13 +1126,13 @@ case $F_page in
       else
         uci_set "owispmanager" "local" "umts_enable" "0"
         uci_commit "owispmanager"
-        
+
         ifdown umts >/dev/null 2>&1
-        
+
         uci_remove "network" "umts"
         uci_commit "network"
       fi
-      
+
       rm /etc/resolv.conf >/dev/null 2>&1
       ln -s /tmp/resolv.conf.auto /etc/resolv.conf >/dev/null 2>&1
 
@@ -1153,25 +1153,25 @@ case $F_page in
         uci_add "network" "interface" "mesh"
         uci_set "network" "mesh" "type" "bridge"
         uci_set "network" "mesh" "proto" "static"
-        
+
        wifi down $CURRENT_MESH_DEVICE >/dev/null 2>&1
-        
+
         uci_remove "wireless" "mesh0"
         uci_add "wireless" "wifi-iface" "mesh0"
         uci_set "wireless" "mesh0" "device" "$CURRENT_MESH_DEVICE"
         uci_set "wireless" "mesh0" "ifname" "mesh0"
         uci_set "wireless" "mesh0" "network" "mesh"
         uci_set "wireless" "mesh0" "mode" "adhoc"
-       
+
         if [ -n "$F_wpa_psk" ]; then
           uci_set "wireless" "mesh0" "encryption" "psk-aes"
           uci_set "wireless" "mesh0" "key" "`echo \"$F_wpa_psk\" | sed 's/[^0-9a-zA-Z\s\-\_\.]/\-/g'`"
         fi
 
         if [ "$F_mesh_addressing_mode" == "static" ]; then
-          
+
           local essid="`echo \"$F_essid\" | sed 's/[^0-9a-zA-Z\s\-\_\.]/\-/g'`"
-          
+
           if [ -z "$essid" ]; then 
             essid="$DEFAULT_MESH_ESSID"
           fi
@@ -1180,25 +1180,24 @@ case $F_page in
           uci_set "network" "mesh" "netmask" "`echo \"$F_netmask\" | sed 's/[^0-9\.]//g'`"
           uci_set "wireless" "mesh" "ssid" "$essid"
           uci_set "wireless" "$CURRENT_MESH_DEVICE" "channel" "`echo \"$F_channel\" | sed 's/[^0-9]//g'`"
-        else 
+        else
           uci_set "network" "mesh" "ipaddr" "$(printf "10.%d.%d.%d\n" "0x`echo $ETH0_MAC | cut -d':' -f4`" "0x`echo $ETH0_MAC | cut -d':' -f5`" "0x`echo $ETH0_MAC | cut -d':' -f6`")"
           uci_set "network" "mesh" "netmask" "255.0.0.0"
           uci_set "wireless" "mesh0" "ssid" "$DEFAULT_MESH_ESSID"
           uci_set "wireless" "$CURRENT_MESH_DEVICE" "channel" "$DEFAULT_MESH_CHANNEL"
-        fi 
-        
+        fi
+
         uci_set "network" "mesh" "dns" "`echo \"$F_dns\" | sed 's/[^0-9\.\s]//g'`"
         uci_set "wireless" "$CURRENT_MESH_DEVICE" "disabled" "0"
-        
+
         if [ "$F_channel" -ge "34" ]; then
           uci_set "wireless" "$CURRENT_MESH_DEVICE" "mode" "a"
         else
           uci_set "wireless" "$CURRENT_MESH_DEVICE" "mode" "bg"
         fi
-        
-        
+
         /etc/init.d/olsrd stop >/dev/null 2>&1
-        
+
         uci_remove "olsrd" "mesh_olsrd_protocol"
         uci_add "olsrd" "olsrd" "mesh_olsrd_protocol"
         uci_set "olsrd" "mesh_olsrd_protocol" "IpVersion" "4"
@@ -1212,7 +1211,7 @@ case $F_page in
           uci_set "olsrd" "mesh_olsrd_secure" "keyfile" "/etc/olsrd.d/olsrd_secure_key"
           echo "$F_olsrd_psk" > /etc/olsrd.d/olsrd_secure_key
         fi
-        
+
         # Olsr arp refresh plugin
         uci_remove "olsrd" "mesh_olsrd_arp_refresh"
         uci_add "olsrd" "LoadPlugin" "mesh_olsrd_arp_refresh"
@@ -1228,7 +1227,7 @@ case $F_page in
         uci_remove "olsrd" "mesh_olsrd_interface"
         uci_add "olsrd" "Interface" "mesh_olsrd_interface"
         uci_set "olsrd" "mesh_olsrd_interface" "interface" "mesh"
-        
+
         if [ -n "$F_is_a_gateway" ]; then
           # This node is a gateway, advertise a default route via hna and configure NAT properly
           uci_add "olsrd" "Hna4" "mesh_olsrd_hna_gw"
@@ -1241,22 +1240,22 @@ case $F_page in
           uci_set "firewall" "owisp_umts" "input" "ACCEPT"
           uci_set "firewall" "owisp_umts" "output" "ACCEPT"
           uci_set "firewall" "owisp_umts" "forward" "DROP"
-          uci_set "firewall" "owisp_umts" "masq"	"1" 
+          uci_set "firewall" "owisp_umts" "masq" "1"
           uci_set "firewall" "owisp_umts" "mtu_fix" "1"
 
           uci_add "firewall" "zone" "owisp_lan"
           uci_set "firewall" "owisp_lan" "name" "lan"
           uci_set "firewall" "owisp_lan" "network" "lan"
           uci_set "firewall" "owisp_lan" "input" "ACCEPT"
-          uci_set "firewall" "owisp_lan" "output"	"ACCEPT" 
-          uci_set "firewall" "owisp_lan" "forward"	"DROP"
-          uci_set "firewall" "owisp_lan" "masq"	"1" 
+          uci_set "firewall" "owisp_lan" "output" "ACCEPT"
+          uci_set "firewall" "owisp_lan" "forward" "DROP"
+          uci_set "firewall" "owisp_lan" "masq" "1"
           uci_set "firewall" "owisp_lan" "mtu_fix" "1"
 
-          uci_add "firewall" "forwarding" "owisp_mesh2lan" 
+          uci_add "firewall" "forwarding" "owisp_mesh2lan"
           uci_set "firewall" "owisp_mesh2lan" "src" "mesh"
           uci_set "firewall" "owisp_mesh2lan" "dest" "lan"
-          
+
           uci_add "firewall" "forwarding" "owisp_mesh2umts" 
           uci_set "firewall" "owisp_mesh2umts" "src" "mesh"
           uci_set "firewall" "owisp_mesh2umts" "dest" "umts"
@@ -1281,12 +1280,12 @@ case $F_page in
         uci_commit "wireless"
         uci_commit "olsrd"
 
-        ifup mesh >/dev/null 2>&1        
+        ifup mesh >/dev/null 2>&1
         wifi up $CURRENT_MESH_DEVICE >/dev/null 2>&1
-        
+
         /etc/init.d/olsrd start >/dev/null 2>&1
         /etc/init.d/olsrd enable >/dev/null 2>&1
-      
+
       else
         uci_set "owispmanager" "local" "mesh_enable" "0"
         uci_commit "owispmanager"
@@ -1307,10 +1306,10 @@ case $F_page in
         uci_remove "olsrd" "mesh_olsrd_interface"
         uci_remove "olsrd" "mesh_olsrd_hna_gw"
         uci_commit "olsrd"
-        
+
         ifdown mesh >/dev/null 2>&1
 
-        uci_remove "network" "mesh"        
+        uci_remove "network" "mesh"
         uci_commit "network"
 
         /etc/init.d/olsrd stop >/dev/null 2>&1
@@ -1332,17 +1331,17 @@ case $F_page in
       uci_set "owispmanager" "home" "address" "$F_server_address"
       uci_set "owispmanager" "home" "port" "$F_server_port"
       if [ -n "$F_certificates" ]; then
-        CA_FILE=`echo "$F_certificates" | 
+        CA_FILE=`echo "$F_certificates" |
           sed -n '/^-----BEGIN OWISP CA CERT-----$/,${/^-----END OWISP CA CERT-----$/q;p}' | sed '1d'`
-        CLIENT_FILE=`echo "$F_certificates" | 
+        CLIENT_FILE=`echo "$F_certificates" |
           sed -n '/^-----BEGIN OWISP CLIENT CERTKEY-----$/,${/^-----END OWISP CLIENT CERTKEY-----$/q;p}' | sed '1d'`
-        TA_FILE=`echo "$F_certificates" | 
+        TA_FILE=`echo "$F_certificates" |
           sed -n '/^-----BEGIN OWISP TA KEY-----$/,${/^-----END OWISP TA KEY-----$/q;p}' | sed '1d'`
-        
+
         if [ -n "$CA_FILE" ]; then
           echo "$CA_FILE" > $OPENVPN_CA_FILE
         fi
-        
+
         if [ -n "$CLIENT_FILE" ]; then
           echo "$CLIENT_FILE" > $OPENVPN_CLIENT_FILE
         fi
@@ -1361,7 +1360,7 @@ case $F_page in
         uci_set "owispmanager" "home" "status" "unconfigured"
         uci_commit "owispmanager"
         PAGE_STATUS="Server configuration committed (incomplete)"
-      fi      
+      fi
     fi
     load_web_config
     render_server_page

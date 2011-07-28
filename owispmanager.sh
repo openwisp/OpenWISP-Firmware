@@ -210,10 +210,10 @@ configuration_retrieve() {
     close_status_log_results
     return 2
   fi
-  
+
   # Retrieve the configuration
   exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
-  
+
   if [ "$?" -eq "0" ]; then
     md5sum $CONFIGURATION_TARGZ_FILE | cut -d' ' -f1 > $CONFIGURATION_TARGZ_MD5_FILE
   else
@@ -281,7 +281,7 @@ stop_configuration_services() {
   stop_dns_masq
   stop_httpd
   stop_hostapd
-  
+
   destroy_wifi_interface
 
   close_status_log_results
@@ -297,9 +297,9 @@ stop_configuration_services() {
 start_configuration_services() {
   # Checks if all the configuration services are running
   if [ ! -f "/proc/`cat $HOSTAPD_PIDFILE 2>/dev/null`/status" ] || [ ! -f "/proc/`cat $HTTPD_PIDFILE 2>/dev/null`/status" ] || [ ! -f "/proc/`cat $DNSMASQ_PIDFILE 2>/dev/null`/status" ]; then
-    
+
     stop_configuration_services
-    
+
     open_status_log_results
     echo "* Starting configuration services"
 
@@ -370,7 +370,7 @@ configuration_install() {
   echo "* Installing new configuration"
 
   cd $CONFIGURATIONS_PATH
-  
+
   tar xzf $CONFIGURATION_TARGZ_FILE
   if [ ! "$?" -eq "0" ]; then
     close_status_log_results
@@ -386,7 +386,7 @@ configuration_install() {
     close_status_log_results
     return 1
   fi
-  
+
   touch $CONFIGURATIONS_ACTIVE_FILE
 
   close_status_log_results
@@ -518,10 +518,10 @@ configuration_check_timer=0
 
 while :
 do
-  
+
   # Reload owispmanager uci configuration at each iteration
   uci_load "owispmanager"
-  
+
   upkeep_timer=`expr \( $upkeep_timer + 1 \) % $UPKEEP_TIME_UNITS`
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
 
@@ -574,7 +574,7 @@ do
         # oops, something went wrong: restart configuration services in a moment
         __ret="1"
       fi
-      
+
       if [ "$__ret" -ne "0" ]; then
         # Restart configuration services
         start_configuration_services
@@ -585,5 +585,5 @@ do
     start_configuration_services
   fi
   sleep $SLEEP_TIME
-  
+
 done

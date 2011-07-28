@@ -10,7 +10,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -19,6 +19,7 @@ ETH0_MAC=`ifconfig eth0 | grep HWaddr | cut -d':' -f2- | cut -d' ' -f4`
 SLEEP_TIME=5
 UPKEEP_TIME_UNITS=12
 CONFCHECK_TIME_UNITS=24
+# OWF Specific settings
 CONFIGURATION_DOMAIN="owispmanager-setup"
 IFACE="setup99"
 STATUS_FILE_MAXLINES=1000
@@ -27,16 +28,8 @@ DEFAULT_CONFIGURATION_IP_RANGE_START="172.22.33.2"
 DEFAULT_CONFIGURATION_IP_RANGE_END="172.22.33.10"
 DEFAULT_CONFIGURATION_NMASK="255.255.255.0"
 DEFAULT_HTTPD_PORT="8080"
-DATE_UPDATE_TIMEOUT=10
-DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
-DATE_UPDATE_SERVERS_HTTP="www.google.it"
-VPN_RESTART_SLEEP_TIME=10
-#DEFAULT_WPAPSK="owm-`ifconfig eth0 | grep HWaddr | cut -d':' -f2- | cut -d' ' -f4 | sed 's/://g'`"
 DEFAULT_SSID="owf-$ETH0_MAC"
 DEFAULT_WPAPSK="owm-Ohz6ohngei"
-DEFAULT_WIFIDEV="wifi0"
-DEFAULT_PHYDEV="phy0"
-MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
 # URIs and Paths
 CONFIGURATION_TARGZ_REMOTE_URL="get_config/$ETH0_MAC"
 CONFIGURATION_TARGZ_MD5_REMOTE_URL="get_config/$ETH0_MAC.md5"
@@ -72,6 +65,14 @@ DEFAULT_INNER_SERVER_PORT="80"
 OLSRD_TXTINFO_PORT="8281"
 DEFAULT_MESH_ESSID="OpenWISP-Mesh"
 DEFAULT_MESH_CHANNEL="36"
+DEFAULT_WIFIDEV="wifi0"
+DEFAULT_PHYDEV="phy0"
+MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
+VPN_RESTART_SLEEP_TIME=10
+DATE_UPDATE_TIMEOUT=10
+DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
+DATE_UPDATE_SERVERS_HTTP="www.google.it"
+
 
 # See load_startup_config() for runtime-defined variables
 
@@ -80,7 +81,7 @@ STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
 _APP_NAME="open WISP Firmware"
-_APP_VERS="1.0"
+_APP_VERS="2.0"
 
 # -------
 # Function:     check_prerequisites
@@ -102,7 +103,7 @@ check_prerequisites() {
 
   # Httpd
   # By default kamikaze uses busybox httpd, backfire uses uhttpd so we need to check
-  # wich daemon is installed 
+  # wich daemon is installed
 
   if [ -x "`which uhttpd`" ]; then
     echo "uHTTP Daemon is present!"
@@ -115,7 +116,6 @@ check_prerequisites() {
     echo "HTTPD Daemon is missing"
   fi
 
-	
   # Hostapd
   if [ -x "`which hostapd`" ]; then
     echo "hostapd is present (`hostapd -v 2>&1 | head -1`)"
@@ -256,7 +256,7 @@ load_startup_config() {
      CONFIGURATION_IP_RANGE_START=$CONFIG_local_setup_range_ip_start
      CONFIGURATION_IP_RANGE_END=$CONFIG_local_setup_range_ip_end
   fi
-  
+
 }
 
 # -------
@@ -269,11 +269,11 @@ load_startup_config() {
 exec_with_timeout() {
   local __command=$1
   local __timeout=$2
-  
+
   if [ -z "$__command" ]; then
     return 1
   fi
-  
+
   if [ -z "$__timeout" ]; then
       __timeout=10
   else
@@ -282,10 +282,10 @@ exec_with_timeout() {
       __timeout=5
     fi
   fi
-  
-  eval "($__command) &" 
+
+  eval "($__command) &"
   local __pid="$!"
-  
+
   while [ "$__timeout" -gt "1" ]; do
     kill -0 $__pid >/dev/null 2>&1
     if [ "$?" -eq "0" ]; then
@@ -296,16 +296,16 @@ exec_with_timeout() {
       return $?
     fi
   done
-  
+
   kill $__pid >/dev/null 2>&1
   sleep 1
   kill -0 $__pid >/dev/null 2>&1
   if [ "$?" -eq "0" ]; then
     kill -9 $__pid >/dev/null 2>&1
   fi
-    
+
   echo "* Command prematurely aborted"
-  
+
   return 1
 }
 
@@ -330,7 +330,7 @@ check_vpn_status() {
 # Notes:
 update_date() {
   local __ret=1
-  
+
   if [ -x "`which ntpdate`" ]; then
     ntpdate -s -b -u -t $DATE_UPDATE_TIMEOUT $DATE_UPDATE_SERVERS_NTP >/dev/null 2>&1
     __ret=$?
@@ -339,6 +339,6 @@ update_date() {
     exec_with_timeout "(htpdate -s -t $DATE_UPDATE_SERVERS_HTTP | grep 'No time correction needed') >/dev/null 2>&1" $DATE_UPDATE_TIMEOUT
     __ret= [ "$?" -ne "0" ]
   fi
-  
+
   return $__ret
 }
