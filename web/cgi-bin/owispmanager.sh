@@ -1110,7 +1110,7 @@ case $F_page in
         uci_remove "network" "umts"
         uci_add "network" "interface" "umts"
         uci_set "network" "umts" "proto" "3g"
-        uci_set "network" "umts" "service" "umts"
+        uci_set "network" "umts" "service" "hsdpa"
         uci_set "network" "umts" "apn" "`echo \"$F_apn\" | sed 's/[^0-9a-zA-Z\.]//g'`"
         uci_set "network" "umts" "pincode" "`echo \"$F_pin\" | sed 's/[^0-9]//g'`"
         uci_set "network" "umts" "dns" "`echo \"$F_dns\" | sed 's/[^0-9\.\s]//g'`"
