@@ -34,6 +34,7 @@ DEFAULT_WPAPSK="owm-Ohz6ohngei"
 CONFIGURATION_TARGZ_REMOTE_URL="get_config/$ETH0_MAC"
 CONFIGURATION_TARGZ_MD5_REMOTE_URL="get_config/$ETH0_MAC.md5"
 WEB_HOME_PATH="$HOME_PATH/web/"
+OWM_URL="owm"
 TMP_PATH="/tmp/"
 OWISPMANAGER_UCI_FILE="/etc/config/owispmanager"
 CONFIGURATIONS_PATH="$TMP_PATH/owispmanager/"
@@ -342,3 +343,4 @@ update_date() {
 
   return $__ret
 }
+

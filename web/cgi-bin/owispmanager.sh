@@ -710,6 +710,14 @@ test_configuration_retrieve() {
     return 0
   fi
 
+  wget -s http://$INNER_SERVER:$INNER_SERVER_PORT/owm/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1
+  if [ "$?" -eq "0" ]; then
+    eval "$1=\"MAC Correctly configured\""
+    return -1
+   else 
+    eval "$1\"Check mac address configuration\""
+  fi
+
   nc -z -w2 $INNER_SERVER $INNER_SERVER_PORT >/dev/null 2>&1
   if [ "$?" -eq "0" ]; then
     eval "$1=\"$INNER_SERVER is responding on port $INNER_SERVER_PORT\""
@@ -718,6 +726,7 @@ test_configuration_retrieve() {
     eval "$1=\"Failed\""
     return 0
   fi
+
 }
 
 render_access_point_page() {
@@ -824,8 +833,11 @@ EOH
       if [ ! -z "$CONFIG_home_address" ]; then
         __content="$__content <tr><td><em>Can I download my configuration?</em></td>"
         test_configuration_retrieve configuration
-        if [ "$?" -eq "1" ]; then
+        rc="$?" 
+        if [ "$rc" -eq "1" ]; then
           __content="$__content <td><font style="color:green">Yes</font> ( $configuration )</td></tr>"
+        elif [ "$rc" -eq "2" ]; then
+          __content="$__content <td><font style="color:red">No</font> Please check your registered mac address </td></tr>"
         else
           __content="$__content <td><font style="color:red">No</font> Please check your server configuration, your firewall setting and your Internet connectivity! ( $configuration ) </td></tr>"
         fi
