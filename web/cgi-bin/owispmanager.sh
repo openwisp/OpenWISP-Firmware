@@ -710,24 +710,27 @@ test_configuration_retrieve() {
     return 0
   fi
 
-  wget -s http://$INNER_SERVER:$INNER_SERVER_PORT/owm/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1
-  if [ "$?" -eq "0" ]; then
-    eval "$1=\"MAC Correctly configured\""
-    return -1
-   else 
-    eval "$1\"Check mac address configuration\""
-  fi
-
   nc -z -w2 $INNER_SERVER $INNER_SERVER_PORT >/dev/null 2>&1
   if [ "$?" -eq "0" ]; then
     eval "$1=\"$INNER_SERVER is responding on port $INNER_SERVER_PORT\""
     return 1
   else
+    #Check if configuration tarball exist 
+    wget -s http://$INNER_SERVER:$INNER_SERVER_PORT/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1
+    wget_rc="$?"
+
+    if [ "$wget_rc" -eq "0" ]; then
+      eval "$1=\"MAC Correctly configured\""
+    else
+      eval "$1\"Check mac address configuration\""
+      return 2
+    fi
+
     eval "$1=\"Failed\""
     return 0
   fi
 
-}
+ }
 
 render_access_point_page() {
   local __cpu="`cat /proc/cpuinfo`"
