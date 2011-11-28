@@ -274,7 +274,7 @@ fi
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
 
 if [ "$CODENAME" == "backfire" ]; then 
-  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/*-ipt-nathelper $ROOTFS/etc/modules.d/disabled/"
+  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/"
   UCI_DEFAULT_DIR="uci-defaults"
 elif [ "$CODENAME" == "kamikaze" ]; then 
   DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/ ; mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null"
