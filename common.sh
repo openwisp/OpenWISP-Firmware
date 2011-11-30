@@ -103,15 +103,8 @@ check_prerequisites() {
   fi
 
   # Httpd
-  # By default kamikaze uses busybox httpd, backfire uses uhttpd so we need to check
-  # wich daemon is installed
-
   if [ -x "`which uhttpd`" ]; then
     echo "uHTTP Daemon is present!"
-    HTTPD="uhttpd"
-  elif [ -x "`which httpd`" ]; then
-    echo "busybox HTTP Daemon is present "
-    HTTPD="httpd"
   else
     __ret="2"
     echo "HTTPD Daemon is missing"
