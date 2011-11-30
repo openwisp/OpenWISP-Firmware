@@ -30,7 +30,7 @@ HOME_PATH="/etc/owispmanager/"
 # Returns:      0 on success, !0 otherwise
 # Notes:
 start_httpd() {
-  start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a $HTTPD -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r $CONFIGURATION_DOMAIN
+  start-stop-daemon -S -b -m -p $HTTPD_PIDFILE -a uhttpd -- -f -p $CONFIGURATION_IP:$HTTPD_PORT -h $WEB_HOME_PATH -r $CONFIGURATION_DOMAIN
   return $?
 }
 
