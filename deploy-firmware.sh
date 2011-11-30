@@ -78,6 +78,14 @@ HIDE_MESH_PAGE="1"
 AUTOGEN_PWD="0"
 WEIGHT="thin"
 
+#Platform specific variables
+CODENAME="backfire"
+RELEASE="10.03"
+BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
+PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
+OVERLAY_OPT="option overlay_root /overlay"
+REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
+
 while getopts "muhs:a:v:w:e:i:p:P:G:" OPTION
 do
   case $OPTION in
@@ -207,29 +215,6 @@ if [ ! -x "$BUILDROOT/scripts/getver.sh" ] ; then
 fi
 
 
-cat $BUILDROOT/package/base-files/files/etc/banner | grep -i kamikaze >> /dev/null
-RET=$?
-
-if [ "$RET" == "0" ]; then
-  CODENAME="kamikaze"
-  RELEASE="8.09"
-  PKG_CMD="make package/symlinks"
-  BINARIES="$BUILDROOT/bin/openwrt-atheros-root.squashfs $BUILDROOT/bin/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/openwrt-x86-squashfs.image $BUILDROOT/bin/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin"
-  OVERLAY_OPT="option overlay_root /jffs"
-elif [ "$RET" == "1" ]; then
-  CODENAME="backfire"
-  RELEASE="10.03"
-  BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
-  PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
-  OVERLAY_OPT="option overlay_root /overlay"
-else 
-  echo -e "$RED Invalid Release. OWF support Backfire (10.03) or Kamikaze (9.02) "
-  exit 1
-fi
-
-echo -e "$GREEN OpenWRT $RELEASE a.k.a. $CODENAME detected"
-REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
-
 # Check for an existing pre-compilated system
 if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM* ]; then
   echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
@@ -261,9 +246,9 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   pushd $BUILDROOT > /dev/null
   echo -e "$GREEN Setting up OpenWRT configuration $WHITE"
   echo -e "$YELLOW Compiling OpenWrt...THIS MAY TAKE SO LONG TIME $WHITE"
-  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME-$WEIGHT $BUILDROOT/.config 2>/dev/null
+  cp $TOOLS/kernel_configs/config.$PLATFORM-$WEIGHT $BUILDROOT/.config 2>/dev/null
   eval $PKG_CMD >/dev/null
-  cp $TOOLS/kernel_configs/config.$PLATFORM.$CODENAME-$WEIGHT $BUILDROOT/.config 2>/dev/null
+  cp $TOOLS/kernel_configs/config.$PLATFORM-$WEIGHT $BUILDROOT/.config 2>/dev/null
   make 
   popd > /dev/null
 
@@ -273,13 +258,8 @@ fi
  
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
 
-if [ "$CODENAME" == "backfire" ]; then 
-  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/"
-  UCI_DEFAULT_DIR="uci-defaults"
-elif [ "$CODENAME" == "kamikaze" ]; then 
-  DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/ ; mv $ROOTFS/etc/modules.d/*-ipt-* $ROOTFS/etc/modules.d/disabled/ 2>/dev/null"
-  UCI_DEFAULT_DIR="default"
-fi
+DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/"
+UCI_DEFAULT_DIR="uci-defaults"
 
 echo -e "$RED *********$YELLOW Configuring OpenWisp firmware: $RED*********$WHITE"
 
