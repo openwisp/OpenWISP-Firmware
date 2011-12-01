@@ -38,7 +38,8 @@ cat << EOU
   -h: Print this help and exit
   -s: OpenWrt sources path
   -a: Architecture (e.g. atheros)
-  -v: Vpn server
+  -v: VPN Server
+  -V: VPN Server Port
   -w: Default wpa-psk
   -e: Configuration essid
   -i: Inner server 
@@ -62,6 +63,7 @@ is_valid_ip() {
 #Define variables to be set with getopt 
 PLATFORM="atheros"
 VPN_REMOTE=""
+VPN_REMOTE_PORT=""
 BUILDROOT=""
 TOOLS=$(cd `dirname $0` && pwd)
 DISABLE_IPTABLES="yes"
@@ -85,7 +87,7 @@ PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 OVERLAY_OPT="option overlay_root /overlay"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
-while getopts "muhs:a:v:w:e:i:p:P:G:" OPTION
+while getopts "muhs:a:v:V:w:e:i:p:P:G:" OPTION
 do
   case $OPTION in
     h) 
@@ -100,6 +102,9 @@ do
       ;;
     v)
       VPN_REMOTE=$OPTARG
+      ;;
+    V)
+      VPN_REMOTE_PORT=$OPTARG
       ;;
     w)
       WPA_PSK=$OPTARG
@@ -234,7 +239,7 @@ fi
 
 if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
-  echo -e "$GREEN Building images... $WHITE"
+  echo -e "$GREEN Building $WEIGHT images... $WHITE"
 
   if [ "$?" -ne "0" ]; then 
     echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
@@ -351,6 +356,7 @@ echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
 cat << EOF > $ROOTFS/etc/config/owispmanager
 config 'server' 'home'
   option 'address' '$VPN_REMOTE'
+  option 'port' '$VPN_REMOTE_PORT'
   option 'status' '$STATUS'
   option 'inner_server' '$INNER_SERVER'
   option 'inner_server_port' '$INNER_SERVER_PORT'
@@ -500,4 +506,4 @@ else
   echo -e "|-> Your WPA-PSK key is $RED $WPA_PSK $WHITE"
 fi
 
-echo -e "|-> You can find your binaries in $RED $BIN_DIR"
+echo -e "|-> You can find your binaries in $RED $BIN_DIR $WHITE"

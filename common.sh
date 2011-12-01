@@ -105,7 +105,6 @@ check_prerequisites() {
   # Httpd
   if [ -x "`which uhttpd`" ]; then
     echo "uHTTP Daemon is present!"
-    HTTPD="uhttpd"
   else
     __ret="2"
     echo "HTTPD Daemon is missing"
