@@ -1,4 +1,4 @@
-#!/bin/bash  
+#!/bin/bash -x
 #
 # OpenWISP Firmware
 # Copyright (C) 2010-2011 CASPUR
@@ -81,7 +81,6 @@ WEIGHT="thin"
 #Platform specific variables
 CODENAME="backfire"
 RELEASE="10.03"
-BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
 PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 OVERLAY_OPT="option overlay_root /overlay"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
@@ -478,6 +477,8 @@ pushd $BUILDROOT > /dev/null
 make target/install >/dev/null
 make package/index  >/dev/null
 popd  >/dev/null
+
+BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
 
 echo -e "$GREEN Done. $WHITE"
 if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ]; then 
