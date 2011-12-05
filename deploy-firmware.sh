@@ -47,6 +47,7 @@ cat << EOU
   -P: Root password
   -u: Enable UMTS
   -m: Enable OLSR mesh
+  -G: Autogenerate root password and WPA Key
 EOU
 }
 
