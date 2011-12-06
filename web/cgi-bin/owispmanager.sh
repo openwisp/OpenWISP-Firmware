@@ -1,6 +1,5 @@
 #!/bin/sh
 #
-# Copyright (C) 2010-2011 CASPUR
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -233,7 +232,7 @@ render_page() {
     <div class="clear">&nbsp;</div>
     <div class="grid_12" id="site_info">
       <div class="box" style="text-align:center">
-        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) 2010 - <a href="http://www.caspur.it/">CASPUR</a></p>
+        <p>$_APP_NAME v. $_APP_VERS - <a href="http://www.caspur.it/">CASPUR</a></p>
       </div>
     </div>
     <div class="clear">&nbsp;</div>
