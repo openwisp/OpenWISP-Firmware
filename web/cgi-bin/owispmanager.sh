@@ -741,7 +741,7 @@ render_access_point_page() {
     <div class="block" id="access_point-block">
       <fieldset id="_status_fieldset">
         <legend id="_status_legend">
-          Access Point Informations
+          Access Point Information
         </legend>
         <table>
           <tbody>
