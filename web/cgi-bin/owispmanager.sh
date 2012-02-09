@@ -549,7 +549,7 @@ render_ethernet_connectivity_page() {
   <div class="box">
     <div class="block" id="connectivity-block">
       $__connectivity
-    </div
+    </div>
   </div>
 </div>
 EOC
