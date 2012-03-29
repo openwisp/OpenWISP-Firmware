@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# OpenWISP Firmware
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +29,7 @@ WHITE="\033[1;37m"
 usage() {
 cat << EOU
 
-  OpenWisp Firmware deployer V 1.2, OpenWisp suite (c) caspur http://openwisp.caspur.it
+  OpenWisp Firmware deployer V 1.2, OpenWisp Suite (C) OpenWISP.org http://openwisp.org
 
   usage: $0 -s /path/to/sources -a arch [OPTION]  
   

@@ -1,5 +1,9 @@
 #!/bin/sh
 #
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -198,7 +202,7 @@ render_page() {
 <body>
   <div class="container_12">
     <div class="grid_12">
-      <h1 id="branding"><a href="/"><img alt="$_APP_NAME configuration" border="0" class="wums_logo" height="50" src="/images/logo_caspur.png" width="64" /></a>$_APP_NAME</h1>
+      <h1 id="branding">$_APP_NAME</h1>
     </div>
     <div class="clear">&nbsp;</div>
 
@@ -232,7 +236,7 @@ render_page() {
     <div class="clear">&nbsp;</div>
     <div class="grid_12" id="site_info">
       <div class="box" style="text-align:center">
-        <p>$_APP_NAME v. $_APP_VERS - <a href="http://www.caspur.it/">CASPUR</a></p>
+        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) 2012 <a href="http://openwisp.org/"> OpenWISP.org</a></p>
       </div>
     </div>
     <div class="clear">&nbsp;</div>

@@ -1,6 +1,8 @@
 #!/bin/bash 
 #
-# OpenWISP Firmware
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

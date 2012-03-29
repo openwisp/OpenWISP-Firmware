@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     |-- cgi-bin
     |   `-- owispmanager.sh
     |-- images
-    |   |-- logo_caspur.png
+    |   |-- openWISP_logo.png (*)
     |   |-- spinner.gif
     |   `-- switch_minus.gif
     |-- index.html

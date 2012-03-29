@@ -1,6 +1,8 @@
 #!/bin/sh
 #
-# OpenWISP Firmware
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,7 +84,7 @@ DATE_UPDATE_SERVERS_HTTP="www.google.it"
 STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
-_APP_NAME="open WISP Firmware"
+_APP_NAME="OpenWISP Firmware"
 _APP_VERS="2.0"
 
 # -------
