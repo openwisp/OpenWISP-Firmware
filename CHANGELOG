@@ -1,0 +1,22 @@
+OWF Changelog
+
+* Note
+
+This changelog only contains release TAGs.
+For a detailed changelog of each commits use the "git log" command.
+
+* Legend
+
+[F] Feature
+[B] Bugfix
+[D] Documentation
+[M] Misc
+[N] Note
+ 
+* Log
+
+April 26th, 2012 - Version 2.0.0
+
+ * [N] Initial commit to Github (earlier versions are to be considered "legacy" and not documented)
+ * [D] Added CHANGELOG
+ * [D] Added README.rdoc
