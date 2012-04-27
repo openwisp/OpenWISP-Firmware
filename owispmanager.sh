@@ -499,7 +499,7 @@ else
       . $HOME_PATH/tools/madwifi.sh
   elif [ "$__ret" -eq "2" ]; then 
     echo "$PHYDEV ok, let's rock!"
-      . $HOME_PATH/tools/ath9k.sh
+      . $HOME_PATH/tools/mac80211.sh
   fi
 fi
 
