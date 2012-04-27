@@ -752,7 +752,7 @@ render_access_point_page() {
             <tr>
               <td><em>Ethernet (eth0) MAC address</em></td>
               <td class="code"><big>$ETH0_MAC</big></td>
-            </tr>
+            </tr>	
             <tr>
               <td><em>CPU Info</em></td>
               <td class="code"><pre>$__cpu</pre></td>
@@ -948,6 +948,7 @@ render_status_page() {
   local __ROUTE_INFO=""
   local __OLSR_INFO=""
   local __UMTS_INFO=""
+  local __LAN_INFO=""
 
   __ROUTE_INFO=$(cat << EOR
 <p>
@@ -957,6 +958,18 @@ render_status_page() {
   </pre>
 </p>
 EOR
+)
+
+  __LAN_INFO=$(cat << EOL
+<p>
+  <label for="lan_table_pre"><b>LAN Connectivity info</b></label>
+  <pre id="lan_table_pre" name="lan_table_pre">
+Current LAN Address Mode: $CURRENT_ETHERNET_ADDRESSING
+Current LAN IP:           $CURRENT_ETHERNET_IP/$CURRENT_ETHERNET_NMASK
+Current LAN Gateway:      $CURRENT_ETHERNET_GW
+  </pre>
+</p>
+EOL
 )
 
   if [ "$CURRENT_UMTS_ENABLE" -eq "1" ]; then
@@ -1008,6 +1021,7 @@ EOO
             ta.scrollTop = ta.scrollHeight;
           </script>
         </p>
+        $__LAN_INFO
         $__ROUTE_INFO
         $__OLSR_INFO
         $__UMTS_INFO
