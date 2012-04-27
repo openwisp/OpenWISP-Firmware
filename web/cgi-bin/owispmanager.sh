@@ -48,7 +48,7 @@ load_web_config() {
   uci_load "network"
 
   if [ "$HIDE_ETHERNET_PAGE" -ne "1" ]; then
-    CURRENT_ETHERNET_ADRESSING="$CONFIG_lan_proto"
+    CURRENT_ETHERNET_ADDRESSING="$CONFIG_lan_proto"
     CURRENT_ETHERNET_IP="$CONFIG_lan_ipaddr"
     CURRENT_ETHERNET_NMASK="$CONFIG_lan_netmask"
     CURRENT_ETHERNET_GW="$CONFIG_lan_gateway"
@@ -293,7 +293,7 @@ ethernet_connectivity_form() {
   local addressing_mode_static_checked
   local _address_display
 
-  if [ "$CURRENT_ETHERNET_ADRESSING" == "static" ]; then
+  if [ "$CURRENT_ETHERNET_ADDRESSING" == "static" ]; then
    addressing_mode_dynamic_checked=""
    addressing_mode_static_checked="checked=\"checked\""
    _address_display=""
@@ -750,7 +750,7 @@ render_access_point_page() {
         <table>
           <tbody>
             <tr>
-              <td><em>Ethernet (eth0) mac address</em></td>
+              <td><em>Ethernet (eth0) MAC address</em></td>
               <td class="code"><big>$ETH0_MAC</big></td>
             </tr>
             <tr>
