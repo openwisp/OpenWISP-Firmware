@@ -37,28 +37,28 @@ So now you can run our deploy script against backfire
 
 In our release we also provides some kernel configuration files for the access points we have tested:
 
-*D-Link DIR 825 [Internal use with ethernet and USB]
-*Abocom WAP 2102 [Internal use flyweight and cheap]
-*UBNT Nanostation/Nanostation loco and Nanostation M2 and M5/Nanostation loco M2 and M5 [External use bullet proof enclosure]
-*UBNT Picostation/Picostation M [External use with a replaceable antenna]
-*UBNT Airwire [Internal use with tricky setup]
-*UBNT UniFi [Internal use, tricky setup]
-*UBNT PowerAPN [internal use with a fancy look]
-*UBNT Routerstation [No enclosure stuff]
-*ALL Alix PC-engines and WRAP devices [multi-enclosure iper-versatile stuff]
+* D-Link DIR 825 [Internal use with ethernet and USB]
+* Abocom WAP 2102 [Internal use flyweight and cheap]
+* UBNT Nanostation/Nanostation loco and Nanostation M2 and M5/Nanostation loco M2 and M5 [External use bullet proof enclosure]
+* UBNT Picostation/Picostation M [External use with a replaceable antenna]
+* UBNT Airwire [Internal use with tricky setup]
+* UBNT UniFi [Internal use, tricky setup]
+* UBNT PowerAPN [internal use with a fancy look]
+* UBNT Routerstation [No enclosure stuff]
+* ALL Alix PC-engines and WRAP devices [multi-enclosure iper-versatile stuff]
 
 Our kernel configuration files contains some packages due to simplify your work. 
 
-*GNU tar (or you may also enable old gnu compatibility on busybox)
-*wget (the busybox one!)
-*htpdate and/or ntpdate
-*wireless-tools and kmod-madwifi or ath9k
-*uhttpd (a tiny single-threaded http daemon)
-*openvpn (and kmod-tun)
-*tc (and kmod-sched)
-*ebtables (and kmod-ebtables)
-*GNU netcat (not the Busybox one!)
-*hostapd
+* GNU tar (or you may also enable old gnu compatibility on busybox)
+* wget (the busybox one!)
+* htpdate and/or ntpdate
+* wireless-tools and kmod-madwifi or ath9k
+* uhttpd (a tiny single-threaded http daemon)
+* openvpn (and kmod-tun)
+* tc (and kmod-sched)
+* ebtables (and kmod-ebtables)
+* GNU netcat (not the Busybox one!)
+* hostapd
 
 The full version of OWF will require UMTS and OLSRD support, but will require better hardware and 
 much more space on disk, we recommends an Alix or a RouterBoard or something similar.
@@ -68,11 +68,11 @@ and D-Link DIR-825 platforms
 *We higly recomend to compile to use our script to configure your AP you can compile openwrt by yourself but at your risk *
 
 Stable version features:
-*MESH Support  
-*3G support  
-*ATH9k and/or madwifi support (Both drivers works alone or togheter)  
-*Simplified and almost fully automatic deploy script with a lot of features  
-*interface failover script  
+* MESH Support  
+* 3G support  
+* ATH9k and/or madwifi support (Both drivers works alone or togheter)  
+* Simplified and almost fully automatic deploy script with a lot of features  
+* interface failover script  
 
 Installing:
 
@@ -81,23 +81,23 @@ Installing:
 In order to deploy our OpenWispFirmware you need to use the deployment script shipped with our release. 
 You only need deploy-firmware.sh to fully customize your OWF installation, with this simple script you can set a couple of things:
 
-*A root password ( instead the default one "ciaociao" ) (-P)  
-*The IP address and port of the internal http server from which ap's can downloads their configurations (-i -p)  
-*The Address of the OWM server (-v)  
-*The OpenVPN port of the OWM server (-V)  
-*The WPA-PSK key (instead of the default one "owm-Ohz6ohngei" ) it must be 14 character long (-w)  
-*The configuration ESSID (instead of "owispmager-setup") (-e)  
-*The Architecture (-a)  
-*Activate Mesh Networking capabilities with -m option  
-*Activate UMTS Netwokring capabilities with -u option  
-*Autogenerate password and wpa key with -G  
+* A root password ( instead the default one "ciaociao" ) (-P)  
+* The IP address and port of the internal http server from which ap's can downloads their configurations (-i -p)  
+* The Address of the OWM server (-v)  
+* The OpenVPN port of the OWM server (-V)  
+* The WPA-PSK key (instead of the default one "owm-Ohz6ohngei" ) it must be 14 character long (-w)  
+* The configuration ESSID (instead of "owispmager-setup") (-e)  
+* The Architecture (-a)  
+* Activate Mesh Networking capabilities with -m option  
+* Activate UMTS Netwokring capabilities with -u option  
+* Autogenerate password and wpa key with -G  
 
 For instance:  
 All you need to know is the OpenWRT source directory and the default architecture, the most tested architecture is atheros our favourite platform 
 are Ubiquity Networks
 
 For instance the same command with more options  
-./deploy-firmware.sh -a atheros -s ~/sources/backfire -v my.vpn.server -w 14-char-wpakey  -P root-password  
+ ~$ ./deploy-firmware.sh -a atheros -s ~/sources/backfire -v my.vpn.server -w 14-char-wpakey  -P root-password  
 
 Now you can use our images to flash your devices.
 
