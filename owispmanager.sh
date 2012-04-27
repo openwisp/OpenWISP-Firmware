@@ -422,30 +422,7 @@ close_status_log_results() {
   fi
 }
 
-check_reset() {
-  if   [ ! -z "`cat /proc/cpuinfo|grep AR2317`" ]; then
-    # Atherso SoC AR2317
-    gpioctl dirin 6 > /dev/null
-    gpioctl get 6 > /dev/null
-    if [ "$?" -eq "64" ]; then
-      open_status_log_results
-      echo "* Reset button pressed..."
-      echo "** Erasing rootfs_data **"
-      mtd -r erase mtd3
-      close_status_log_results
-      sleep 100
-      exit 1
-    fi
-  #elif 
-  # TODO: other hardware
-  fi
-}
-
-
 # ------------------- MAIN
-
-# Check and serve reset botton
-check_reset
 
 clean_up() {
   echo "* Cleaning up..."
@@ -499,7 +476,7 @@ else
       . $HOME_PATH/tools/madwifi.sh
   elif [ "$__ret" -eq "2" ]; then 
     echo "$PHYDEV ok, let's rock!"
-      . $HOME_PATH/tools/ath9k.sh
+      . $HOME_PATH/tools/mac80211.sh
   fi
 fi
 

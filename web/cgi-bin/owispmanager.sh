@@ -1,5 +1,9 @@
 #!/bin/sh
 #
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -44,7 +48,7 @@ load_web_config() {
   uci_load "network"
 
   if [ "$HIDE_ETHERNET_PAGE" -ne "1" ]; then
-    CURRENT_ETHERNET_ADRESSING="$CONFIG_lan_proto"
+    CURRENT_ETHERNET_ADDRESSING="$CONFIG_lan_proto"
     CURRENT_ETHERNET_IP="$CONFIG_lan_ipaddr"
     CURRENT_ETHERNET_NMASK="$CONFIG_lan_netmask"
     CURRENT_ETHERNET_GW="$CONFIG_lan_gateway"
@@ -198,7 +202,7 @@ render_page() {
 <body>
   <div class="container_12">
     <div class="grid_12">
-      <h1 id="branding"><a href="/"><img alt="$_APP_NAME configuration" border="0" class="wums_logo" height="50" src="/images/logo_caspur.png" width="64" /></a>$_APP_NAME</h1>
+      <h1 id="branding">$_APP_NAME</h1>
     </div>
     <div class="clear">&nbsp;</div>
 
@@ -232,7 +236,7 @@ render_page() {
     <div class="clear">&nbsp;</div>
     <div class="grid_12" id="site_info">
       <div class="box" style="text-align:center">
-        <p>$_APP_NAME v. $_APP_VERS - <a href="http://www.caspur.it/">CASPUR</a></p>
+        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) 2012 <a href="http://openwisp.org/"> OpenWISP.org</a></p>
       </div>
     </div>
     <div class="clear">&nbsp;</div>
@@ -289,7 +293,7 @@ ethernet_connectivity_form() {
   local addressing_mode_static_checked
   local _address_display
 
-  if [ "$CURRENT_ETHERNET_ADRESSING" == "static" ]; then
+  if [ "$CURRENT_ETHERNET_ADDRESSING" == "static" ]; then
    addressing_mode_dynamic_checked=""
    addressing_mode_static_checked="checked=\"checked\""
    _address_display=""
@@ -746,9 +750,9 @@ render_access_point_page() {
         <table>
           <tbody>
             <tr>
-              <td><em>Ethernet (eth0) mac address</em></td>
+              <td><em>Ethernet (eth0) MAC address</em></td>
               <td class="code"><big>$ETH0_MAC</big></td>
-            </tr>
+            </tr>	
             <tr>
               <td><em>CPU Info</em></td>
               <td class="code"><pre>$__cpu</pre></td>
@@ -944,6 +948,7 @@ render_status_page() {
   local __ROUTE_INFO=""
   local __OLSR_INFO=""
   local __UMTS_INFO=""
+  local __LAN_INFO=""
 
   __ROUTE_INFO=$(cat << EOR
 <p>
@@ -953,6 +958,18 @@ render_status_page() {
   </pre>
 </p>
 EOR
+)
+
+  __LAN_INFO=$(cat << EOL
+<p>
+  <label for="lan_table_pre"><b>LAN Connectivity info</b></label>
+  <pre id="lan_table_pre" name="lan_table_pre">
+Current LAN Address Mode: $CURRENT_ETHERNET_ADDRESSING
+Current LAN IP:           $CURRENT_ETHERNET_IP/$CURRENT_ETHERNET_NMASK
+Current LAN Gateway:      $CURRENT_ETHERNET_GW
+  </pre>
+</p>
+EOL
 )
 
   if [ "$CURRENT_UMTS_ENABLE" -eq "1" ]; then
@@ -1004,6 +1021,7 @@ EOO
             ta.scrollTop = ta.scrollHeight;
           </script>
         </p>
+        $__LAN_INFO
         $__ROUTE_INFO
         $__OLSR_INFO
         $__UMTS_INFO
