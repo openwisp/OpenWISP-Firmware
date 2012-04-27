@@ -97,6 +97,6 @@ create_wifi_interface() {
 # Notes:
 destroy_wifi_interface() {
   ifconfig $IFACE down 2>/dev/null
-  iw dev $PHYDEV del 2>/dev/null
+  iw dev $IFACE del 2>/dev/null
   return 0
 }
