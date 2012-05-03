@@ -1,14 +1,14 @@
-h1. FlashingUbiquitiUnifi
+# FlashingUbiquitiUnifi
 
 ![unifi](http://www.i4wifi.eu/out/pictures/1/ubntuf3p.jpg)
 
-h2. IP Network Connection
+## IP Network Connection
 
 * Configure IP 192.168.1.10/24 on your host on a NIC directly connected to the Ubiquiti device
 * You will need a tftp client and (of course) an OpenWRT's Linux image:
  - openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin
 
-h2. Flashing Via TTL Serial 
+## Flashing Via TTL Serial 
 
 Open the plastic shell with a little TORX key 
 
