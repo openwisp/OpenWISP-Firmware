@@ -1,5 +1,7 @@
 # FlashingDlinkDir825
 
+![DIR-825](http://www.channelinsider.com/images/stories/d-link-dir-825-router.jpg)
+
 ## IP Network Connection
 
 * Configure IP 192.168.0.100/24 on your host on a NIC directly connected to the DIR-825
