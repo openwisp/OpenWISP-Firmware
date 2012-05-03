@@ -1,6 +1,6 @@
 # Flashing OpenWRT on Ubiquiti Picostation Devices
 
-## Images
+![Picostation](http://www.ubnt.com/img/picostation_airoscombo.jpg)
 
 There are three ways to flash this device. 
 
