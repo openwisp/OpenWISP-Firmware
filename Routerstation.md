@@ -1,6 +1,6 @@
 # FlashingUbiquitiRouterstation
 
-## Images
+![routerstation](http://www.wifi-stock.com/prods/Routerstation.jpg)
 
 ## IP Network Connection
 
