@@ -1,6 +1,6 @@
 # Flashing OpenWRT on Ubiquiti Nanostation/Bullet Devices
 
-## Images
+![bullet](http://www.ubnt.com/img/products_bullet.png)
 
 ## IP Network Connection
 
