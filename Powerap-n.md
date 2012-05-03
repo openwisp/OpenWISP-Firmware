@@ -1,6 +1,6 @@
 # FlashingUbiquitiPowerAPN
 
-![APN](http://ntema.com.ua/upload/Power%20APN_1.jpg)
+![APN](http://voicecell.net/wp-content/uploads/2011/05/powerAPN.jpg)
 
 h2. IP Network Connection
 
