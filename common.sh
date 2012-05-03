@@ -1,6 +1,8 @@
 #!/bin/sh
 #
-# OpenWISP Firmware
+# This file is part of the OpenWISP Firmware
+#
+# Copyright (C) 2012 OpenWISP.org
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,6 +72,7 @@ DEFAULT_MESH_CHANNEL="36"
 DEFAULT_WIFIDEV="wifi0"
 DEFAULT_PHYDEV="phy0"
 MADWIFI_CONFIGURATION_COMMAND="wlanconfig"
+MAC80211_CONFIGURATION_COMMAND="iw"
 VPN_RESTART_SLEEP_TIME=10
 DATE_UPDATE_TIMEOUT=10
 DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
@@ -82,7 +85,7 @@ DATE_UPDATE_SERVERS_HTTP="www.google.it"
 STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
-_APP_NAME="open WISP Firmware"
+_APP_NAME="OpenWISP Firmware"
 _APP_VERS="2.0"
 
 # -------
@@ -95,14 +98,30 @@ _APP_VERS="2.0"
 check_prerequisites() {
   local __ret="0"
 
-  # Madwifi-ng tools
-  if [ -x "`which $MADWIFI_CONFIGURATION_COMMAND`" ]; then
-    echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are present"
+  # Wi-Fi drivers/tools
+  check_driver
+  __ret=$?
+  if [ "$__ret" -eq "1" ]; then
+    # Madwifi-ng tools
+    if [ -x "`which $MADWIFI_CONFIGURATION_COMMAND`" ]; then
+      echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are present"
+    else
+      __ret="2"
+      echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are missing!"
+    fi
+  elif [ "$__ret" -eq "2" ]; then
+    # mac80211 tools
+    if [ -x "`which $MAC80211_CONFIGURATION_COMMAND`" ]; then
+      echo "mac80211 tools ($MAC80211_CONFIGURATION_COMMAND) are present"
+    else
+      __ret="2"
+      echo "mac80211 tools ($MAC80211_CONFIGURATION_COMMAND) are missing!"
+    fi
   else
     __ret="2"
-    echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are missing!"
+    echo "No Wi-Fi driver installed or unsupported Wi-Fi system!"
   fi
-
+    
   # Httpd
   if [ -x "`which uhttpd`" ]; then
     echo "uHTTP Daemon is present!"
@@ -182,12 +201,12 @@ check_prerequisites() {
 
 # -------
 # Function:     check_driver
-# Description:  Check for presence of $WIFIDEV interface
+# Description:  Check for presence of $WIFIDEV/$PHYDEV interface
 # Input:        nothing
 # Output:       nothing
-# Returns:      0 if wifi iface is not present
+# Returns:      0 if no supported Wi-Fi iface is present
 #               1 if madwifi iface is present
-#               2 if ath9k iface is present
+#               2 if mac80211 iface is present
 # Notes:
 check_driver() {
   if [ ! -z "`grep $WIFIDEV /proc/net/dev`" ]; then
