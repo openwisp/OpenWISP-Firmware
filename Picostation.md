@@ -1,18 +1,16 @@
-h1.  Flashing OpenWRT on Ubiquiti Picostation Devices
+# Flashing OpenWRT on Ubiquiti Picostation Devices
 
-h2. Images
-
-{{thumb(owf-picostation.jpg)}}
+## Images
 
 There are three ways to flash this device. 
 
-h2. Using TFTP
+## Using TFTP
 
 The simplest method that also works with bakfire, similar to the method described here:
 
 https://spider.caspur.it/projects/owf/wiki/FlashingUbiquitiNanostation/
 
-h2. IP Network Connection
+## IP Network Connection
 
 * Configure IP 192.168.1.10/24 on your host on a NIC directly connected to the Ubiquiti device
 * You will need a tftp client and (of course) an OpenWRT's Linux image:
@@ -35,7 +33,7 @@ That's it! :) You can now telnet on your device!
 </pre>
 
 
-h2. Serial Connection (Alternative Method)
+## Serial Connection (Alternative Method)
 
 Skip *_IP Network Connection_* and go to *_Flashing via RedBoot_* section, instruction are identical. So you don't 
 have to set your network and telnet to your Ubiquiti, just stop redboot and following our instructions. 
@@ -60,12 +58,12 @@ DTR = ON
 
 *_NOTE_* You *must* have a TFTP server running on your machine
 
-h2. Flashing via RedBoot
+## Flashing via RedBoot
 
 Yet another method to flash your picostation( it only works with kamikaze )
 
 
-h2. IP Network Connection
+## IP Network Connection
 
 * Configure IP 192.168.1.10/24 on your host on a NIC directly connected to the device
 * You will need a tftp server listening on that IP address and (of course) an OpenWRT's Linux kernel and a root squash filesystem:
@@ -235,11 +233,11 @@ Enter 'help' for a list of built-in commands.
 root@OpenWrt:~#
 </pre>
 
-h2. Extras!
+## Extras!
 
-h3. GPIOs
+### GPIOs
 
-h3. Madwifi Softled
+### Madwifi Softled
 
 Using Wi-Fi led for Wi-Fi activity
 
