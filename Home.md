@@ -35,7 +35,7 @@ Please refer to the [[ConfigurationInstructions]] page.
 
 Sample openVPN configuration (you'll have to generate your own certificates).
 
-<pre><code>
+```
 mode server
 tls-server
 
@@ -69,7 +69,7 @@ status /var/log/openvpn/setup.stats
 log /var/log/openvpn/setup.log
 
 verb 1
-</code></pre>
+```
 
 TAP OpenVPN's configuration will be generated through OWM
 
@@ -104,13 +104,13 @@ If you want to upload certificates after compilation you need to create a file f
 Install and configure an OWM instance as usual. Then let it be reached via http through the setup VPN
 
 Sample apache2 configuration snippet
-<pre>
+```
    <Location "/owm/get_config">      # Change this to match your configuration
       Order Deny,Allow
       Deny from all
       Allow from 10.8.0.0/16
    </Location>
-</pre>
+```
 
 ## OWF / OWM FAQ
 
@@ -136,7 +136,3 @@ A. A Layer 2 VPN Server is useful to encapsulate traffic between your device, co
 Q. How VPN certificated are renewed?
 A. Setup VPN will never expire, but l2vpn will expires, when certificate
  will be renewed will be sent to te AP's trough configuration service. 
-
-## Screenshots
-
-Some screenshots of the web GUI
