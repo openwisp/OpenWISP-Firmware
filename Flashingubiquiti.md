@@ -1,6 +1,6 @@
 ## Please proceed to the appropriate subsection
 
-* [[FlashingUbiquitiPicostation|Picostation]]
+* [[Picostation]]
 * [[FlashingUbiquitiNanostation|Nanostation/Nanostation Loco/ Bullet]]
 * [[FlashingUbiquitiRouterstation|Routerstation]]
 * [[FlashingUbiquitiNanostationM2M5|Nanostation M2/M5]]
