@@ -1,21 +1,13 @@
-{{shareit(owf_flashing_ubiquiti_dir825, message=Open WISP Firmware: flashing DIR-825, url=http://spider.caspur.it/projects/owf/wiki/Dir825)}}
+# FlashingDlinkDir825
 
-{{toc}}
-
-h1. FlashingDlinkDir825
-
-h2. Images
-
-||{{thumb(dlink-dir825.jpg)}}||
-
-h2. IP Network Connection
+## IP Network Connection
 
 * Configure IP 192.168.0.100/24 on your host on a NIC directly connected to the DIR-825
 * You will need just a browser 
 
 Proceed to the following section.
 
-h2. == Flashing via Firmware update page ==
+## == Flashing via Firmware update page ==
 
 * Open up favorite internet browser and go to the http://192.168.0.1/, use "admin" as the username, and "" as the password (leave the field blank).
 * Proceed into the firmware update page, click "Browse" and select the openwrt-ar71xx-generic-dir-825-b1-backup-loader.bin freshly compiled openwrt image.
@@ -24,7 +16,7 @@ h2. == Flashing via Firmware update page ==
 
 *PLEASE USE BACKFIRE, KAMIKAZE MAY NOT WORK*
 
-h2. == Flashing via Firmware recovery mode ==
+## == Flashing via Firmware recovery mode ==
 
 * Powercycle device holding the reset button until the power LED starts blinking Orange
 * Set a static IP on your PC to 192.168.0.100 / 255.255.255.0
@@ -35,7 +27,7 @@ h2. == Flashing via Firmware recovery mode ==
 
 We have tested the procedure also using a virtual machine 
 
-h2. == Flashing via MTD *TBT* ==
+## == Flashing via MTD *TBT* ==
 
 *DIRECTLY FROM OPENWRT WIKI*
 
@@ -47,7 +39,7 @@ h2. == Flashing via MTD *TBT* ==
 # mtd -w /tmp/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin firmware
  *(DANGER: do not use this method unless you are absolutelly required to do so. Any write to the jffs2 partition may corrupt newly flashed firmware and you will be forced to use firmware recovery mode to unbrick the router!)*
 
-h2. == Telnet to your device == 
+## == Telnet to your device == 
 
 Now you can telnet to your device but your NIC need to be reconfigured with an IP like 192.168.1.*/24 
 
@@ -74,8 +66,7 @@ Enter 'help' for a list of built-in commands.
 root@OpenWrt:~#
 </pre>
 
-h2. == Automatic flashing script == 
-
+## == Automatic flashing script == 
 
 In order to flash DIR-825 without using IE7 here it is a flashing script written in ruby
 
