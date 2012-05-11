@@ -25,10 +25,6 @@ For AboCom WAP2102 and Planex GW-MF54G2 device flashing see [[FlashingAboCom]]
 For D-Link devices flashing (e.g.: DIR-825) see [[FlashingDlink]]
 For D-Link devices flashing (e.g.: DIR-825) see [[FlashingAlixAndWrap]]
 
-## How to configure an access point running the openWISP firmware
-
-Please refer to the [[ConfigurationInstructions]] page.
-
 ## How to configure a VPN setup server
 
 ### setup openVPN server
