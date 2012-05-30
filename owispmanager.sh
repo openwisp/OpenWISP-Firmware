@@ -462,22 +462,21 @@ if [ "$__ret" -gt "0" ]; then
     exit
   fi
   close_status_log_results
-else
+fi
+check_driver
+__ret=$?
+while [ "$__ret" -eq "0" ]; do
+  echo "Waiting for device (driver not yet loaded?)"
+  sleep 5
   check_driver
   __ret=$?
-  while [ "$__ret" -eq "0" ]; do
-    echo "Waiting for device (driver not yet loaded?)"
-    sleep 5
-    check_driver
-    __ret=$?
-  done
-  if [ "$__ret" -eq "1" ]; then
-    echo "$WIFIDEV ok, let's rock!"
-      . $HOME_PATH/tools/madwifi.sh
-  elif [ "$__ret" -eq "2" ]; then 
-    echo "$PHYDEV ok, let's rock!"
-      . $HOME_PATH/tools/mac80211.sh
-  fi
+done
+if [ "$__ret" -eq "1" ]; then
+  echo "$WIFIDEV ok, let's rock!"
+    . $HOME_PATH/tools/madwifi.sh
+elif [ "$__ret" -eq "2" ]; then 
+  echo "$PHYDEV ok, let's rock!"
+    . $HOME_PATH/tools/mac80211.sh
 fi
 
 mkdir -p $CONFIGURATIONS_PATH >/dev/null 2>&1
