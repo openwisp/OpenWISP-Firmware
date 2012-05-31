@@ -100,8 +100,7 @@ check_prerequisites() {
 
   # Wi-Fi drivers/tools
   check_driver
-  __ret=$?
-  if [ "$__ret" -eq "1" ]; then
+  if [ "$?" -eq "1" ]; then
     # Madwifi-ng tools
     if [ -x "`which $MADWIFI_CONFIGURATION_COMMAND`" ]; then
       echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are present"
