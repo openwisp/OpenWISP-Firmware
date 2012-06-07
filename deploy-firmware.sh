@@ -353,6 +353,21 @@ config wifi-device  wifi1
   option disabled 1
 EOF
 
+echo -e "$YELLOW * Deploying initial ethernet nic configuration $WHITE"
+
+cat << EOF > $ROOTFS/etc/config/network
+config 'interface' 'loopback'
+  option 'ifname' 'lo'
+  option 'proto' 'static'
+  option 'ipaddr' '127.0.0.1'
+  option 'netmask' '255.0.0.0'
+
+config 'interface' 'lan'
+  option 'ifname' 'eth0'
+  option 'type' 'bridge'
+  option 'proto' 'dhcp'
+EOF
+
 echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
 
 cat << EOF > $ROOTFS/etc/config/owispmanager
