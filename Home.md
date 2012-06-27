@@ -1,7 +1,8 @@
 ## What is it?
 
-Open WISP Firmware is a set of scripts (shell and web cgi) that sits on top of "OpenWrt":http://openwrt.org/.
-It provides a daemon for the retrieving the configuration of the following components from a "OpenWISP Manager":https://spider.caspur.it/projects/owm/wiki :
+Open WISP Firmware is a set of scripts (shell and web cgi) that sits on top of [OpenWrt](http://openwrt.org/).
+It provides a daemon for the retrieving the configuration of the following components from a [OpenWISP Manager](https://github.com/openwisp/OpenWISP-Manager/wiki)
+ :
 
 * wifi (currently only for madwifi-ng and ath9k)
 * networking
