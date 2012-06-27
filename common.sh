@@ -100,7 +100,8 @@ check_prerequisites() {
 
   # Wi-Fi drivers/tools
   check_driver
-  if [ "$?" -eq "1" ]; then
+  local __driver_check_result="$?"
+  if [ "$__driver_check_result" -eq "1" ]; then
     # Madwifi-ng tools
     if [ -x "`which $MADWIFI_CONFIGURATION_COMMAND`" ]; then
       echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are present"
@@ -108,7 +109,7 @@ check_prerequisites() {
       __ret="2"
       echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are missing!"
     fi
-  elif [ "$__ret" -eq "2" ]; then
+  elif [ "$__driver_check_result" -eq "2" ]; then
     # mac80211 tools
     if [ -x "`which $MAC80211_CONFIGURATION_COMMAND`" ]; then
       echo "mac80211 tools ($MAC80211_CONFIGURATION_COMMAND) are present"
