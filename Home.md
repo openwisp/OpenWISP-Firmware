@@ -20,10 +20,10 @@ Open WISP Firmware currently works on OpenWRT Backfire 10.03
 
 Please see the [[InstallationInstructions]]
 
-For Ubiquiti devices flashing (e.g.: nano-pico stations & co.) instructions  see [[FlashingUbiquiti]]
-For AboCom WAP2102 and Planex GW-MF54G2 device flashing see [[FlashingAboCom]]
-For D-Link devices flashing (e.g.: DIR-825) see [[FlashingDlink]]
-For D-Link devices flashing (e.g.: DIR-825) see [[FlashingAlixAndWrap]]
+* For Ubiquiti devices flashing (e.g.: nano-pico stations & co.) instructions  see [[FlashingUbiquiti]]
+* For AboCom WAP2102 and Planex GW-MF54G2 device flashing see [[FlashingAboCom]]
+* For D-Link devices flashing (e.g.: DIR-825) see [[FlashingDlink]]
+* For D-Link devices flashing (e.g.: DIR-825) see [[FlashingAlixAndWrap]]
 
 ## How to configure a VPN setup server
 
