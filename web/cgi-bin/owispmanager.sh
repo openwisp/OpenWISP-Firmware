@@ -905,6 +905,7 @@ render_info_page() {
     SERVER_INFOS="<li><b>Server settings.</b> Configure "home" server and the certificates needed to communicate with it.</li>"
   fi
 
+  load_startup_config
   check_prerequisites >/dev/null 2>&1
   if [ "$?" -ne "0" ]; then
     __prereq="<p><font style=\"color:red\">Firmware problem: this system doesn't meet all the requisites needed to run $_APP_NAME...</font><br />Please check the status log.</p>"
