@@ -49,6 +49,7 @@ cat << EOU
   -u: Enable UMTS
   -m: Enable OLSR mesh
   -G: Autogenerate root password and WPA Key
+  -j: Number of jobs in compiling OpenWRT
 EOU
 }
 
@@ -81,6 +82,7 @@ HIDE_UMTS_PAGE="1"
 HIDE_MESH_PAGE="1"
 AUTOGEN_PWD="0"
 WEIGHT="thin"
+JOBS="1"
 
 #Platform specific variables
 CODENAME="backfire"
@@ -89,7 +91,7 @@ PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 OVERLAY_OPT="option overlay_root /overlay"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
-while getopts "muhs:a:v:V:w:e:i:p:P:G:" OPTION
+while getopts "muhs:a:v:V:w:e:i:p:P:G:j:" OPTION
 do
   case $OPTION in
     h) 
@@ -138,6 +140,9 @@ do
       WPA_PSK=owm-`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c10`
       PASSWORD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c8`
       WEIGHT="full"
+      ;;
+    j)
+      JOBS=$OPTARG
       ;;
     ?)
       echo -e "$RED Invalid argument"
@@ -255,7 +260,7 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   cp $TOOLS/kernel_configs/config.$PLATFORM-$WEIGHT $BUILDROOT/.config 2>/dev/null
   eval $PKG_CMD >/dev/null
   cp $TOOLS/kernel_configs/config.$PLATFORM-$WEIGHT $BUILDROOT/.config 2>/dev/null
-  make 
+  make -j $JOBS
   popd > /dev/null
 
 else
