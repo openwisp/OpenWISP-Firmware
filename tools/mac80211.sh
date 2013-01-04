@@ -27,20 +27,17 @@ load_startup_config
 # Returns:      0 on success, !0 otherwise
 # Notes:        you can enable 802.11n support with ieee80211n=1
 start_hostapd() {
-  if [ "$WIFIMODE" -eq "80211a" ]; then
-    echo "
-driver=nl80211
+  if [ "$WIFIMODE"=="80211a" ]; then
+    echo "driver=nl80211
 hw_mode=a
 channel=48" > $HOSTAPD_FILE
   else
-    echo "
-driver=nl80211
+    echo "driver=nl80211
 hw_mode=g
 channel=$CHAN" > $HOSTAPD_FILE
   fi
 
-echo "
-interface=$IFACE
+echo "interface=$IFACE
 ctrl_interface=/var/run/hostapd-phy0
 auth_algs=1
 macaddr_acl=0
@@ -68,7 +65,6 @@ stop_hostapd() {
   start-stop-daemon -K -p $HOSTAPD_PIDFILE >/dev/null 2>&1
   return 0
 }
-
 
 # -------
 # Function:     create_wifi_interface
