@@ -84,7 +84,7 @@ HIDE_MESH_PAGE="1"
 AUTOGEN_PWD="0"
 WEIGHT="thin"
 JOBS="1"
-WIFIMODE=""
+WIFI_MODE=""
 
 #Platform specific variables
 CODENAME="backfire"
