@@ -50,6 +50,7 @@ cat << EOU
   -m: Enable OLSR mesh
   -G: Autogenerate root password and WPA Key
   -j: Number of jobs in compiling OpenWRT
+  -A: enables 80211a support for 5ghz antennas
 EOU
 }
 
@@ -83,6 +84,7 @@ HIDE_MESH_PAGE="1"
 AUTOGEN_PWD="0"
 WEIGHT="thin"
 JOBS="1"
+WIFIMODE=""
 
 #Platform specific variables
 CODENAME="backfire"
@@ -91,7 +93,7 @@ PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 OVERLAY_OPT="option overlay_root /overlay"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
 
-while getopts "muhs:a:v:V:w:e:i:p:P:G:j:" OPTION
+while getopts "Amuhs:a:v:V:w:e:i:p:P:G:j:" OPTION
 do
   case $OPTION in
     h) 
@@ -143,6 +145,9 @@ do
       ;;
     j)
       JOBS=$OPTARG
+      ;;
+    A)
+      WIFI_MODE="80211a"
       ;;
     ?)
       echo -e "$RED Invalid argument"
@@ -398,6 +403,7 @@ config 'server' 'local'
   option 'hide_ethernet_page' '0'
   option 'ethernet_device' 'eth0'
   option 'ethernet_enable' '0'
+  option 'setup_wifi_mode' '$WIFI_MODE' 
 EOF
 
 if [ "$UMTS_ENABLE" == "1" ]; then
