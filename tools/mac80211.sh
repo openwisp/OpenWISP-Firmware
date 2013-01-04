@@ -27,10 +27,19 @@ load_startup_config
 # Returns:      0 on success, !0 otherwise
 # Notes:        you can enable 802.11n support with ieee80211n=1
 start_hostapd() {
-  echo "
+  if [ "$WIFIMODE" -eq "80211a" ]; then
+    echo "
+driver=nl80211
+hw_mode=a
+channel=48" > $HOSTAPD_FILE
+  else
+    echo "
 driver=nl80211
 hw_mode=g
-channel=$CHAN
+channel=$CHAN" > $HOSTAPD_FILE
+  fi
+
+echo "
 interface=$IFACE
 ctrl_interface=/var/run/hostapd-phy0
 auth_algs=1
@@ -42,7 +51,7 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP
 ssid=$SSID
-ignore_broadcast_ssid=0" > $HOSTAPD_FILE
+ignore_broadcast_ssid=0" >> $HOSTAPD_FILE
 
   hostapd -P $HOSTAPD_PIDFILE -B $HOSTAPD_FILE
   return $?
