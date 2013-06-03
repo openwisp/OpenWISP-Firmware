@@ -573,7 +573,7 @@ render_umts_connectivity_page() {
   <div class="box">
     <div class="block" id="connectivity-block">
       $__connectivity
-    </div
+    </div>
   </div>
 </div>
 EOC
@@ -1143,7 +1143,7 @@ case $F_page in
         uci_remove "network" "umts"
         uci_add "network" "interface" "umts"
         uci_set "network" "umts" "proto" "3g"
-        uci_set "network" "umts" "service" "hsdpa"
+        uci_set "network" "umts" "service" "umts"
         uci_set "network" "umts" "apn" "`echo \"$F_apn\" | sed 's/[^0-9a-zA-Z\.]//g'`"
         uci_set "network" "umts" "pincode" "`echo \"$F_pin\" | sed 's/[^0-9]//g'`"
         uci_set "network" "umts" "dns" "`echo \"$F_dns\" | sed 's/[^0-9\.\s]//g'`"
@@ -1151,6 +1151,7 @@ case $F_page in
         uci_set "network" "umts" "peerdns" "0"
         uci_set "network" "umts" "defaultroute" "0"
         uci_set "network" "umts" "keepalive" "5"
+        uci_set "network" "umts" "auto" "1"
 
         uci_commit "network"
 

@@ -47,6 +47,7 @@ cat << EOU
   -p: Inner server port
   -P: Root password
   -u: Enable UMTS
+  -d: UMTS device
   -m: Enable OLSR mesh
   -G: Autogenerate root password and WPA Key
   -j: Number of jobs in compiling OpenWRT
@@ -78,6 +79,7 @@ INNER_SERVER_PORT=""
 PASSWORD=""
 UMTS_ENABLE="0"
 MESH_ENABLE="0"
+UMTS_DEVICE="/dev/ttyUSB0"
 HIDE_UMTS_PAGE="1"
 HIDE_MESH_PAGE="1"
 AUTOGEN_PWD="0"
@@ -85,13 +87,13 @@ WEIGHT="thin"
 JOBS="1"
 
 #Platform specific variables
-CODENAME="backfire"
-RELEASE="10.03"
+CODENAME="attitude_adjustment"
+RELEASE="12.09-rc1"
 PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
 OVERLAY_OPT="option overlay_root /overlay"
-REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/packages/
+REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/generic/packages/
 
-while getopts "muhs:a:v:V:w:e:i:p:P:G:j:" OPTION
+while getopts "muhs:a:v:V:w:e:i:p:P:G:j:d:" OPTION
 do
   case $OPTION in
     h) 
@@ -116,10 +118,10 @@ do
     e)
       WPA_SSID=$OPTARG
       ;;
-    i)
+    p)
       INNER_SERVER_PORT=$OPTARG
       ;;
-    p)
+    i)
       INNER_SERVER=$OPTARG
       ;;
     P)
@@ -134,6 +136,11 @@ do
       UMTS_ENABLE="1"
       HIDE_UMTS_PAGE="0"
       WEIGHT="full"
+      ;;
+    d)
+      UMTS_ENABLE="1"
+      WEIGHT="full"
+      UMTS_DEVICE=$OPTARG
       ;;
     G)
       AUTOGEN_PWD="1"
@@ -193,7 +200,7 @@ fi
 if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
   echo -e "$RED WPA-PSK problem:"
   echo -e "$RED ** $YELLOW HINT $RED**"
-  echo -e "$YELLOW WPA-PSK key must be 14 character lenght"
+  echo -e "$YELLOW WPA-PSK key must be 14 character length"
   usage
   exit 1
 fi 
@@ -295,9 +302,9 @@ echo -e "$YELLOW * Installing boot script"
 cat << EOF > $ROOTFS/etc/inittab
 ::sysinit:/etc/init.d/rcS S boot
 ::shutdown:/etc/init.d/rcS K stop
-tts/0::askfirst:/bin/login
-ttyS0::askfirst:/bin/login
-tty1::askfirst:/bin/login
+#tts/0::askfirst:/bin/login
+#ttyS0::askfirst:/bin/login
+#tty1::askfirst:/bin/login
 ::respawn:/etc/owispmanager/owispmanager.sh
 EOF
 
@@ -342,7 +349,8 @@ rm $ROOTFS/etc/rc.d/S*htpdate $ROOTFS/etc/rc.d/S*ntpdate $ROOTFS/etc/rc.d/S*http
 
 echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
-echo "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1" >  ./etc/crontabs/root
+echo -e "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (/usr/sbin/htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1\n0 2 * * * /sb    in/reboot" >  $ROOTFS/etc/crontabs/root
+
   popd
 
 echo -e "$YELLOW * Deploying initial wireless configuration $WHITE"
@@ -356,6 +364,27 @@ config wifi-device  wifi1
   option type     atheros
   option channel  auto
   option disabled 1
+
+config wifi-device  wifi2
+  option type     atheros
+  option channel  auto
+  option disabled 1
+
+config wifi-device  radio0
+  option type      mac80211
+  option channel  auto
+  option disabled 1
+
+config wifi-device radio1
+  option type      mac80211
+  option channel  auto
+  option disabled 1
+
+config wifi-device radio2
+  option type      mac80211
+  option channel  auto
+  option disabled 1
+
 EOF
 
 echo -e "$YELLOW * Deploying initial ethernet nic configuration $WHITE"
@@ -371,6 +400,9 @@ config 'interface' 'lan'
   option 'ifname' 'eth0'
   option 'type' 'bridge'
   option 'proto' 'dhcp'
+  option 'dns' '8.8.8.8'
+  option 'peerdns' '0'
+
 EOF
 
 echo -e "$YELLOW * Configuring owispmanager settings $WHITE"
@@ -406,27 +438,51 @@ if [ "$UMTS_ENABLE" == "1" ]; then
 
   cat << EOF >> $ROOTFS/etc/config/owispmanager
   option 'umts_device' '$UMTS_DEVICE'
-  option 'umts_enable' '0'
+  option 'umts_enable' '1'
 EOF
 
   cat << EOF > $ROOTFS/etc/modules.d/60-usb-serial
 usbserial vendor=0x12d1 product=0x1464
 EOF
 
+  cat << EOF > $ROOTFS/etc/config/network
+config 'interface' 'umts'
+  option 'ifname' 'ppp0'
+  option 'device' '$UMTS_DEVICE'
+  option 'service' 'umts'
+  option 'proto' '3g'
+  option 'defaultroute' '0'
+  option 'ppp_options' 'noipdefault'
+  option 'dns' 8.8.8.8'
+  option 'peerdns' '0'
+EOF
+
+  mkdir -p $ROOTFS/etc/ppp/ip-down.d $ROOTFS/etc/ip-up.d
   cp -R $TOOLS/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh
   cp -R $TOOLS/ppp/ip-up.d/add_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
   chmod +x $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
 
   echo -e "$YELLOW * Configuring UMTS init script $WHITE"
 
-  cp $TOOLS/utils/umts.sh $ROOTFS/etc/owispmanager/umts.sh
-  chmod +x $ROOTFS/etc/owispmanager/umts.sh  
+  # cp $TOOLS/utils/umts.sh $ROOTFS/etc/owispmanager/umts.sh
+  # chmod +x $ROOTFS/etc/owispmanager/umts.sh
+  cp -R $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh
+  chmod +x $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh  
+  cp -R $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
+  chmod +x $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
+
+  cp -R $TOOLS/utils/usb_serial $ROOTFS/etc/hotplug.d/usb/30-serial
+  cp -R $TOOLS/utils/apn_remove $ROOTFS/etc/hotplug.d/usb/40-apn
+
+  cp -R $TOOLS/utils/getreginfo.gcom $ROOTFS/etc/gcom/getreginfo.gcom
 
   cat << EOF >> $ROOTFS/etc/inittab
-::respawn:/etc/owispmanager/umts.sh
+#::respawn:/etc/owispmanager/umts.sh
+::respawn:/etc/owispmanager/umts-wd.sh
+::respawn:/etc/owispmanager/apn.sh
 EOF
 
-
+  sed -i -e '/s/failure 5/failure 4/g' -e '/s/interval 1/interval 65535/g' $ROOTFS/etc/ppp/options
 fi
 
 if [ "$MESH_ENABLE" == "1" ]; then 
@@ -462,8 +518,10 @@ echo -e "$YELLOW * Configuring password timezone and hostname $WHITE"
 # Rewrite passwd file entirely
 cat << EOF > $ROOTFS/etc/passwd
 $ENC_PWD
+daemon:*:1:1:daemon:/var:/bin/false
+ftp:*:55:55:ftp:/home/ftp:/bin/false
+network:*:101:101:network:/var:/bin/false
 nobody:*:65534:65534:nobody:/var:/bin/false
-daemon:*:65534:65534:daemon:/var:/bin/false
 EOF
 
 if [ "$?" -ne "0" ]; then
@@ -502,8 +560,8 @@ fi
 
 echo -e "$YELLOW * Rebuilding images..."
 pushd $BUILDROOT > /dev/null
-make target/install >/dev/null
-make package/index  >/dev/null
+make target/install V=s >/dev/null
+make package/index V=s  >/dev/null
 popd  >/dev/null
 
 BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"

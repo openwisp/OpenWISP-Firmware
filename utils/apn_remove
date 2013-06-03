@@ -1,0 +1,5 @@
+case "$ACTION" in
+  remove)
+  uci delete network.umts.apn
+  ;;
+esac
