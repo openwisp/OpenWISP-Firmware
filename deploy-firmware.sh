@@ -349,7 +349,7 @@ rm $ROOTFS/etc/rc.d/S*htpdate $ROOTFS/etc/rc.d/S*ntpdate $ROOTFS/etc/rc.d/S*http
 
 echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
-echo -e "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (/usr/sbin/htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1\n0 2 * * * /sb    in/reboot" >  $ROOTFS/etc/crontabs/root
+echo -e "0 */1 * * * (/usr/sbin/ntpdate -s -b -u -t 5 ntp.ien.it || (/usr/sbin/htpdate -s -t www.google.it & sleep 5; kill $!)) >/dev/null 2>&1\n0 2 * * * /sbin/reboot" >  $ROOTFS/etc/crontabs/root
 
   popd
 
