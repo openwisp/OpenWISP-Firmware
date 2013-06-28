@@ -13,9 +13,16 @@ For a detailed changelog of each commits use the "git log" command.
 [M] Misc
 [N] Note
  
-* Log
+* Changelog
 
-April 26th, 2012 - Version 2.0.0
+June 28th, 2013 - Version 1.2 Codename "Aida Ash"
+ * [M] ath9k renamed to mac80211
+ * [N] Lan info on status page
+ * [B] Fixes destroy_wifi_interface()
+ * [M] OpenWISP Layout
+ * [B] deploy-firmware now works with OpenWRT backfire
+ 
+April 26th, 2012 - Version 2.0.0 (obsolete)
 
  * [N] Initial commit to Github (earlier versions are to be considered "legacy" and not documented)
  * [D] Added CHANGELOG
