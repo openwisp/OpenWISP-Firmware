@@ -273,7 +273,11 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
 else
   echo -e "$GREEN Assuming No"
 fi
- 
+
+if [ "$PLATFORM" == "dir825" ] || [ "$PLATFORM" == "tl-mr3040" ] || [ $PLATFORM == "ath5k" ]; then
+  PLATFORM="ar71xx"
+fi
+
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
 
 DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/"
@@ -564,10 +568,10 @@ make target/install V=s >/dev/null
 make package/index V=s  >/dev/null
 popd  >/dev/null
 
-BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
+BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-generic-tl-mr3040-v1-squashfs-factory.bin"
 
 echo -e "$GREEN Done. $WHITE"
-if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ]; then 
+if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ] || [ "$PLATFORM" == "dir825" ] || [ "$PLATFORM" == "tl-mr3040" ] || [ $PLATFORM == "ath5k" ]; then 
   echo -e "$RED ********* $YELLOW Moving Compiled Images into \"builds\" directory $WHITE"
   BIN_DIR="$TOOLS/builds/$CODENAME/$PLATFORM/`date '+%d-%m-%y-%H%M%S'`"
   mkdir -p $BIN_DIR
