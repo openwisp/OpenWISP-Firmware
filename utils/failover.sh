@@ -21,7 +21,7 @@
 
 INTERFACES="br-lan 3g-umts"
 INTERFACES_METRICS="0 20"
-TEST_IPS="194.242.230.1 193.204.5.28 193.201.40.14"
+TEST_IPS="8.8.8.8 8.8.4.4 193.201.40.14"
 SLEEP_TIME=3
 PING_WAIT_TIME=3
 
@@ -66,10 +66,7 @@ get_interface_default_route_priority() {
 get_interface_default_route_metric() {
   [ -z "$1" ] && return 1;
   
-  local _route=`ip route show | grep "^default via .* dev $1"`
-  [ -z "$_route" ] && return 1;
-  
-  local _metric=`echo "$_route" | awk ' { print $7 }'`
+  local _metric=`grep -E "$1[[:space:]]+00000000" /proc/net/route | awk '{print $7}'`
   echo "${_metric:-0}"
   
   return 0  
@@ -128,7 +125,7 @@ interface_default_route_test() {
 # Test the presence of needed application
 
 [ -x "/bin/ping" ] || { echo "ping is missing!"; exit 1; }
-[ -x "/usr/sbin/ip" ] || { echo "ip route is missing!"; exit 1; }
+[ -x "/usr/sbin/ip" -o "/bin/ip" ] || { echo "ip route is missing!"; exit 1; }
 [ -x "/usr/bin/awk" ] || { echo "awk is missing!"; exit 1; }
 [ -x "/bin/sed" ] || { echo "sed is missing!"; exit 1; }
 
