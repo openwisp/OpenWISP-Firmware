@@ -3,17 +3,17 @@
 IFACE="3g-umts"
 COM_PORT=$(uci get network.umts.device)
 SERVICE_PORT="/dev/ttyUSB2"
-SLEEP_TIME_IFUP=5
-SLEEP_TIME_LOOP=40
 TEST_IP="8.8.8.8"
 PING_NUM=10
 PING_WAIT_TIME=3
 COUNT=0
+SLEEP_TIME_IFUP=5
+SLEEP_TIME_LOOP=20
 REBOOT_CMD="sync ; reboot"
 PPPD_FLAG=0
 
 while true; do
-  sleep $SLEEP_TIME_LOOP
+  sleep $SLEEP_TIME_LOOP 
   ping -c $PING_NUM -I $IFACE -W $PING_WAIT_TIME $TEST_IP >/dev/null 2>&1 
   RET=$?
   
@@ -24,10 +24,12 @@ while true; do
     #ifdown umts
     echo -e -n "ATZ\r" > $SERVICE_PORT
     sleep $SLEEP_TIME_IFUP
-    #ifup umts    
+    #ifup umts
   fi
 
   COUNT=`expr $COUNT + $RET`
+
+  sleep $SLEEP_TIME_LOOP
   
   if [ $PPPD_FLAG -eq 1 -a $RET != 0 ]; then
     logger $0 "unable to set up 3g connection: restarting system"

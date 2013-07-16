@@ -452,7 +452,7 @@ config 'interface' 'umts'
   option 'service' 'umts'
   option 'proto' '3g'
   option 'defaultroute' '0'
-  option 'ppp_options' 'noipdefault'
+  option 'pppd_options' 'noipdefault'
   option 'dns' 8.8.8.8'
   option 'peerdns' '0'
 EOF

@@ -25,8 +25,8 @@ HOME_PATH="/etc/owispmanager/"
 _WIFI_CHANNELS="1,2,3,4,5,6,7,8,9,10,11,12,13,34,36,38,40,42,44,46,48,52,56,60,64,149,153,157,161"
 _BG_CHANNELS_DESCR="1 (802.11bg),2 (802.11bg),3 (802.11bg),4 (802.11bg),5 (802.11bg),6 (802.11bg),7 (802.11bg),8 (802.11bg),9 (802.11bg),10 (802.11bg),11 (802.11bg),12 (802.11bg),13 (802.11bg)"
 _A_CHANNELS_DESCR="34 (802.11a),36 (802.11a),38 (802.11a),40 (802.11a),42 (802.11a),44 (802.11a),46 (802.11a),48 (802.11a),52 (802.11a),56 (802.11a),60 (802.11a),64 (802.11a),149 (802.11a),153 (802.11a),157 (802.11a),161 (802.11a)"
-_APN="web.omnitel.it,ibox.tim.it,internet.wind,tre.it"
-_APN_DESCR="vodafone,tim,wind,tre"
+_APN=",web.omnitel.it,ibox.tim.it,internet.wind,datacard.tre.it"
+_APN_DESCR="auto,vodafone,tim,wind,tre"
 
 load_web_config() {
   uci_load "owispmanager"
@@ -1142,6 +1142,7 @@ case $F_page in
 
         uci_remove "network" "umts"
         uci_add "network" "interface" "umts"
+        uci_set "network" "umts" "iface" "ppp0"
         uci_set "network" "umts" "proto" "3g"
         uci_set "network" "umts" "service" "umts"
         uci_set "network" "umts" "apn" "`echo \"$F_apn\" | sed 's/[^0-9a-zA-Z\.]//g'`"
@@ -1150,8 +1151,6 @@ case $F_page in
         uci_set "network" "umts" "device" "$CONFIG_local_umts_device"
         uci_set "network" "umts" "peerdns" "0"
         uci_set "network" "umts" "defaultroute" "0"
-        uci_set "network" "umts" "keepalive" "5"
-        uci_set "network" "umts" "auto" "1"
 
         uci_commit "network"
 
