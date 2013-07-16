@@ -1,0 +1,24 @@
+CONF_PATH="/etc/modules.d/60-usb-serial"
+RESTART_CMD="rmmod usbserial ; insmod usbserial $STRING" 
+
+case "$ACTION" in 
+  add)
+  OLD_STRING=`cat $CONF_PATH | cut -d' ' -f2-`
+  DEVICE=`lsusb | grep -v "root hub"`
+  RET=$?
+
+  if [ $RET -eq 0 ]; then
+    VENDOR=`echo $DEVICE | cut -d' ' -f6 | cut -d':' -f1`
+    PRODUCT=`echo $DEVICE | cut -d' ' -f6 | cut -d':' -f2`
+    STRING="vendor=0x$VENDOR product=0x$PRODUCT"
+  else
+    STRING=$OLD_STRING
+  fi
+
+  if [ "$STRING" != "$OLD_STRING" ]; then
+    echo "usbserial $STRING" > $CONF_PATH
+    logger $0 "device added: ID $VENDOR:$PRODUCT"
+    eval $RESTART_CMD
+  fi
+  ;;
+esac
