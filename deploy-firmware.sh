@@ -8,12 +8,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,8 +31,8 @@ cat << EOU
 
   OpenWisp Firmware deployer V 1.2, OpenWisp Suite (C) OpenWISP.org http://openwisp.org
 
-  usage: $0 -s /path/to/sources -a arch [OPTION]  
-  
+  usage: $0 -s /path/to/sources -a arch [OPTION]
+
   Read the README.txt file for more instructions
 
   Options:
@@ -43,7 +43,7 @@ cat << EOU
   -V: VPN Server Port
   -w: Default wpa-psk
   -e: Configuration essid
-  -i: Inner server 
+  -i: Inner server
   -p: Inner server port
   -P: Root password
   -u: Enable UMTS
@@ -54,8 +54,8 @@ cat << EOU
 EOU
 }
 
-#check if INNER_SERVER is a valid ip 
-#TODO: pass inner server variable. 
+#check if INNER_SERVER is a valid ip
+#TODO: pass inner server variable.
 
 is_valid_ip() {
 
@@ -64,7 +64,7 @@ is_valid_ip() {
 
 }
 
-#Define variables to be set with getopt 
+#Define variables to be set with getopt
 PLATFORM="atheros"
 VPN_REMOTE=""
 VPN_REMOTE_PORT=""
@@ -96,7 +96,7 @@ REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/generic/packages/
 while getopts "muhs:a:v:V:w:e:i:p:P:G:j:d:" OPTION
 do
   case $OPTION in
-    h) 
+    h)
       usage
       exit 1
       ;;
@@ -154,14 +154,14 @@ do
     ?)
       echo -e "$RED Invalid argument"
       usage
-      exit 1 
+      exit 1
       ;;
   esac
 done
 
 if [ -z "$BUILDROOT" ]; then
   usage
-  exit 1 
+  exit 1
 fi
 
 if [ "$PLATFORM" == "avr32" ]; then
@@ -169,7 +169,7 @@ if [ "$PLATFORM" == "avr32" ]; then
 fi
 
 
-if [ "$WEIGHT" == "full" ]; then 
+if [ "$WEIGHT" == "full" ]; then
   DISABLE_IPTABLES="no"
 fi
 
@@ -188,8 +188,8 @@ if [ -f "$TOOLS/openvpn/ca.crt" ] && [ -z "$VPN_REMOTE" ]; then
   echo -e "$RED ** $WHITE If you put your certs on the openvpn folder server configuration page will be hidden"
   echo ""
   usage
-  exit 1 
-elif [ ! -f "$TOOLS/openvpn/client.crt" ]; then 
+  exit 1
+elif [ ! -f "$TOOLS/openvpn/client.crt" ]; then
   STATUS="unconfigured"
   HIDE_SERVER_PAGE="0"
 else
@@ -203,7 +203,7 @@ if [ -n "$WPA_PSK" ] && [ ${#WPA_PSK} -lt 14  ]; then
   echo -e "$YELLOW WPA-PSK key must be 14 character length"
   usage
   exit 1
-fi 
+fi
 
 if [ -n "$INNER_SERVER_PORT" ] && [ ! $(echo "$INNER_SERVER_PORT" | grep -E "^[0-9]+$") ]; then
   echo ""
@@ -215,7 +215,7 @@ fi
 
 if [ -n "$INNER_SERVER" ] && [ `is_valid_ip` == 1 ]; then
   echo -e "$YELLOW Default OpenVPN INNER SERVER will be $INNER_SERVER"
-elif [ -z "$INNER_SERVER" ]; then 
+elif [ -z "$INNER_SERVER" ]; then
   echo -e "$GREEN OpenVPN Inner Sever not changed"
 else
   echo -e "$RED Inner server error"
@@ -234,7 +234,7 @@ fi
 
 
 # Check for an existing pre-compilated system
-if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM* ]; then
+if [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM ] || [ ! -x $BUILDROOT/build_dir/linux-$PLATFORM\_* ]; then
   echo -e "$YELLOW You don't have an already compiled system, I'll build a minimal one for you "
   REPLAY="y"
 elif [ "$MESH_ENABLE" == "1" ]; then
@@ -255,7 +255,7 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
   # Configure and compile a minimal owrt system
   echo -e "$GREEN Building $WEIGHT images... $WHITE"
 
-  if [ "$?" -ne "0" ]; then 
+  if [ "$?" -ne "0" ]; then
     echo -e "$YELLOW we don't have a preconfigured kernel configuration for $CODENAME on $PLATFORM"
     echo -e "$YELLOW Please create a config file by yourself"
     exit 2
@@ -272,10 +272,6 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
 
 else
   echo -e "$GREEN Assuming No"
-fi
-
-if [ "$PLATFORM" == "dir825" ] || [ "$PLATFORM" == "tl-mr3040" ] || [ $PLATFORM == "ath5k" ]; then
-  PLATFORM="ar71xx"
 fi
 
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
@@ -325,9 +321,9 @@ echo -e "$YELLOW * Disabling unneeded services"
 
 if [ "$DISABLE_IPTABLES" == "yes" ]; then
   echo -e "$YELLOW * Disabling iptables"
-  rm $ROOTFS/etc/rc.d/S*firewall 2>/dev/null 
+  rm $ROOTFS/etc/rc.d/S*firewall 2>/dev/null
   eval $DISABLE_FW_MODULES
-elif [ "$DISABLE_IPTABLES" == "no" ]; then 
+elif [ "$DISABLE_IPTABLES" == "no" ]; then
   echo -e "$YELLOW * Enabling iptables"
   cat << EOF > $ROOTFS/etc/config/firewall
 config defaults
@@ -349,7 +345,7 @@ config 'forwarding' 'owisp_mesh2mesh'
 EOF
 fi
 
-rm $ROOTFS/etc/rc.d/S*htpdate $ROOTFS/etc/rc.d/S*ntpdate $ROOTFS/etc/rc.d/S*httpd $ROOTFS/etc/rc.d/S*uhttpd $ROOTFS/etc/rc.d/S*dnsmasq 2>/dev/null 
+rm $ROOTFS/etc/rc.d/S*htpdate $ROOTFS/etc/rc.d/S*ntpdate $ROOTFS/etc/rc.d/S*httpd $ROOTFS/etc/rc.d/S*uhttpd $ROOTFS/etc/rc.d/S*dnsmasq 2>/dev/null
 
 echo -e "$YELLOW * Enabling needed services $WHITE"
 pushd $ROOTFS
@@ -456,12 +452,12 @@ config 'interface' 'umts'
   option 'service' 'umts'
   option 'proto' '3g'
   option 'defaultroute' '0'
-  option 'pppd_options' 'noipdefault'
+  option 'ppp_options' 'noipdefault'
   option 'dns' 8.8.8.8'
   option 'peerdns' '0'
 EOF
 
-  mkdir -p $ROOTFS/etc/ppp/ip-down.d $ROOTFS/etc/ip-up.d
+  mkdir -p $ROOTFS/etc/ppp/ip-down.d $ROOTFS/etc/ppp/ip-up.d
   cp -R $TOOLS/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh
   cp -R $TOOLS/ppp/ip-up.d/add_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
   chmod +x $ROOTFS/etc/ppp/ip-down.d/del_default_route.sh $ROOTFS/etc/ppp/ip-up.d/add_default_route.sh
@@ -471,7 +467,7 @@ EOF
   # cp $TOOLS/utils/umts.sh $ROOTFS/etc/owispmanager/umts.sh
   # chmod +x $ROOTFS/etc/owispmanager/umts.sh
   cp -R $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh
-  chmod +x $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh  
+  chmod +x $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh
   cp -R $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
   chmod +x $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
 
@@ -486,10 +482,11 @@ EOF
 ::respawn:/etc/owispmanager/apn.sh
 EOF
 
-  sed -i -e '/s/failure 5/failure 4/g' -e '/s/interval 1/interval 65535/g' $ROOTFS/etc/ppp/options
+sed -i --expression='s/failure 5/failure 4/g' --expression='s/interval 1/interval 65535/g' $ROOTFS/etc/ppp/options
+
 fi
 
-if [ "$MESH_ENABLE" == "1" ]; then 
+if [ "$MESH_ENABLE" == "1" ]; then
   cat << EOF >> $ROOTFS/etc/config/owispmanager
   option 'mesh_device' 'wifi1'
   option 'mesh_enable' '0'
@@ -568,19 +565,19 @@ make target/install V=s >/dev/null
 make package/index V=s  >/dev/null
 popd  >/dev/null
 
-BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-generic-tl-mr3040-v1-squashfs-factory.bin"
+BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
 
 echo -e "$GREEN Done. $WHITE"
-if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ] || [ "$PLATFORM" == "dir825" ] || [ "$PLATFORM" == "tl-mr3040" ] || [ $PLATFORM == "ath5k" ]; then 
+if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ]; then
   echo -e "$RED ********* $YELLOW Moving Compiled Images into \"builds\" directory $WHITE"
   BIN_DIR="$TOOLS/builds/$CODENAME/$PLATFORM/`date '+%d-%m-%y-%H%M%S'`"
   mkdir -p $BIN_DIR
   cp $BINARIES $BIN_DIR 2>/dev/null
-else 
+else
   echo -e "$RED Search your binaries in $BUILDROOT your platform is not tested right now"
 fi
 
-echo -e "$GREEN Your system is ready. $WHITE" 
+echo -e "$GREEN Your system is ready. $WHITE"
 echo -e "$YELLOW ==================================$GREEN Summary $YELLOW================================== $WHITE"
 echo -e "|-> Your root password is $RED $PASSWORD $WHITE"
 
