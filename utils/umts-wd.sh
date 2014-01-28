@@ -12,6 +12,19 @@ SLEEP_TIME_LOOP=20
 REBOOT_CMD="sync ; reboot"
 PPPD_FLAG=0
 
+reset_modem() {
+  echo -e -n "ATZ\r" > $SERVICE_PORT
+}
+
+force_pppd() {
+  pppd $COM_PORT nodetach &    
+  LASTPID=$!                   
+  sleep $SLEEP_TIME_IFUP       
+  ifdown umts             
+  kill "$LASTPID"         
+  ifup umts
+}
+
 while true; do
   sleep $SLEEP_TIME_LOOP 
   ping -c $PING_NUM -I $IFACE -W $PING_WAIT_TIME $TEST_IP >/dev/null 2>&1 
@@ -20,11 +33,13 @@ while true; do
   if [ $RET -eq 0 ]; then
     COUNT=0
     PPPD_FLAG=0
-  elif [ -c $SERVICE_PORT ]; then
-    #ifdown umts
-    echo -e -n "ATZ\r" > $SERVICE_PORT
+  elif [ -c $SERVICE_PORT ]; then 
+    # This can be counterproductive on certain boards (i.e. Ubiquity Routerstation)
+    # ifdown umts
+    reset_modem
     sleep $SLEEP_TIME_IFUP
-    #ifup umts
+    # Uncomment if conjuction with "ifdown umts" some lines above
+    # ifup umts
   fi
 
   COUNT=`expr $COUNT + $RET`
@@ -38,12 +53,7 @@ while true; do
   fi
 
   if [ $COUNT -ge 3 ]; then
-    pppd $COM_PORT nodetach &
-    LASTPID=$!
-    sleep $SLEEP_TIME_IFUP
-    ifdown umts
-    kill "$LASTPID"
-    ifup umts
+    force_pppd
     PPPD_FLAG=1
   fi
   

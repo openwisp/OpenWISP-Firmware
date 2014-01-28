@@ -273,7 +273,7 @@ if [ $REPLAY == 'y' ] || [ $REPLAY == 'Y' ]; then
 else
   echo -e "$GREEN Assuming No"
 fi
-
+ 
 ROOTFS=$(find $BUILDROOT/build_dir -name root-$PLATFORM*)
 
 DISABLE_FW_MODULES="mkdir $ROOTFS/etc/modules.d/disabled/; mv $ROOTFS/etc/modules.d/*-ipt-conntrack $ROOTFS/etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/"
@@ -445,15 +445,15 @@ EOF
 usbserial vendor=0x12d1 product=0x1464
 EOF
 
-  cat << EOF > $ROOTFS/etc/config/network
+  cat << EOF >> $ROOTFS/etc/config/network
 config 'interface' 'umts'
   option 'ifname' 'ppp0'
   option 'device' '$UMTS_DEVICE'
   option 'service' 'umts'
   option 'proto' '3g'
   option 'defaultroute' '0'
-  option 'ppp_options' 'noipdefault'
-  option 'dns' 8.8.8.8'
+  option 'pppd_options' 'noipdefault'
+  option 'dns' '8.8.8.8'
   option 'peerdns' '0'
 EOF
 
@@ -467,9 +467,9 @@ EOF
   # cp $TOOLS/utils/umts.sh $ROOTFS/etc/owispmanager/umts.sh
   # chmod +x $ROOTFS/etc/owispmanager/umts.sh
   cp -R $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh
-  chmod +x $TOOLS/utils/umts-wd.sh $ROOTFS/etc/owispmanager/umts-wd.sh
+  chmod +x $ROOTFS/etc/owispmanager/umts-wd.sh
   cp -R $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
-  chmod +x $TOOLS/utils/apn.sh $ROOTFS/etc/owispmanager/apn.sh
+  chmod +x $ROOTFS/etc/owispmanager/apn.sh
 
   cp -R $TOOLS/utils/usb_serial $ROOTFS/etc/hotplug.d/usb/30-serial
   cp -R $TOOLS/utils/apn_remove $ROOTFS/etc/hotplug.d/usb/40-apn
@@ -482,8 +482,7 @@ EOF
 ::respawn:/etc/owispmanager/apn.sh
 EOF
 
-sed -i --expression='s/failure 5/failure 4/g' --expression='s/interval 1/interval 65535/g' $ROOTFS/etc/ppp/options
-
+  sed -i -e 's/failure 5/failure 4/g' -e 's/interval 1/interval 65535/g' $ROOTFS/etc/ppp/options
 fi
 
 if [ "$MESH_ENABLE" == "1" ]; then

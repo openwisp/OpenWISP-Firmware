@@ -1,6 +1,7 @@
 #!/bin/sh
 
 SERVICE_PORT="/dev/ttyUSB2"
+COM_PORT=$(uci get network.umts.device)
 IMSI_SCRIPT_PATH="/etc/gcom/getimsi.gcom"
 REG_SCRIPT_PATH="/etc/gcom/getreginfo.gcom"
 H3G_IT_ID="22299"
@@ -16,6 +17,31 @@ use_gcom() {
   local _scriptname="$1"
   gcom -s $_scriptname -d $SERVICE_PORT
 }
+
+set_apn() {
+  local _apn="$1"
+  uci set network.umts.apn=$_apn
+}
+
+force_pppd() {
+  pppd $COM_PORT nodetach &
+  LASTPID=$!
+  sleep 5
+  ifdown umts
+  kill "$LASTPID"
+  ifup umts
+}
+
+# Deregister from the network
+force_deregister() {
+  echo -e -n "AT+COPS=2\r" > $SERVICE_PORT
+}
+
+# Force registration to a specific operator
+manual_registration() {                                   
+  local operator=$1                                       
+  echo -e -n "AT+COPS=1,2,$operator\r" > $SERVICE_PORT    
+} 
 
 while true; do
 
@@ -48,15 +74,16 @@ while true; do
     esac
 
     if [ $RET2 -eq 0 -a -n $APN_NAME ]; then
-      uci set network.umts.apn=$APN_NAME
+      set_apn $APN_NAME
       logger $0 "APN is $APN_NAME"
+      force_pppd
     fi
 
     STATUS=`use_gcom $REG_SCRIPT_PATH | grep [0-2],[0-5] | cut -d',' -f2 | cut -c 1`
     if [ $STATUS -eq 5 ]; then
-      echo -e -n "AT+COPS=2\r" > $SERVICE_PORT
+      force_deregister
       sleep 5
-      echo -e -n "AT+COPS=1,2,$OP_ID\r" > $SERVICE_PORT
+      manual_registration $OP_ID
       sleep 10
     fi
 
