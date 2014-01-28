@@ -302,9 +302,9 @@ echo -e "$YELLOW * Installing boot script"
 cat << EOF > $ROOTFS/etc/inittab
 ::sysinit:/etc/init.d/rcS S boot
 ::shutdown:/etc/init.d/rcS K stop
-#tts/0::askfirst:/bin/login
-#ttyS0::askfirst:/bin/login
-#tty1::askfirst:/bin/login
+tts/0::askfirst:/bin/login
+ttyS0::askfirst:/bin/login
+tty1::askfirst:/bin/login
 ::respawn:/etc/owispmanager/owispmanager.sh
 EOF
 
