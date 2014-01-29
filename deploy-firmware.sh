@@ -426,11 +426,7 @@ if [ "$UMTS_ENABLE" == "1" ]; then
   option 'umts_enable' '1'
 EOF
 
-  cat << EOF > $ROOTFS/etc/modules.d/60-usb-serial
-usbserial vendor=0x12d1 product=0x1464
-EOF
-
-  cat << EOF >> $ROOTFS/etc/config/network
+cat << EOF >> $ROOTFS/etc/config/network
 config 'interface' 'umts'
   option 'ifname' 'ppp0'
   option 'device' '$UMTS_DEVICE'
