@@ -29,7 +29,7 @@ WHITE="\033[1;37m"
 usage() {
 cat << EOU
 
-  OpenWisp Firmware deployer V 1.2, OpenWisp Suite (C) OpenWISP.org http://openwisp.org
+  OpenWisp Firmware deployer V 1.3, OpenWisp Suite (C) OpenWISP.org http://openwisp.org
 
   usage: $0 -s /path/to/sources -a arch [OPTION]
 
@@ -89,7 +89,7 @@ JOBS="1"
 #Platform specific variables
 CODENAME="attitude_adjustment"
 RELEASE="12.09-rc1"
-PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a"
+PKG_CMD="./scripts/feeds update -a && ./scripts/feeds install -a && make tools/clean"
 OVERLAY_OPT="option overlay_root /overlay"
 REPO=http://downloads.openwrt.org/$CODENAME/$RELEASE/$PLATFORM/generic/packages/
 
