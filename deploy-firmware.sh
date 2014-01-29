@@ -545,7 +545,8 @@ make target/install V=s >/dev/null
 make package/index V=s  >/dev/null
 popd  >/dev/null
 
-BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-dir-825-b1-squashfs-backup-loader.bin"
+BINARIES="$BUILDROOT/bin/$PLATFORM/openwrt-atheros-root.squashfs $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-vmlinux.lzma $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt2-pico2-squashfs.bin $BUILDROOT/bin/$PLATFORM/openwrt-x86-generic-combined-squashfs.img  $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-generic-ubnt-rs-jffs2-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-atheros-ubnt5-squashfs.bin
+$BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-generic-ubnt-nano-m-squashfs-factory.bin $BUILDROOT/bin/$PLATFORM/openwrt-ar71xx-generic-dir-825-b1-squashfs-backup-loader.bin"
 
 echo -e "$GREEN Done. $WHITE"
 if [ "$PLATFORM" == "atheros" ] || [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == "ar71xx" ]; then
