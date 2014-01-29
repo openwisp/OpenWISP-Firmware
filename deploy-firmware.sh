@@ -370,21 +370,6 @@ config wifi-device  wifi2
   option channel  auto
   option disabled 1
 
-config wifi-device  radio0
-  option type      mac80211
-  option channel  auto
-  option disabled 1
-
-config wifi-device radio1
-  option type      mac80211
-  option channel  auto
-  option disabled 1
-
-config wifi-device radio2
-  option type      mac80211
-  option channel  auto
-  option disabled 1
-
 EOF
 
 echo -e "$YELLOW * Deploying initial ethernet nic configuration $WHITE"
