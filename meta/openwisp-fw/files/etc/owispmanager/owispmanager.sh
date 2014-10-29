@@ -19,7 +19,7 @@
 HOME_PATH="/etc/owispmanager/"
 . $HOME_PATH/common.sh
 
-. $PKG_INSTROOT/etc/functions.sh
+. /lib/functions.sh
 
 # -------
 # Function:     start_httpd
