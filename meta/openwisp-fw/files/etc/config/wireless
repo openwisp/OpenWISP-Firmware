@@ -1,0 +1,9 @@
+config wifi-device wifi0
+  option type atheros
+  option channel auto
+  option disabled 1
+
+config wifi-device wifi1
+  option type atheros
+  option channel auto
+  option disabled 1
