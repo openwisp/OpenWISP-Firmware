@@ -2,6 +2,18 @@
 
 ![owf_abocom](https://spider.caspur.it/attachments/39/owf-abocom.jpg)
 
+## ap51-flash
+
+The device is supported by ap51-flash, a tool for flashing (nearly) all ap51/ap61 based routers.
+https://dev.open-mesh.com/projects/dev/wiki/Ap51-supported-devices
+
+<pre>
+  svn checkout http://dev.open-mesh.com/downloads/svn/ap51-flash/trunk/ ap51flash
+  cd ap51flash
+  make
+  sudo ./ap51flash 
+</pre>
+
 ## Serial Connection
 
 Skip *_IP Network Connection_* and go to *_Flashing via RedBoot_* section, instruction are identical. So you don't 
