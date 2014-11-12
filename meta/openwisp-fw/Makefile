@@ -37,6 +37,8 @@ endef
 
 define Package/openwisp-fw/description
 	 meta package for OpenWisp firmware
+
+	 This package can use extra file from targz fetched through wget using the $OPENWISP_CONF variable
 endef
 
 define Package/openwisp-fw-mesh/description
@@ -54,12 +56,10 @@ endef
 define Package/openwisp-fw/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
-	#TODO set root pass
-	#TODO essid
-	#TODO wpa-psk pass in safe-mode
-	#TODO vpn-server/port
-	#TODO innerserver/port
-	#TODO install vpn cert
+	if [ -n $OPENWISP_CONF ]; then
+		wget $OPENWISP_CONF -O /tmp/custom-config.tgz
+		tar xvzf /tmp/custom-config.tgz -O $(1)/
+	fi
 endef
 
 define Package/openwisp-fw-mesh/install
