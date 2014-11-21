@@ -56,9 +56,9 @@ endef
 define Package/openwisp-fw/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
-	if [ -n $OPENWISP_CONF ]; then
-		wget $OPENWISP_CONF -O /tmp/custom-config.tgz
-		tar xvzf /tmp/custom-config.tgz -O $(1)/
+	if [ -n $(OPENWISP_CONF) ]; then \
+		wget $(OPENWISP_CONF) -O /tmp/custom-config.tgz; \
+		tar xvzf /tmp/custom-config.tgz -C $(1)/; \
 	fi
 endef
 
