@@ -19,7 +19,7 @@ define Package/openwisp-fw
 	MAINTAINER:=info@openwisp.org
 	#this is a meta package suitable for any archs...
 	PKG_ARCH:=all
-	DEPENDS:=+uhttpd +hostapd +openvpn-openssl +dnsmasq +ntpdate +netcat
+	DEPENDS:=+uhttpd +hostapd +openvpn-openssl +dnsmasq +ntpdate +netcat +tc +ebtables +tcpdump +ip +kmod-sched
 endef
 
 define Package/openwisp-fw-mesh
