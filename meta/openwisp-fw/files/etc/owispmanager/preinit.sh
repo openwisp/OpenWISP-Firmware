@@ -31,6 +31,9 @@ rm /etc/rc.d/S*uhttpd 2>/dev/null
 # dnsmasq
 rm /etc/rc.d/S*dnsmasq 2>/dev/null
 
+#odhcpd
+rm /etc/rc.d/S*odhcpd 2>/dev/null
+
 ## Set hostname
 sed -i 's/option[ \t]hostname[ \t].*$/option hostname Unconfigured/' $SYSTEM_CONFIG_PATH
 
