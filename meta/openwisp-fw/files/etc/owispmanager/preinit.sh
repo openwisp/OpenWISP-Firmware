@@ -9,7 +9,7 @@ DISABLED_MODULES_PATH="/etc/modules.d/disabled"
 # firewall
 if [ ! -d  "$DISABLED_MODULES_PATH" ]; then
 	mkdir "$DISABLED_MODULES_PATH"
-	mv $ROOTFS/etc/modules.d/*-ipt-conntrack /etc/modules.d/*-ipt-nat $ROOTFS/etc/modules.d/disabled/
+	mv /etc/modules.d/*-ipt-conntrack /etc/modules.d/*-ipt-nat /etc/modules.d/disabled/
 fi
 
 if [ -z "`grep mesh $FIREWALL_CONFIG_PATH`"]; then
