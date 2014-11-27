@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-fw
-PKG_VERSION:=1
+PKG_VERSION:=$(shell git describe --tags)
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -60,6 +60,7 @@ define Package/openwisp-fw/install
 		wget $(OPENWISP_CONF) -O /tmp/custom-config.tgz; \
 		tar xvzf /tmp/custom-config.tgz -C $(1)/; \
 	fi
+	git describe --tags > $(1)/etc/openwisp_version
 endef
 
 define Package/openwisp-fw-mesh/install
