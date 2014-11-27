@@ -13,25 +13,26 @@ PKG_VERSION:=$(shell git describe --tags)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/openwisp-fw
-	SECTION:=utils
-	CATEGORY:=Utilities
+	SECTION:=openwisp
+	CATEGORY:=OpenWisp
 	TITLE:=OpenWisp Firmware config files
 	MAINTAINER:=info@openwisp.org
 	#this is a meta package suitable for any archs...
 	PKG_ARCH:=all
-	DEPENDS:=+uhttpd +hostapd +openvpn-openssl +dnsmasq +ntpdate +netcat +tc +ebtables +tcpdump +ip +kmod-sched
+	DEPENDS:=+uhttpd +hostapd +openvpn-openssl +dnsmasq +ntpdate +netcat +tc
+	DEPENDS+=+ebtables +tcpdump +ip +kmod-sched
 endef
 
 define Package/openwisp-fw-mesh
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware MESH extension
-	DEPENDS:=openwisp-fw +olsrd # FIXME
+	DEPENDS:=+openwisp-fw +olsrd # FIXME
 endef
 
 define Package/openwisp-fw-umts
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware UMTS extension
-	DEPENDS:=openwisp-fw +usb-modeswitch +comgt # FIXME
+	DEPENDS:=+openwisp-fw +usb-modeswitch +comgt # FIXME
 endef
 
 
