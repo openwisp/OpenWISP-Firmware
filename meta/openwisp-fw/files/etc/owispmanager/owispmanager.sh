@@ -376,6 +376,11 @@ configuration_install() {
     close_status_log_results
     return 1
   fi
+  # WORKAROUND for issue #2
+  OWRT_MAJOR=`grep -o '^..' /etc/openwrt_version`
+  if [ $OWRT_MAJOR -gt 10 ]; then
+    sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
+  fi
   $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
     if [ -f "$POST_INSTALL_SCRIPT_FILE" ]; then
