@@ -1,5 +1,9 @@
 = OpenWISP Firmware
 
+**WARNING**: a new version of this firmware is under active development on this repository: https://github.com/openwisp/openwrt-feed
+
+Soon the changes will be merged back in this repository.
+
 == Description
 
 OpenWISP Firmware is a set of scripts (shell and web cgi) that sits on top of OpenWrt.
