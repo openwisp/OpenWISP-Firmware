@@ -26,7 +26,7 @@ endef
 define Package/openwisp-fw-mesh
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware MESH extension
-	DEPENDS:=+openwisp-fw +olsrd # FIXME
+	DEPENDS:=+openwisp-fw +batctl
 endef
 
 define Package/openwisp-fw-umts
