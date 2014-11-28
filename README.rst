@@ -2,10 +2,12 @@
 OpenWISP Firmware
 =================
 
+**Current Version**: 1.3 alpha
+
 Description
 -----------
 
-**OpenWISP Firmware** (shortly OWF) is an openwrt package that provides a daemon for the retrieving the configuration of the following components from a OpenWISP Manager (OWM) server:
+**OpenWISP Firmware** (shortly OWF) is an openwrt package that provides a daemon that periodically retrieves the configuration of the following components from an **OpenWISP Manager** (OWM) server:
 
 - wifi (currently only for madwifi-ng and ath9k)
 - networking
@@ -23,13 +25,13 @@ See the OWM wiki for more details.
 Compiling OWF
 -------------
 
-In order to have a fully working OWF you have to compile it by yourself.
+In order to have a fully working OWF you have to compile it yourself.
 
-OWF package support a *overlay configuration file* that you should provide at compile time, this overlay allow you to include custom configuration. See below for more information on this file.
+OWF package supports an *overlay configuration file* that you should provide at compile time, this overlay allows you to include custom configuration. See below for more information on this file.
 
-We strongly suggest to build OpenWRT on a GNU/Linux environment, you can find other pre-requisites here http://wiki.openwrt.org/doc/howto/build.
+We strongly suggest to build OpenWRT on a GNU/Linux environment, you can find other pre-requisites here: http://wiki.openwrt.org/doc/howto/build.
 
-If you have a properly configured machine follow this steps inside OpenWRT root directory::
+If you have a properly configured machine follow this steps inside the OpenWRT root directory::
 
   echo "src-git eoip https://github.com/agustim/openwrt-linux-eoip.git" >> feeds.conf
   echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
@@ -55,7 +57,7 @@ Overlay Configuration File
 
 The overlay configuration file is a *tar.gz* file that is extracted inside the target rootfs and can potentially overwrite any other config file or add new files inside filesytem.
 
-Here I will provide and structural example of the overlay configuration file that should be provide to be fully compliant with current OWM and OWF v1.2::
+Here I will provide a structural example of the overlay configuration file that should be provided to be fully compliant with OWM and OWF v1.2::
 
   etc
   ├── config
@@ -66,7 +68,7 @@ Here I will provide and structural example of the overlay configuration file tha
   │   └── ta.key
   └── shadow
 
-In this example I will provide here the file content of ``etc/config/owispmanager``::
+This is an exmaple of the contents of ``etc/config/owispmanager``::
 
   config 'server' 'call_home'
     option 'address' 'my_OWM_server'
@@ -91,7 +93,7 @@ In this example I will provide here the file content of ``etc/config/owispmanage
     option 'ethernet_device' 'eth0'
     option 'ethernet_enable' '0'
 
-Following with the example the ``etc/openvpn/`` directory will contain the RSA certs to establish a successfull connection with your own **openvpn** server (aka setup vpn) while ``etc/shadow`` will provide a default password for the root user, here the file content for password *pass*::
+The ``etc/openvpn/`` directory will contain the RSA certificates to establish a successfull connection with your own **openvpn** server (aka setup vpn) while ``/etc/shadow`` will provide a default password for the root user, here the file content for password "*pass*"::
 
   root:$1$SwrPpeIH$8MMk3YQiVXl5uQzRgTIvU/:16386:0:99999:7:::
   daemon:*:0:0:99999:7:::
@@ -99,23 +101,20 @@ Following with the example the ``etc/openvpn/`` directory will contain the RSA c
   network:*:0:0:99999:7:::
   nobody:*:0:0:99999:7:::
 
-
-The overlay configuration file **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` that should be a http url.
-
+The overlay configuration file **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` that should be a HTTP URL.
 
 Developing the firmware
 -----------------------
 
-If you like to work locally on firmare improvement you would use a local OpenWisp Firmware repo clone and a local OpenWrt repo clone. In this configuration you would like to use the following configuration for feed configuration::
+If you'd like to work locally on firmare improvement you should use a local OpenWisp Firmware repo clone and a local OpenWrt repo clone. In this configuration you should use the following commands for feed configuration::
 
   echo "src-link openwisp /path/to/local/git/repo/" >> feeds.conf
   ./scripts/feeds update
 
+Compile Openwrt for multiple architectures
+------------------------------------------
 
-Compile Openwrt for multi archs
--------------------------------
-
-Here follow an example script to compile OWF for different arch target::
+Here follows an example script to compile OWF for different arch targets::
 
   #!/bin/bash
 
@@ -137,7 +136,6 @@ Here follow an example script to compile OWF for different arch target::
     make defconfig;
     make -j 4;
   done
-
 
 Copyright
 ---------
@@ -170,7 +168,6 @@ Copyright (C) 2012-2014 OpenWISP.org
   .........................===............
   ...=......................=.=...........
   ...........................=............
-
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
