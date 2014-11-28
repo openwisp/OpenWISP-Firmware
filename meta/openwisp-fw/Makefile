@@ -50,9 +50,12 @@ define Package/openwisp-fw-umts/description
 	 meta package for OpenWisp firmware - UMTS
 endef
 
-define Build/Compile
+define Package/openwisp-fw/config
+  source "$(SOURCE)/Config.in"
 endef
 
+define Build/Compile
+endef
 
 define Package/openwisp-fw/install
 	$(INSTALL_DIR) $(1)/
