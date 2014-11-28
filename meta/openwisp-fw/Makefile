@@ -32,7 +32,7 @@ endef
 define Package/openwisp-fw-umts
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware UMTS extension
-	DEPENDS:=+openwisp-fw +usb-modeswitch +comgt # FIXME
+	DEPENDS:=+openwisp-fw +comgt
 endef
 
 
