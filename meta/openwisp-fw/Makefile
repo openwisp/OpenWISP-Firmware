@@ -61,7 +61,7 @@ define Package/openwisp-fw/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
 	if [ $(OPENWISP_CONF) ]; then \
-		wget $(OPENWISP_CONF) -qO - | tar xvzf -C $(1)/; \
+		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
 	fi
 	git describe --tags > $(1)/etc/openwisp_version
 endef
