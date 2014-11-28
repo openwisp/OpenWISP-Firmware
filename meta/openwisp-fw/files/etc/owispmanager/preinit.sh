@@ -7,10 +7,8 @@ DISABLED_MODULES_PATH="/etc/modules.d/disabled"
 ## Disabling unneedeed services
 
 # firewall
-if [ ! -d  "$DISABLED_MODULES_PATH" ]; then
-	mkdir "$DISABLED_MODULES_PATH"
-	mv /etc/modules.d/*-ipt-conntrack /etc/modules.d/*-ipt-nat /etc/modules.d/disabled/
-fi
+mkdir -p "$DISABLED_MODULES_PATH"
+mv /etc/modules.d/*-ipt-conntrack /etc/modules.d/*-ipt-nat $DISABLED_MODULES_PATH
 
 if [ -z "`grep mesh $FIREWALL_CONFIG_PATH`"]; then
   rm /etc/rc.d/S*firewall 2>/dev/null
