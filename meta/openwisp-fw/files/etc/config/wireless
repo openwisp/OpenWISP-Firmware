@@ -1,14 +1,4 @@
-config 'wifi-device' 'wifi0'
-  option 'type' 'atheros'
-  option 'channel' 'auto'
-  option disabled '1'
-
-config 'wifi-device' 'wifi1'
-  option 'type' 'atheros'
-  option 'channel' 'auto'
-  option 'disabled' '1'
-
-config 'wifi-device' 'wifi2'
-  option 'type' 'atheros'
-  option 'channel' 'auto'
-  option 'disabled' '1'
+config wifi-device  radio0
+	option type     mac80211
+	option channel  11
+	option disabled 1
