@@ -1,0 +1,10 @@
+menu "Configuration"
+        depends on PACKAGE_openwisp-fw
+
+config OPENWISP_BUSYBOX_OPTIONS
+	bool "Enable busybox extras for openwisp-fw"
+	default y
+	select BUSYBOX_CUSTOM
+	select BUSYBOX_CONFIG_LOGIN
+
+endmenu
