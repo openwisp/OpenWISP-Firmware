@@ -6,7 +6,7 @@ config 'server' 'home'
   option 'inner_server_port' ''
 
 config 'server' 'local'
-  option 'hide_server_page' '1'
+  option 'hide_server_page' '0'
   option 'setup_wpa_psk' ''
   option 'setup_wifi_dev' ''
   option 'setup_httpd_port' ''
