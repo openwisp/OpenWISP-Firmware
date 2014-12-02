@@ -70,7 +70,7 @@ Here I will provide a structural example of the overlay configuration file that 
 
 This is an exmaple of the contents of ``etc/config/owispmanager``::
 
-  config 'server' 'call_home'
+  config 'server' 'home'
     option 'address' 'my_OWM_server'
     option 'port' ''
     option 'status' 'configured'
