@@ -381,6 +381,8 @@ configuration_install() {
   if [ $OWRT_MAJOR -gt 10 ]; then
     sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
   fi
+  # WORKAROUND override uci wireless configuration
+  sed -i "s/uci -m import wireless/uci import wireless/g" $INSTALL_SCRIPT_FILE
   $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
     if [ -f "$POST_INSTALL_SCRIPT_FILE" ]; then
