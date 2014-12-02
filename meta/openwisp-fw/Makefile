@@ -35,11 +35,6 @@ define Package/openwisp-fw-umts
 	DEPENDS:=+openwisp-fw +comgt
 endef
 
-define Package/openwisp-fw-webif
-	$(call Package/openwisp-fw)
-	TITLE:=OpenWisp webif extra package
-	DEPENDS:=openwisp-fw
-endef
 
 define Package/openwisp-fw/description
 	 meta package for OpenWisp firmware
@@ -85,12 +80,7 @@ define Package/openwisp-fw-umts/install
 	#sed -i -e 's/failure 5/failure 4/g' -e 's/interval 1/interval 65535/g' $(1)/etc/ppp/options
 endef
 
-define Package/openwisp-fw-webif/install
-	$(INSTALL_DIR) $(1)/
-	$(CP) -r ./files-webif/* $(1)/
-endef
 
 $(eval $(call BuildPackage,openwisp-fw))
 $(eval $(call BuildPackage,openwisp-fw-mesh))
 $(eval $(call BuildPackage,openwisp-fw-umts))
-$(eval $(call BuildPackage,openwisp-fw-webif))
