@@ -4,6 +4,14 @@ OpenWISP Firmware
 
 **Current Version**: 1.3 alpha
 
+============================ ======================================================================= 
+OpenWRT version              Build status 
+============================ ======================================================================= 
+Trunk                         .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-edge
+14.07 (Barrier Breaker)       .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-1407 
+12.09 (Attitude Adjustment)   .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-1209 
+============================ =======================================================================
+
 Description
 -----------
 
