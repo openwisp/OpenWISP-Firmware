@@ -18,7 +18,7 @@ https://dev.open-mesh.com/projects/dev/wiki/Ap51-supported-devices
      svn checkout http://dev.open-mesh.com/downloads/svn/ap51-flash/trunk/ ap51flash
      cd ap51flash
      make
-     sudo ./ap51flash 
+     sudo ./ap51flash
    </pre>
 
 Serial Connection
@@ -120,7 +120,7 @@ Flashing via RedBoot
    <pre>
    RedBoot> fconfig
    Run script at boot: true
-   Boot script: 
+   Boot script:
    .. fis load -l linux
    .. go
    </pre>
@@ -226,7 +226,7 @@ command.
    ... Program from 0x80040000-0x802e0000 at 0xbfcf0000: ..........................................
    ... Erase from 0xbffe0000-0xbfff0000: .
    ... Program from 0x80ff0000-0x81000000 at 0xbffe0000: .
-   RedBoot>  
+   RedBoot>
    </pre>
 
 -  Reboot

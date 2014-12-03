@@ -58,10 +58,10 @@ certificates).
     persist-tun
 
     # This must match your configuration
-    ca /etc/openvpn/auth/ca.pem          
-    cert /etc/openvpn/auth/server.pem    
-    key /etc/openvpn/auth/server.key    
-    dh /etc/openvpn/auth/dh1024.pem     
+    ca /etc/openvpn/auth/ca.pem
+    cert /etc/openvpn/auth/server.pem
+    key /etc/openvpn/auth/server.key
+    dh /etc/openvpn/auth/dh1024.pem
     tls-auth /etc/openvpn/auth/ta.key 0
 
     cipher BF-CBC

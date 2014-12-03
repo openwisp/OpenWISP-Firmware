@@ -148,7 +148,7 @@ written in ruby
 
     postdata="\x0d\x0a-----------------------------7db12928202b8--\x0d\x0a"
 
-    # Each line must end with cr/lf characters, and we have to know how many 
+    # Each line must end with cr/lf characters, and we have to know how many
     # data the script will send to the dir-825 this is why we concatenate it before
     # creating the header
 
