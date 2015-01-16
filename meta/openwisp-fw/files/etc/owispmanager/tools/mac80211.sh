@@ -44,9 +44,9 @@ ssid=$SSID
 ignore_broadcast_ssid=0" > $HOSTAPD_FILE
 
   if [ "`iw $PHYDEV info | grep '2[0-9]\{3\} MHz'`" ]; then
-      echo "hw_mode=g" > $HOSTAPD_FILE
+      echo "hw_mode=g" >> $HOSTAPD_FILE
     else
-      echo "hw_mode=a" > $HOSTAPD_FILE
+      echo "hw_mode=a" >> $HOSTAPD_FILE
     fi
 
   hostapd -P $HOSTAPD_PIDFILE -B $HOSTAPD_FILE
