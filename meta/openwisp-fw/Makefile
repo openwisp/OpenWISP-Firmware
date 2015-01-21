@@ -27,9 +27,6 @@ endef
 define Package/openwisp-fw
 	$(call Package/openwisp-fw-base)
 	TITLE:=OpenWisp Firmware standard package
-	MAINTAINER:=info@openwisp.org
-	#this is a meta package suitable for any archs...
-	PKG_ARCH:=all
 	DEPENDS+=+openvpn-polarssl
 endef
 
