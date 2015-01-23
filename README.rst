@@ -117,17 +117,20 @@ Here follows an example script to compile OWF for different arch targets::
 
   #!/bin/bash
 
+  prj_dir=`pwd`
+
   git clone git://git.openwrt.org/openwrt.git --depth 10
   cd openwrt
 
-  #configure feeds
+  # OPENWISP_CONF must be defined before invoking jenkins_hook.sh
+  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" (see below)
+
+  #configure feeds, install jenkins_hook.sh
   cp feeds.conf.default feeds.conf
-  echo "src-git openwisp https://github.com/openwisp/openwrt-feed.git" >> feeds.conf
-  echo "src-git wlansi https://github.com/wlanslovenija/firmware-packages-opkg.git" >> feeds.conf
+  ${prj_dir}/jenkins_hook.sh
+
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
-
-  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" (see below)
 
   #config target
   for arch in ar71xx atheros x86; do
