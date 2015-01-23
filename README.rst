@@ -123,6 +123,7 @@ Here follows an example script to compile OWF for different arch targets::
   #configure feeds
   cp feeds.conf.default feeds.conf
   echo "src-git openwisp https://github.com/openwisp/openwrt-feed.git" >> feeds.conf
+  echo "src-git wlansi https://github.com/wlanslovenija/firmware-packages-opkg.git" >> feeds.conf
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
 
