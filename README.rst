@@ -113,6 +113,11 @@ The ``etc/openvpn/`` directory will contain the RSA certificates to establish a 
 
 The overlay configuration file **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` that should be a HTTP URL.
 
+*Beware:* if you update your overlay configuration file please ensure to clean and recompile the openwisp package. This can be done using the following command inside openwrt build dir::
+
+   make package/openwisp-fw/clean
+
+
 Developing the firmware
 -----------------------
 
@@ -144,6 +149,7 @@ Here follows an example script to compile OWF for different arch targets::
     echo "CONFIG_TARGET_$arch=y" > .config;
     echo "CONFIG_PACKAGE_openwisp-fw=y" >> .config
     make defconfig;
+    make package/openwisp-fw/clean;
     make -j 4;
   done
 
