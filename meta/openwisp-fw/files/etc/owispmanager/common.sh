@@ -98,30 +98,6 @@ _APP_VERS="2.0"
 check_prerequisites() {
   local __ret="0"
 
-  # Wi-Fi drivers/tools
-  check_driver
-  local __driver_check_result="$?"
-  if [ "$__driver_check_result" -eq "1" ]; then
-    # Madwifi-ng tools
-    if [ -x "`which $MADWIFI_CONFIGURATION_COMMAND`" ]; then
-      echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are present"
-    else
-      __ret="2"
-      echo "madwifi-ng tools ($MADWIFI_CONFIGURATION_COMMAND) are missing!"
-    fi
-  elif [ "$__driver_check_result" -eq "2" ]; then
-    # mac80211 tools
-    if [ -x "`which $MAC80211_CONFIGURATION_COMMAND`" ]; then
-      echo "mac80211 tools ($MAC80211_CONFIGURATION_COMMAND) are present"
-    else
-      __ret="2"
-      echo "mac80211 tools ($MAC80211_CONFIGURATION_COMMAND) are missing!"
-    fi
-  else
-    __ret="2"
-    echo "No Wi-Fi driver installed or unsupported Wi-Fi system!"
-  fi
-    
   # Httpd
   if [ -x "`which uhttpd`" ]; then
     echo "uHTTP Daemon is present!"
