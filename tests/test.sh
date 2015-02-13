@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# $1 is firmware file to test
+# $1 is the board method
+# $2 is firmware file to test
+# $3 is the number of the first n-th test that could be skipped
+
+# all command parameters are passed as is at test functions
 
 # define default for ifaces if not set in env
 WAN_IFACE=${WAN_IFACE:-eth0}
@@ -12,6 +16,13 @@ SERIAL_PORT=${SERIAL_PORT:-/dev/ttyACM0}
 SUDO="sudo"
 
 if [[ -z $1 ]]; then
+	echo "board not set"
+	exit 9
+else
+	source boards/$1.sh
+fi
+
+if [[ -z $2 ]]; then
 	echo "Image missing"
 	exit 8
 fi
@@ -20,29 +31,6 @@ set -x
 
 function pre_condition {
 	echo 0 | sudo tee /proc/sys/net/ipv4/ip_forward
-}
-
-function flash {
-	# 1 flash the device, we assume that it is a ap51 flashable device
-	$SUDO chmod 777 $SERIAL_PORT
-	stty -F $SERIAL_PORT raw ispeed 15200 ospeed 15200 cs8 -ignpar -cstopb -echo
-	# rly2 off
-	echo 'p' > $SERIAL_PORT
-	sleep 2
-	# rly2 on
-	echo 'f' > $SERIAL_PORT
-
-	make -C ap51flash
-	sudo ifconfig $LAN_IFACE up
-	$SUDO timeout 500 ./ap51flash/ap51-flash $LAN_IFACE $1
-	if [[ $? -eq 124 ]]; then
-		exit 2
-	fi
-	# power reset
-        echo 'p' > $SERIAL_PORT
-        sleep 2
-        # rly2 on
-        echo 'f' > $SERIAL_PORT
 }
 
 function dhcp {
@@ -103,10 +91,10 @@ function wifi_connect {
 
 
 # lists of the tests that should be run in order
-TESTS="pre_condition flash dhcp wifi_up_safe_mode wifi_up wifi_connect"
+TESTS="pre_condition board_flash dhcp wifi_up_safe_mode wifi_up wifi_connect board_power_off"
 
-if [ "$2" ]; then
-	TESTS=`echo $TESTS | cut -d " " -f $2-`
+if [ "$3" ]; then
+	TESTS=`echo $TESTS | cut -d " " -f $3-`
 fi
 
 for test_name in $TESTS; do
