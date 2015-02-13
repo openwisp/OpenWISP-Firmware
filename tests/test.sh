@@ -26,31 +26,39 @@ function flash {
 	# 1 flash the device, we assume that it is a ap51 flashable device
 	$SUDO chmod 777 $SERIAL_PORT
 	stty -F $SERIAL_PORT raw ispeed 15200 ospeed 15200 cs8 -ignpar -cstopb -echo
-	# All relays on
-	echo 'd' > $SERIAL_PORT
-	sleep 1
-	# Turn relay 1 off
-	echo 'o' > $SERIAL_PORT
+	# rly2 off
+	echo 'p' > $SERIAL_PORT
+	sleep 2
+	# rly2 on
+	echo 'f' > $SERIAL_PORT
 
 	make -C ap51flash
 	sudo ifconfig $LAN_IFACE up
-	timeout 200 $SUDO ./ap51flash/ap51-flash $LAN_IFACE $1
+	$SUDO timeout 500 ./ap51flash/ap51-flash $LAN_IFACE $1
 	if [[ $? -eq 124 ]]; then
 		exit 2
 	fi
+	# power reset
+        echo 'p' > $SERIAL_PORT
+        sleep 2
+        # rly2 on
+        echo 'f' > $SERIAL_PORT
 }
 
 function dhcp {
 	# 2  dhcp-lease
-	rm -f /tmp/dhcpd_leased
+	$SUDO rm -f /tmp/dhcpd_leased
 	$SUDO ifconfig $LAN_IFACE 192.168.99.1
-	timeout 200 python ./vendor/tiny-dhcp.py -a 192.168.99.1 -i $LAN_IFACE > /tmp/dhcpd_leased
+	$SUDO timeout 200 python ./vendor/tiny-dhcp.py -a 192.168.99.1 -i $LAN_IFACE -d 8.8.8.8 > /tmp/dhcpd_leased
 	if [[ $? -ne 0 ]]; then
 		exit 2
 	fi
 	if [[ ! -f /tmp/dhcpd_leased ]]; then
 		exit 3
 	fi
+
+	LEASED_IP=`head -n 1 /tmp/dhcpd_leased`
+	ping $LEASED_IP -c 2 || exit 2
 }
 
 
@@ -59,7 +67,7 @@ function wifi_up_safe_mode {
 	SSID=""
 	for a in `seq 1 30`; do
 		sleep 10
-		SSID=`sudo iw $WLAN_IFACE scan | grep SSID | grep -o 'owf-.*'`
+		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o 'owf-.*'`
 		if [[ -n "$SSID" ]]; then
 			break
 		fi
@@ -71,13 +79,13 @@ function wifi_up_safe_mode {
 
 function wifi_up {
 	echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-	sudo iptables -t nat -A POSTROUTING -o eth3 -j MASQUERADE
+	sudo iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE
 
 	# 3 test ssid available
 	SSID=""
 	for a in `seq 1 30`; do
 		sleep 10
-		SSID=`sudo iw $WLAN_IFACE scan | grep SSID | grep -o 'Test2WiFi'`
+		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o 'Test2WiFi'`
 		if [[ -n "$SSID" ]]; then
 			break
 		fi
@@ -89,8 +97,8 @@ function wifi_up {
 }
 
 function wifi_connect {
-	sudo iw dev $WLAN_IFACE connect -w Test2Wifi || exit 2
-	sudo dhclient $WLAN_IFACE
+	$SUDO iw dev $WLAN_IFACE connect -w Test2Wifi || exit 2
+	$SUDO dhclient $WLAN_IFACE
 }
 
 
