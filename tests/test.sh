@@ -105,6 +105,10 @@ function wifi_connect {
 # lists of the tests that should be run in order
 TESTS="pre_condition flash dhcp wifi_up_safe_mode wifi_up wifi_connect"
 
+if [ "$2" ]; then
+	TESTS=`echo $TESTS | cut -d " " -f $2-`
+fi
+
 for test_name in $TESTS; do
 	$test_name $* #forward all cmds args to function
 done
