@@ -10,34 +10,36 @@
 WAN_IFACE=${WAN_IFACE:-eth0}
 LAN_IFACE=${LAN_IFACE:-eth1}
 WLAN_IFACE=${WLAN_IFACE:-wlan0}
+LAN_ADDRESS=${LAN_ADDRESS:-"192.168.99.1"}
 
 SERIAL_PORT=${SERIAL_PORT:-/dev/ttyACM0}
 
 SUDO="sudo"
+SSID_TO_BE=${LAN_ADDRESS:-"Test2WiFi"}
 
 if [[ -z $1 ]]; then
-	echo "board not set"
+	echo "Error: board not set. Exiting now"
 	exit 9
 else
 	source boards/$1.sh
 fi
 
 if [[ -z $2 ]]; then
-	echo "Image missing"
+	echo "Error: image missing. Exiting now"
 	exit 8
 fi
 
 set -x
 
-function pre_condition {
+pre_condition() {
 	echo 0 | sudo tee /proc/sys/net/ipv4/ip_forward
 }
 
-function dhcp {
+dhcp() {
 	# 2  dhcp-lease
 	$SUDO rm -f /tmp/dhcpd_leased
-	$SUDO ifconfig $LAN_IFACE 192.168.99.1
-	$SUDO timeout 200 python ./vendor/tiny-dhcp.py -a 192.168.99.1 -i $LAN_IFACE -d 8.8.8.8 > /tmp/dhcpd_leased
+	$SUDO ifconfig $LAN_IFACE $LAN_ADDRESS
+	$SUDO timeout 200 python ./vendor/tiny-dhcp.py -a $LAN_ADDRESS -i $LAN_IFACE -d 8.8.8.8 > /tmp/dhcpd_leased
 	if [[ $? -ne 0 ]]; then
 		exit 2
 	fi
@@ -50,7 +52,7 @@ function dhcp {
 }
 
 
-function wifi_up_safe_mode {
+wifi_up_safe_mode() {
 	# 3 test ssid available
 	SSID=""
 	for a in `seq 1 30`; do
@@ -65,27 +67,27 @@ function wifi_up_safe_mode {
 	fi
 }
 
-function wifi_up {
+wifi_up() {
 	echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-	sudo iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE
+	$SUDO iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE
 
 	# 3 test ssid available
 	SSID=""
 	for a in `seq 1 30`; do
 		sleep 10
-		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o 'Test2WiFi'`
+		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o $SSID_TO_BE`
 		if [[ -n "$SSID" ]]; then
 			break
 		fi
 	done
-	if [[ $SSID != "Test2WiFi" ]]; then
+	if [[ $SSID != "$SSID_TO_BE" ]]; then
 		exit 2
 	fi
 
 }
 
-function wifi_connect {
-	$SUDO iw dev $WLAN_IFACE connect -w Test2Wifi || exit 2
+wifi_connect() {
+	$SUDO iw dev $WLAN_IFACE connect -w $SSID_TO_BE || exit 2
 	$SUDO dhclient $WLAN_IFACE
 }
 
