@@ -47,8 +47,9 @@ dhcp() {
 		exit 3
 	fi
 
+	sleep 2
 	LEASED_IP=`head -n 1 /tmp/dhcpd_leased`
-	ping $LEASED_IP -c 2 || exit 2
+	ping $LEASED_IP -c 1 || dhcp  # ensure that dhcp leased is acked
 }
 
 
