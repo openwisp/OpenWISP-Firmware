@@ -15,7 +15,7 @@ LAN_ADDRESS=${LAN_ADDRESS:-"192.168.99.1"}
 SERIAL_PORT=${SERIAL_PORT:-/dev/ttyACM0}
 
 SUDO="sudo"
-SSID_TO_BE=${LAN_ADDRESS:-"Test2WiFi"}
+SSID_TO_TEST=${SSID_TO_TEST:-"Test2WiFi"}
 
 if [[ -z $1 ]]; then
 	echo "Error: board not set. Exiting now"
@@ -75,19 +75,19 @@ wifi_up() {
 	SSID=""
 	for a in `seq 1 30`; do
 		sleep 10
-		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o $SSID_TO_BE`
+		SSID=`$SUDO iw $WLAN_IFACE scan | grep SSID | grep -o $SSID_TO_TEST`
 		if [[ -n "$SSID" ]]; then
 			break
 		fi
 	done
-	if [[ $SSID != "$SSID_TO_BE" ]]; then
+	if [[ $SSID != "$SSID_TO_TEST" ]]; then
 		exit 2
 	fi
 
 }
 
 wifi_connect() {
-	$SUDO iw dev $WLAN_IFACE connect -w $SSID_TO_BE || exit 2
+	$SUDO iw dev $WLAN_IFACE connect -w $SSID_TO_TEST || exit 2
 	$SUDO dhclient $WLAN_IFACE
 }
 
