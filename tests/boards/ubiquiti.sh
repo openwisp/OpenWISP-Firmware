@@ -2,7 +2,7 @@
 #	- board_flash
 #	- board_power_off
 
-function board_flash {
+board_flash() {
 	# 1 flash the device, we assume that it is a ap51 flashable device
 	$SUDO chmod 777 $SERIAL_PORT
 	stty -F $SERIAL_PORT raw ispeed 15200 ospeed 15200 cs8 -ignpar -cstopb -echo
@@ -26,7 +26,20 @@ function board_flash {
 }
 
 
-function board_power_off {
+board_power_off() {
 	# rly2 off
 	echo 'p' > $SERIAL_PORT
+}
+
+board_reset() {
+	# Board reset
+	echo 'p' > $SERIAL_PORT
+	sleep 2
+	# rly2 on
+	echo 'f' > $SERIAL_PORT
+}
+
+shutdown_test() {
+	# Board shutdown
+
 }

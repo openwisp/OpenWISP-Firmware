@@ -100,6 +100,10 @@ if [ "$3" ]; then
 	TESTS=`echo $TESTS | cut -d " " -f $3-`
 fi
 
+# First stage
+board_reset
+
 for test_name in $TESTS; do
 	$test_name $* #forward all cmds args to function
 done
+
