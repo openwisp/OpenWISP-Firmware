@@ -71,7 +71,7 @@ wifi_up_safe_mode() {
 
 http_safe_mode() {
 	sleep 5
-	if [[ ! `curl $HTTP_URL` | grep html ]]; then
+	if [[ ! `curl $HTTP_URL | grep html` ]]; then
 		exit 2
 	fi
 }
