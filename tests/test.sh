@@ -72,9 +72,7 @@ wifi_up() {
 	echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 	$SUDO iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE
 
-	# Check connectivity
 	LEASED_IP=`head -n 1 /tmp/dhcpd_leased`
-	ping $LEASED_IP -c 1 || dhcp  # ensure that dhcp leased is acked
 
 	# 3 test ssid available
 	SSID=""
@@ -84,6 +82,7 @@ wifi_up() {
 		if [[ -n "$SSID" ]]; then
 			break
 		fi
+		ping $LEASED_IP -c 1 || dhcp # dhcp goes down sometimes, then recheck connectivity
 	done
 	if [[ $SSID != "$SSID_TO_TEST" ]]; then
 		exit 2
