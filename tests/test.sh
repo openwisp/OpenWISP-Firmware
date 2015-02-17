@@ -91,6 +91,7 @@ wifi_up() {
 }
 
 wifi_connect() {
+	$SUDO iw dev $WLAN_IFACE disconnect
 	$SUDO iw dev $WLAN_IFACE connect -w $SSID_TO_TEST || exit 2
 	$SUDO timeout 60 dhclient $WLAN_IFACE
 }
