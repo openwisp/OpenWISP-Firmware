@@ -60,9 +60,14 @@ endef
 define Package/openwisp-fw/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
-	if [ $(OPENWISP_CONF) ]; then \
+
+	#unpack external configuration
+	if [ -z "$(OPENWISP_CONF)" ]; then exit 2; fi
+	if [ -f $(OPENWISP_CONF) ]; then tar xvzf $(OPENWISP_CONF) -C $(1)/; fi
+	if [ echo $(OPENWISP_CONF) | grep '^http' - ]; then \
 		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
 	fi
+
 	git describe --tags > $(1)/etc/openwisp_version
 endef
 
