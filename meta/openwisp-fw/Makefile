@@ -32,7 +32,7 @@ endef
 define Package/openwisp-fw-umts
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware UMTS extension
-	DEPENDS:=+openwisp-fw +comgt
+	DEPENDS:=+openwisp-fw +comgt +kmod-usb2 +usbutils
 endef
 
 
@@ -75,9 +75,27 @@ endef
 define Package/openwisp-fw-umts/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files-umts/* $(1)/
-	#TODO config ttyXXX modem
-	#TODO update inittab: https://github.com/openwisp/OpenWISP-Firmware/blob/umts-improvement/deploy-firmware.sh#L460
-	#sed -i -e 's/failure 5/failure 4/g' -e 's/interval 1/interval 65535/g' $(1)/etc/ppp/options
+	cat << EOF >> $(1)/etc/config/network
+config 'interface' 'umts'
+  option 'ifname' 'ppp0'
+  option 'device' '/dev/ttyUSB2'
+  option 'service' 'umts'
+  option 'proto' '3g'
+  option 'defaultroute' '0'
+  option 'pppd_options' 'noipdefault'
+  option 'dns' '8.8.8.8'
+  option 'peerdns' '0'
+EOF
+
+  sed -i '/#SED_HOOK/a  option hide_umts_page 0' $(1)/etc/config/owispmanager
+  sed -i '/#SED_HOOK/a  option umts_device "/dev/ttyUSB2"' $(1)/etc/config/owispmanager
+  sed -i '/#SED_HOOK/a  option umts_enable 1' $(1)/etc/config/owispmanager
+
+  cat << EOF >> $(1)/etc/inittab
+::respawn:/etc/owispmanager/umts-wd.sh
+::respawn:/etc/owispmanager/apn.sh
+EOF
+
 endef
 
 
