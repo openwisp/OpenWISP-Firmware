@@ -72,6 +72,10 @@ wifi_up() {
 	echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 	$SUDO iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE
 
+	# Check connectivity
+	LEASED_IP=`head -n 1 /tmp/dhcpd_leased`
+	ping $LEASED_IP -c 1 || dhcp  # ensure that dhcp leased is acked
+
 	# 3 test ssid available
 	SSID=""
 	for a in `seq 1 30`; do
