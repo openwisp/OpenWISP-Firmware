@@ -13,7 +13,6 @@ WLAN_IFACE=${WLAN_IFACE:-wlan0}
 LAN_ADDRESS=${LAN_ADDRESS:-"192.168.99.1"}
 SERIAL_PORT=${SERIAL_PORT:-/dev/ttyACM0}
 SSID_TO_TEST=${SSID_TO_TEST:-"Test2WiFi"}
-HTTP_URL=${HTTP_URL:-"http://172.22.33.1"}
 
 SUDO="sudo"
 
@@ -69,12 +68,14 @@ wifi_up_safe_mode() {
 	fi
 }
 
-http_safe_mode() {
-	sleep 5
-	if [[ ! `curl $HTTP_URL | grep html` ]]; then
-		exit 2
-	fi
-}
+## Patch needed: see https://github.com/openwisp/OpenWISP-Firmware/pull/24
+#http_safe_mode() {
+#	sleep 5
+#	if [[ ! `curl $LEASED_IP:8080 | grep html` ]]; then
+#		exit 2
+#	fi
+#}
+
 
 wifi_up() {
 	echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
@@ -109,7 +110,7 @@ wifi_connect() {
 
 
 # lists of the tests that should be run in order
-TESTS="pre_condition board_flash dhcp wifi_up_safe_mode http_safe_mode wifi_up wifi_connect board_power_off"
+TESTS="pre_condition board_flash dhcp wifi_up_safe_mode wifi_up wifi_connect board_power_off"
 
 if [ "$3" ]; then
 	TESTS=`echo $TESTS | cut -d " " -f $3-`
