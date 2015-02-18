@@ -304,7 +304,7 @@ start_configuration_services() {
     echo "* Starting configuration services"
 
     if [ "$HAS_RADIO" -eq "0" ]; then
-        if ["$NETWORK_PROTO" == "$DHCP"]; then
+        if [ "$NETWORK_PROTO" == "$DHCP_ON" ]; then
             ifconfig $IFACE_LAN $CONFIGURATION_IP netmask $CONFIGURATION_NMASK up
             if [ "$?" -ne "0" ]; then
               return 1
