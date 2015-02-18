@@ -492,6 +492,11 @@ if [ "$__ret" -gt "0" ]; then
   fi
   close_status_log_results
 fi
+# While loop to test if bootstrap is finished
+while [ ! -f /tmp/boot_done ] ;
+    do
+      sleep 3
+done
 check_driver
 __ret=$?
 if [ "$__ret" -eq "0" ]; then
