@@ -47,93 +47,6 @@ stop_httpd() {
 }
 
 
-# -------
-# Function:     start_dns_masq
-# Description:  Starts dnsmasq daemon
-# Input:        nothing
-# Output:       nothing
-# Returns:      0 on success, !0 otherwise
-# Notes:
-start_dns_masq() {
-  echo "
-  nameserver $CONFIGURATION_IP
-  search $CONFIGURATION_DOMAIN
-  " > $DNSMASQ_RESOLV_FILE
-  
-  touch $DNSMASQ_LEASE_FILE
-  
-  dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN \
-          -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE \
-          --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h
-          
-  return $?
-}
-
-# -------
-# Function:     stop_dns_masq
-# Description:  Stops dnsmasq daemon
-# Input:        nothing
-# Output:       nothing
-# Returns:      0
-# Notes:
-stop_dns_masq() {
-  start-stop-daemon -K -p $DNSMASQ_PIDFILE >/dev/null 2>&1
-  return 0
-}
-
-# -------
-# Function:     start_vpn
-# Description:  Starts the setup vpn
-# Input:        nothing
-# Output:       nothing
-# Returns:      0 if success, !0 otherwise
-# Notes:
-start_vpn() {
-  openvpn --daemon --syslog openvpn_setup --writepid $VPN_PIDFILE --client --comp-lzo --nobind \
-          --ca $OPENVPN_CA_FILE --cert $OPENVPN_CLIENT_FILE --key $OPENVPN_CLIENT_FILE \
-          --cipher BF-CBC --dev $VPN_IFACE --dev-type tun  --proto tcp --remote $CONFIG_home_address $CONFIG_home_port \
-          --resolv-retry infinite --tls-auth $OPENVPN_TA_FILE 1 --verb 1
-  return $?
-}
-
-# -------
-# Function:     stop_vpn
-# Description:  Stops the setup vpn
-# Input:        nothing
-# Output:       nothing
-# Returns:      0
-# Notes:
-stop_vpn() {
-  VPN_PID="`cat $VPN_PIDFILE 2>/dev/null`"
-  if [ ! -z "$VPN_PID" ]; then
-    kill $VPN_PID
-    sleep 1
-    while [ ! -z "`(cat /proc/$VPN_PID/cmdline|grep openvpn) 2>/dev/null`" ]; do
-      kill -9 $VPN_PID 2>/dev/null
-    done
-  fi
-  return 0
-}
-
-# -------
-# Function:     restart_vpn
-# Description:  Restarts the setup vpn
-# Input:        nothing
-# Output:       nothing
-# Returns:      0
-# Notes:
-restart_vpn() {
-  stop_vpn
-  start_vpn
-  if [ "$?" -eq "0" ]; then
-    sleep $VPN_RESTART_SLEEP_TIME
-    check_vpn_status
-    return $?
-  else
-    return $?
-  fi
-}
-
 
 # -------
 # Function:     configuration_retrieveTool
@@ -157,41 +70,6 @@ configuration_retrieve_command() {
 
 }
 
-# -------
-# Function:     vpn_watchdog
-# Description:  Check Setup VPN status and restart it if necessary
-# Input:        nothing
-# Output:       nothing
-# Returns:      0 on success (VPN is up and running) !0 otherwise
-# Notes:
-
-vpn_watchdog() {
-  check_vpn_status
-  if [ "$?" -eq "0" ]; then
-    return 0
-  else
-    open_status_log_results
-    echo "* VPN is down, trying to restart it"
-
-    update_date
-    if [ "$?" -eq "0" ]; then
-      echo "* Date/time correctly updated!"
-    else
-      echo "** Can't update date/time: check network configuration, DNS and NTP and/or HTTP connectivity **"
-    fi
-
-    restart_vpn
-    if [ "$?" -eq "0" ]; then
-      echo "* VPN correctly started"
-      close_status_log_results
-      return 0
-    else
-      echo "* Can't start VPN"
-      close_status_log_results
-      return 1
-    fi
-  fi
-}
 
 # -------
 # Function:     configuration_retrieve
@@ -212,7 +90,7 @@ configuration_retrieve() {
   fi
 
   # Retrieve the configuration
-  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
+  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER:3000/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
 
   if [ "$?" -eq "0" ]; then
     md5sum $CONFIGURATION_TARGZ_FILE | cut -d' ' -f1 > $CONFIGURATION_TARGZ_MD5_FILE
@@ -242,7 +120,7 @@ is_configuration_changed() {
     return 0 # Assume configuration isn't changed!
   fi
 
-  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1" 15
+  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER:3000/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1" 15
   if [ "$?" -eq "0" ]; then
     # Validates md5 format
     if [ -z "`head -1 $CONFIGURATION_TARGZ_MD5_FILE.tmp | egrep -e \"^[0-9a-z]{32}$\"`" ]; then
@@ -278,7 +156,7 @@ stop_configuration_services() {
   open_status_log_results
   echo "* Stopping configuration services"
 
-  stop_dns_masq
+  
   stop_httpd
   stop_hostapd
 
@@ -323,15 +201,7 @@ start_configuration_services() {
       stop_configuration_services
       return 1
     fi
-    if [ "$?" -eq "0" ]; then
-      start_dns_masq
-    else
-      echo "* BUG: Cannot start dnsmasq!"
-      stop_configuration_services
-      return 1
-    fi
-
-    close_status_log_results
+-    close_status_log_results
   fi
   return 0
 }
@@ -384,9 +254,7 @@ configuration_install() {
   fi
   # WORKAROUND for issue #2
   OWRT_MAJOR=`grep -o '^..' /etc/openwrt_version`
-  if [ $OWRT_MAJOR -gt 10 ]; then
-    sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
-  fi
+  
   $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
     if [ -f "$POST_INSTALL_SCRIPT_FILE" ]; then
@@ -511,10 +379,6 @@ do
 
   upkeep_timer=`expr \( $upkeep_timer + 1 \) % $UPKEEP_TIME_UNITS`
   configuration_check_timer=`expr \( $configuration_check_timer + 1 \) % $CONFCHECK_TIME_UNITS`
-
-  vpn_watchdog
-  __vpn_status="$?"
-
   if [ "$CONFIG_home_status" == "$STATE_CONFIGURED" ]; then
     if [ -f $CONFIGURATIONS_ACTIVE_FILE ]; then
       # Uci configuration completed and remote configuration applied
@@ -522,7 +386,7 @@ do
         upkeep
       fi
       if [ "$configuration_check_timer" -eq "0" ]; then
-        if [ "$__vpn_status" -eq "0" ]; then
+      
           is_configuration_changed
           if [ "$?" -eq "1" ]; then
             configuration_uninstall
@@ -537,12 +401,12 @@ do
               configuration_install
             fi
           fi
-        fi
+        
       fi
     else
       # Uci configuration completed but non yet applied (setup state)
       __ret="0"
-      if [ "$__vpn_status" -eq "0" ]; then
+      
         configuration_retrieve
         if [ "$?" -eq "0" ]; then
           # Free resources ASAP for low-end devices
@@ -557,10 +421,7 @@ do
           # oops, something went wrong: restart configuration services in a moment
           __ret="1"
         fi
-      else
-        # oops, something went wrong: restart configuration services in a moment
-        __ret="1"
-      fi
+
 
       if [ "$__ret" -ne "0" ]; then
         # Restart configuration services
