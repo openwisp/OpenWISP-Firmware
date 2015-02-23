@@ -13,21 +13,21 @@ HARDWARE test component
 
 Below some picture of an actual setup and some information about hardware cabling.
 
-..image:: https://dl.dropboxusercontent.com/u/16893292/fw_panel.jpg
+.. image:: https://dl.dropboxusercontent.com/u/16893292/fw_panel.jpg
   :scale: 30%
 
 A plastic panel is used to take in place all the tools, APs and cabling.
 
-..image:: https://dl.dropboxusercontent.com/u/16893292/fw_panel_text.jpg
+.. image:: https://dl.dropboxusercontent.com/u/16893292/fw_panel_text.jpg
   :scale: 30%
 
 
-..image:: https://dl.dropboxusercontent.com/u/16893292/fw_server.jpg
+.. image:: https://dl.dropboxusercontent.com/u/16893292/fw_server.jpg
   :scale: 30%
 
 The panel is installed next to the jenkins slave to allow simple cabling
 
-..image:: https://dl.dropboxusercontent.com/u/16893292/fw_server_text.jpg
+.. image:: https://dl.dropboxusercontent.com/u/16893292/fw_server_text.jpg
   :scale: 30%
 
 
