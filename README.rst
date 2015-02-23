@@ -42,7 +42,6 @@ We strongly suggest to build OpenWRT on a GNU/Linux environment, you can find ot
 If you have a properly configured machine follow this steps inside the OpenWRT root directory::
 
   cp feeds.conf.default feeds.conf
-  echo "src-git eoip https://github.com/agustim/openwrt-linux-eoip.git" >> feeds.conf
   echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw

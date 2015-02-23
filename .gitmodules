@@ -1,0 +1,6 @@
+[submodule "tests/ap51flash"]
+	path = tests/ap51flash
+	url = https://github.com/Unidata-SpA/ap51flash
+[submodule "tests/dnsmasq"]
+	path = tests/dnsmasq
+	url = git@github.com:Unidata-SpA/dnsmasq.git

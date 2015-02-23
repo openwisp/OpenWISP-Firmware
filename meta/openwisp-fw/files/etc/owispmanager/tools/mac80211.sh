@@ -29,7 +29,6 @@ load_startup_config
 start_hostapd() {
   echo "
 driver=nl80211
-hw_mode=g
 channel=$CHAN
 interface=$IFACE
 ctrl_interface=/var/run/hostapd-phy0
@@ -43,6 +42,12 @@ wpa_pairwise=TKIP
 rsn_pairwise=CCMP
 ssid=$SSID
 ignore_broadcast_ssid=0" > $HOSTAPD_FILE
+
+  if [ "`iw $PHYDEV info | grep '2[0-9]\{3\} MHz'`" ]; then
+      echo "hw_mode=g" >> $HOSTAPD_FILE
+    else
+      echo "hw_mode=a" >> $HOSTAPD_FILE
+    fi
 
   hostapd -P $HOSTAPD_PIDFILE -B $HOSTAPD_FILE
   return $?

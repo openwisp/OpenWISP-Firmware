@@ -303,7 +303,12 @@ start_configuration_services() {
     open_status_log_results
     echo "* Starting configuration services"
 
-    create_wifi_interface 1
+    if [ "`iw phy0 info | grep '2[0-9]\{3\} MHz'`" ]; then
+      create_wifi_interface 1
+    else
+      create_wifi_interface 36
+    fi
+
     if [ "$?" -ne "0" ]; then
       echo "* BUG: create_wifi_interface failed!"
       stop_configuration_services
