@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-fw
-
+PKG_VERSION:=1
 
 include $(INCLUDE_DIR)/package.mk
 
