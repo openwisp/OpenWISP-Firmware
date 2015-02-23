@@ -63,8 +63,8 @@ OPENVPN_TA_FILE="/etc/openvpn/ta.key"
 OPENVPN_CA_FILE="/etc/openvpn/ca.crt"
 OPENVPN_CLIENT_FILE="/etc/openvpn/client.crt"
 VPN_IFACE="setup00"
-DEFAULT_INNER_SERVER="10.8.0.1"
-DEFAULT_INNER_SERVER_PORT="80"
+DEFAULT_INNER_SERVER="83.171.9.195"
+DEFAULT_INNER_SERVER_PORT="3000"
 # Misc
 OLSRD_TXTINFO_PORT="8281"
 DEFAULT_MESH_ESSID="OpenWISP-Mesh"
@@ -112,21 +112,6 @@ check_prerequisites() {
   else
     __ret="2"
     echo "hostapd is missing!"
-  fi
-
-  if [ -x "`which openvpn`" ]; then
-    echo "OpenVPN is present" 
-  else
-    __ret="2"
-    echo "OpenVPN is missing!"
-  fi
-
-  # Dnsmasq
-  if [ -x "`which dnsmasq`" ]; then
-    echo "dnsmasq is present (`dnsmasq -v 2>&1 | head -1`)"
-  else
-    __ret="2"
-    echo "dnsmasq is missing!"
   fi
 
   # The following ar not "fatal"
@@ -236,17 +221,6 @@ load_startup_config() {
   INNER_SERVER=${CONFIG_home_inner_server:-$DEFAULT_INNER_SERVER}
   INNER_SERVER_PORT=${CONFIG_home_inner_server_port:-$DEFAULT_INNER_SERVER_PORT}
 
-  CONFIGURATION_IP=$DEFAULT_CONFIGURATION_IP
-  CONFIGURATION_NMASK=$DEFAULT_CONFIGURATION_NMASK
-  CONFIGURATION_IP_RANGE_START=$DEFAULT_CONFIGURATION_IP_RANGE_START
-  CONFIGURATION_IP_RANGE_END=$DEFAULT_CONFIGURATION_IP_RANGE_END
-  if [ ! -z "$CONFIG_local_setup_ip" ] && [ ! -z "$CONFIG_local_setup_netmask" ] && [ ! -z "$CONFIG_local_setup_range_ip_start" ] && [ ! -z "$CONFIG_local_setup_range_ip_end" ]; then
-     CONFIGURATION_IP=$CONFIG_local_setup_ip
-     CONFIGURATION_NMASK=$CONFIG_local_setup_netmask
-     CONFIGURATION_IP_RANGE_START=$CONFIG_local_setup_range_ip_start
-     CONFIGURATION_IP_RANGE_END=$CONFIG_local_setup_range_ip_end
-  fi
-
 }
 
 # -------
@@ -299,17 +273,6 @@ exec_with_timeout() {
   return 1
 }
 
-# -------
-# Function:     check_vpn_status
-# Description:  Checks setup vpn status
-# Input:        nothing
-# Output:       nothing
-# Returns:      0 if the vpn is up and runnng, !0 otherwise
-# Notes:
-check_vpn_status() {
-  (route -n|grep $VPN_IFACE) >/dev/null 2>&1
-  return $?
-}
 
 # -------
 # Function:     update_date
