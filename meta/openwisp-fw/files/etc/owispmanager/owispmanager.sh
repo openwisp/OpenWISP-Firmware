@@ -59,13 +59,13 @@ start_dns_masq() {
   nameserver $CONFIGURATION_IP
   search $CONFIGURATION_DOMAIN
   " > $DNSMASQ_RESOLV_FILE
-  
+
   touch $DNSMASQ_LEASE_FILE
-  
+
   dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN \
           -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE \
           --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h
-          
+
   return $?
 }
 
@@ -202,7 +202,7 @@ vpn_watchdog() {
 # Notes:
 configuration_retrieve() {
   open_status_log_results
-  
+
   echo "Retrieving configuration..."
   RETRIEVE_CMD=""
   configuration_retrieve_command RETRIEVE_CMD
@@ -303,10 +303,23 @@ start_configuration_services() {
     open_status_log_results
     echo "* Starting configuration services"
 
-    if [ "`iw phy0 info | grep '2[0-9]\{3\} MHz'`" ]; then
-      create_wifi_interface 1
+    # Support no-wifi devices
+    if [ "$HAS_RADIO" -eq "0" ]; then
+      if [ "$NETWORK_PROTO" == "$DHCP_ON" ]; then
+        ifconfig $IFACE_LAN $CONFIGURATION_IP netmask $CONFIGURATION_NMASK up
+        if [ "$?" -ne "0" ]; then
+          return 1
+        fi
+      fi
+      /etc/init.d/uhttpd start
+      return 0
     else
-      create_wifi_interface 36
+      # Support 5GHz devices
+      if [ "`iw phy0 info | grep '2[0-9]\{3\} MHz'`" ]; then
+        create_wifi_interface 1
+      else
+        create_wifi_interface 36
+      fi
     fi
 
     if [ "$?" -ne "0" ]; then
@@ -362,6 +375,12 @@ configuration_uninstall() {
   for iface in `uci show wireless | grep -v radio0 | cut -d . -f 2 | cut -d = -f1  | uniq`; do
     uci delete wireless.$iface;
   done
+  # Same as above, remove any pre-configured bridged interface in no-radio configuration
+  if [ "$HAS_RADIO" -eq "0" ]; then
+    for iface in `uci show network | grep -v loopback | grep -v lan | grep -v $IFACE | cut -d . -f 2 | cut -d = -f1  | uniq`; do
+        uci delete network.$iface;
+    done
+  fi
 
   rm -Rf $CONFIGURATIONS_PATH/*
 
@@ -445,9 +464,9 @@ clean_up() {
   echo "* Cleaning up..."
   echo "* Uninstalling runtime configuration"
   configuration_uninstall
-  echo "* Stopping configuration services"  
+  echo "* Stopping configuration services"
   stop_configuration_services
-  echo "* Goodbye!"  
+  echo "* Goodbye!"
   echo ""
 }
 
@@ -480,18 +499,20 @@ if [ "$__ret" -gt "0" ]; then
   fi
   close_status_log_results
 fi
+# While loop to test if bootstrap is finished
+while [ ! -f /tmp/boot_done ] ;
+    do
+      sleep 3
+done
 check_driver
 __ret=$?
-while [ "$__ret" -eq "0" ]; do
-  echo "Waiting for device (driver not yet loaded?)"
-  sleep 5
-  check_driver
-  __ret=$?
-done
-if [ "$__ret" -eq "1" ]; then
+if [ "$__ret" -eq "0" ]; then
+  echo "no radio card configured, let's rock!"
+  HAS_RADIO=0
+elif [ "$__ret" -eq "1" ]; then
   echo "$WIFIDEV ok, let's rock!"
     . $HOME_PATH/tools/madwifi.sh
-elif [ "$__ret" -eq "2" ]; then 
+elif [ "$__ret" -eq "2" ]; then
   echo "$PHYDEV ok, let's rock!"
     . $HOME_PATH/tools/mac80211.sh
 fi

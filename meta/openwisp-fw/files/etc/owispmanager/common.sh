@@ -8,7 +8,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -77,6 +77,10 @@ VPN_RESTART_SLEEP_TIME=10
 DATE_UPDATE_TIMEOUT=10
 DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
 DATE_UPDATE_SERVERS_HTTP="www.google.it"
+HAS_RADIO=1
+NETWORK_PROTO=`uci show network.lan.proto | cut -f2 -d'='`
+DHCP_ON="dhcp"
+IFACE_LAN="br-lan"
 
 
 # See load_startup_config() for runtime-defined variables
@@ -115,7 +119,7 @@ check_prerequisites() {
   fi
 
   if [ -x "`which openvpn`" ]; then
-    echo "OpenVPN is present" 
+    echo "OpenVPN is present"
   else
     __ret="2"
     echo "OpenVPN is missing!"
@@ -171,7 +175,7 @@ check_prerequisites() {
     fi
     echo "GNU netcat is missing!"
   fi
-  
+
   return $__ret
 }
 
@@ -216,7 +220,7 @@ create_uci_config() {
 
 # -------
 # Function:     load_startup_config
-# Description:  Loads current confguration and sets up the global variables 
+# Description:  Loads current confguration and sets up the global variables
 #               used by configuration services
 # Input:        nothing
 # Output:       nothing
@@ -224,7 +228,7 @@ create_uci_config() {
 # Notes:
 load_startup_config() {
   uci_load "owispmanager"
-  
+
   # Set "local" configuration variables
   # If there are uci keys defined, use them...
 
@@ -332,4 +336,3 @@ update_date() {
 
   return $__ret
 }
-
