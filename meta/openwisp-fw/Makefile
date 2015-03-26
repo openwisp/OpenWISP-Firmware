@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-fw
-PKG_VERSION:=$(shell git describe --always --tags 2> /dev/null || echo no-git)
+PKG_VERSION:=$(shell git describe --always --tags 2> /dev/null || echo 1.3)
 
 include $(INCLUDE_DIR)/package.mk
 

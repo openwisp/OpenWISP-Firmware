@@ -2,7 +2,7 @@
 OpenWISP Firmware
 =================
 
-**Current Version**: 1.3 alpha
+**Current Version**: 1.3
 
 ============================ ======================================================================= 
 OpenWRT version              Build status 
