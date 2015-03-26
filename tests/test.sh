@@ -13,6 +13,7 @@ WLAN_IFACE=${WLAN_IFACE:-wlan0}
 LAN_ADDRESS=${LAN_ADDRESS:-"192.168.99.1"}
 SERIAL_PORT=${SERIAL_PORT:-/dev/ttyACM0}
 SSID_TO_TEST=${SSID_TO_TEST:-"Test2WiFi"}
+RLY_VERSION=${RLY_VERSION:-"RLY02"}
 
 SUDO="sudo"
 
@@ -21,7 +22,7 @@ if [[ -z $1 ]]; then
 	echo "Error: board not set. Exiting now"
 	exit 9
 else
-	source boards/$1.sh
+	source boards/$1.sh $RLY_VERSION
 fi
 
 if [[ -z $2 ]]; then
@@ -49,7 +50,7 @@ dhcp() {
 
 	sleep 2
 	LEASED_IP=`head -n 1 /tmp/dhcpd_leased`
-	ping $LEASED_IP -c 1 || dhcp  # ensure that dhcp leased is acked
+	ping $LEASED_IP -c 1 || dhcp  # ensure that dhcp leased is acknoledged
 }
 
 

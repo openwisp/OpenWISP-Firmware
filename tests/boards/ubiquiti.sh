@@ -2,6 +2,15 @@
 #	- board_flash
 #	- board_power_off
 
+# USB-RLY02
+RLYO2[0]="p" #on
+RLYO2[1]="f" #off
+# USB-RLY16
+RLY16[0]="e" #on
+RLY16[1]="o" #off
+
+TYPE=$1
+
 board_flash() {
 	# 1 flash the device, we assume that it is a ap51 flashable device
 	board_reset
@@ -18,7 +27,7 @@ board_flash() {
 
 board_power_off() {
 	# rly2 off
-	echo 'p' > $SERIAL_PORT
+	eval echo \${$TYPE[1]} > $SERIAL_PORT
 }
 
 board_reset() {
@@ -26,10 +35,10 @@ board_reset() {
 	stty -F $SERIAL_PORT raw ispeed 15200 ospeed 15200 cs8 -ignpar -cstopb -echo
 
 	# Board reset
-	echo 'p' > $SERIAL_PORT
+	eval echo \${$TYPE[1]} > $SERIAL_PORT
 	sleep 2
 	# rly2 on
-	echo 'f' > $SERIAL_PORT
+	eval echo \${$TYPE[0]} > $SERIAL_PORT
 }
 
 shutdown_test() {
