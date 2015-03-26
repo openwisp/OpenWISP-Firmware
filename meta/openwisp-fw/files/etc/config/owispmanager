@@ -23,5 +23,5 @@ config 'server' 'local'
 
 
 config 'server' 'vpn_fail'
-  option 'reboot_enabled' '1'
+  option 'reboot_enabled' '0'
   option 'reboot_delay' '180'
