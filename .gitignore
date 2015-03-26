@@ -1,0 +1,4 @@
+#ignore the follow paths
+*.DS_Store
+*~
+._*

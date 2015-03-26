@@ -1,11 +1,15 @@
-What is it?
------------
+.. OpenWISP Firmware documentation master file, created by
+   sphinx-quickstart on Thu Mar 26 15:49:28 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-Open WISP Firmware is a set of scripts (shell and web cgi) that sits on
-top of `OpenWrt <http://openwrt.org/>`__. It provides a daemon for the
-retrieving the configuration of the following components from a
-`OpenWISP Manager <https://github.com/openwisp/OpenWISP-Manager/wiki>`__
-:
+OpenWISP Firmware
+=================
+
+OpenWISP Firmware is a set of scripts (shell and web cgi) that sits on
+top of `OpenWrt <http://openwrt.org/>`__. It provides a daemon for
+retrieving an OpenWRT configuration of the following components from a
+`OpenWISP Manager <https://github.com/openwisp/OpenWISP-Manager/wiki>`__ instance:
 
 -  wifi (currently only for madwifi-ng and ath9k)
 -  networking
@@ -13,12 +17,13 @@ retrieving the configuration of the following components from a
 -  openvpn (layer 2, tap)
 -  cronjobs
 
-Open WISP Firmware also provides a web GUI for: \* configuring basic
-network parameters \* configuring basic Open WISP server settings \*
-performing a set of test to spot and resolve most common problems that
-may prevent Open WISP firmware to work correctly
+OpenWISP Firmware also provides a web GUI for:
 
-Open WISP Firmware currently works on OpenWRT Backfire 10.03
+- configuring basic network parameters
+- configuring basic Open WISP server settings
+- performing a set of test to spot and resolve most common problems that may prevent OpenWISP firmware to work correctly
+
+OpenWISP Firmware currently works on OpenWRT Barrier Breaker 14.10.
 
 How to install
 --------------
@@ -155,3 +160,29 @@ in your owm installation
 Q. How VPN certificated are renewed? A. Setup VPN will never expire, but
 l2vpn will expires, when certificate will be renewed will be sent to te
 AP's trough configuration service.
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   /Installationinstructions.rst
+   /flashing/Flashingubiquiti.rst
+   /flashing/Flashingalixandwrap.rst
+   /flashing/Flashingabocom.rst
+   /flashing/Flashingdlink.rst
+   /flashing/Nanostation-m2-m5.rst
+   /flashing/Nanostation-nanostation-loco--bullet.rst
+   /flashing/Picostation-2hp.rst
+   /flashing/Picostation.rst
+   /flashing/Powerap-n.rst
+   /flashing/Routerstation.rst
+   /flashing/Unifi.rst
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
