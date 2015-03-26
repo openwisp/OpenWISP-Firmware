@@ -367,8 +367,12 @@ configuration_uninstall() {
 
   cd $CONFIGURATIONS_PATH
 
-  $PRE_UNINSTALL_SCRIPT_FILE
-  $UNINSTALL_SCRIPT_FILE
+  if [ -f "$PRE_UNINSTALL_SCRIPT_FILE" ]; then
+    $PRE_UNINSTALL_SCRIPT_FILE
+  fi
+  if [ -f "$UNINSTALL_SCRIPT_FILE" ]; then
+    $UNINSTALL_SCRIPT_FILE
+  fi
 
   # WORKAROUND, remove any pre-configured wireless iface that can conflict with server
   # provided config or can be apply if the connection (eth0) is not ready
