@@ -167,18 +167,6 @@ Contents:
    :maxdepth: 2
 
    /Installationinstructions.rst
-   /flashing/Flashingubiquiti.rst
-   /flashing/Flashingalixandwrap.rst
-   /flashing/Flashingabocom.rst
-   /flashing/Flashingdlink.rst
-   /flashing/Nanostation-m2-m5.rst
-   /flashing/Nanostation-nanostation-loco--bullet.rst
-   /flashing/Picostation-2hp.rst
-   /flashing/Picostation.rst
-   /flashing/Powerap-n.rst
-   /flashing/Routerstation.rst
-   /flashing/Unifi.rst
-
 
 Indices and tables
 ==================
