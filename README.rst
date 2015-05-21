@@ -2,7 +2,7 @@
 OpenWISP Firmware
 =================
 
-**Current Version**: 1.3
+.. image:: http://img.shields.io/github/release/openwisp/OpenWISP-Firmware.svg
 
 ============================ ======================================================================= 
 OpenWRT version              Build status 
