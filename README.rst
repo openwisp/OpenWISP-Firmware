@@ -110,7 +110,10 @@ The ``etc/openvpn/`` directory will contain the RSA certificates to establish a 
   network:*:0:0:99999:7:::
   nobody:*:0:0:99999:7:::
 
-The overlay configuration file **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` that should be a HTTP URL.
+The overlay configuration layer **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` it could be a local targz file,
+a valid http url to download the targz or a local directory.
+
+For and example of directory structure see tests/dummy_config and refer to .travis.yml to setup the correct build enviroment.
 
 *Beware:* if you update your overlay configuration file please ensure to clean and recompile the openwisp package. This can be done using the following command inside openwrt build dir::
 

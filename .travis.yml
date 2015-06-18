@@ -10,4 +10,4 @@ before_script:
     - sudo chmod a+x /usr/local/bin/owrt-pkgtest
 
 script:
-    - owrt-pkgtest -d meta openwisp-fw
+    - OPENWISP_CONF=`pwd`/tests/dummy_config/ owrt-pkgtest -d meta openwisp-fw
