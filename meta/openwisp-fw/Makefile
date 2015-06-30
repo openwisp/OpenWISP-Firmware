@@ -27,7 +27,7 @@ endef
 define Package/openwisp-fw
 	$(call Package/openwisp-fw-base)
 	TITLE:=OpenWisp Firmware standard package
-	DEPENDS+=+openwisp-fw-base +openvpn-polarssl
+	DEPENDS+=+openwisp-fw-base +openvpn-polarssl +vtun
 endef
 
 define Package/openwisp-fw-mesh
