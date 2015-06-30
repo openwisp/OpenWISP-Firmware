@@ -89,10 +89,7 @@ stop_dns_masq() {
 # Returns:      0 if success, !0 otherwise
 # Notes:
 start_vpn() {
-  openvpn --daemon --syslog openvpn_setup --writepid $VPN_PIDFILE --client --comp-lzo --nobind \
-          --ca $OPENVPN_CA_FILE --cert $OPENVPN_CLIENT_FILE --key $OPENVPN_CLIENT_FILE \
-          --cipher BF-CBC --dev $VPN_IFACE --dev-type tun  --proto tcp --remote $CONFIG_home_address $CONFIG_home_port \
-          --resolv-retry infinite --tls-auth $OPENVPN_TA_FILE 1 --verb 1
+  vtund -f /etc/vtund-client.conf $VTUN_CLIENT $VTUN_SERVER
   return $?
 }
 
@@ -104,14 +101,7 @@ start_vpn() {
 # Returns:      0
 # Notes:
 stop_vpn() {
-  VPN_PID="`cat $VPN_PIDFILE 2>/dev/null`"
-  if [ ! -z "$VPN_PID" ]; then
-    kill $VPN_PID
-    sleep 1
-    while [ ! -z "`(cat /proc/$VPN_PID/cmdline|grep openvpn) 2>/dev/null`" ]; do
-      kill -9 $VPN_PID 2>/dev/null
-    done
-  fi
+  killall vtund
   return 0
 }
 
