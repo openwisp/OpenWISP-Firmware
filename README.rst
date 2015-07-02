@@ -4,13 +4,10 @@ OpenWISP Firmware
 
 .. image:: http://img.shields.io/github/release/openwisp/OpenWISP-Firmware.svg
 
-============================ ======================================================================= 
-OpenWRT version              Build status 
-============================ ======================================================================= 
-Trunk                         .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-edge
-14.07 (Barrier Breaker)       .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-1407 
-12.09 (Attitude Adjustment)   .. image:: https://ci.publicwifi.it/buildStatus/icon?job=openwisp-1209 
-============================ =======================================================================
+.. image:: https://travis-ci.org/openwisp/OpenWISP-Firmware.svg?branch=master
+    :target: https://travis-ci.org/openwisp/OpenWISP-Firmware
+
+**Current Version**: 1.3
 
 Description
 -----------
@@ -110,7 +107,10 @@ The ``etc/openvpn/`` directory will contain the RSA certificates to establish a 
   network:*:0:0:99999:7:::
   nobody:*:0:0:99999:7:::
 
-The overlay configuration file **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` that should be a HTTP URL.
+The overlay configuration layer **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` it could be a local targz file,
+a valid http url to download the targz or a local directory.
+
+For and example of directory structure see tests/dummy_config and refer to .travis.yml to setup the correct build enviroment.
 
 *Beware:* if you update your overlay configuration file please ensure to clean and recompile the openwisp package. This can be done using the following command inside openwrt build dir::
 

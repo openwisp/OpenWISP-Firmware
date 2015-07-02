@@ -401,8 +401,10 @@ configuration_install() {
     return 1
   fi
   # WORKAROUND for issue #2
-  OWRT_MAJOR=`grep -o '^..' /etc/openwrt_version`
-  if [ $OWRT_MAJOR -gt 10 ]; then
+  source /etc/openwrt_release
+  REV_NUMBER=`echo $DISTRIB_REVISION | cut -d "r" -f2`
+  # Please FIX the test with the correct revision number
+  if [ $REV_NUMBER -gt 40000 ]; then
     sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
   fi
   $INSTALL_SCRIPT_FILE

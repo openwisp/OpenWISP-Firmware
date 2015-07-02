@@ -73,8 +73,13 @@ define Package/openwisp-fw-base/install
 	$(CP) -r ./files/* $(1)/
 
 	#unpack external configuration
-	if [ -z "$(OPENWISP_CONF)" ]; then exit 2; fi
-	if [ -f $(OPENWISP_CONF) ]; then tar xvzf $(OPENWISP_CONF) -C $(1)/; fi
+	if [ -z "$(OPENWISP_CONF)" ]; then exit 2; fi      # system unconfigured
+	if [ -d $(OPENWISP_CONF) ]; then \
+		cp -fr $(OPENWISP_CONF) $(1)/; \
+	fi
+	if [ -f $(OPENWISP_CONF) ]; then \
+		tar xvzf $(OPENWISP_CONF) -C $(1)/; \
+	fi
 	if [ `echo $(OPENWISP_CONF) | grep '^http' -` ]; then \
 		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
 	fi
