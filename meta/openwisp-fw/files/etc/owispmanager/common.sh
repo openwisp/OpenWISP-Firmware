@@ -64,12 +64,11 @@ VPN_PIDFILE="$TMP_PATH/owispmanager-ovpn.pid"
 OPENVPN_TA_FILE="/etc/openvpn/ta.key"
 OPENVPN_CA_FILE="/etc/openvpn/ca.crt"
 OPENVPN_CLIENT_FILE="/etc/openvpn/client.crt"
-VPN_IFACE="tun0"
+VPN_IFACE="setup00"
 DEFAULT_INNER_SERVER="10.10.10.1"
 DEFAULT_INNER_SERVER_PORT="80"
 # VTUN
 VTUN_CLIENT="client"
-VTUN_SERVER=`uci show owispmanager.home.address | cut -f2 -d'='`
 # Misc
 OLSRD_TXTINFO_PORT="8281"
 DEFAULT_MESH_ESSID="OpenWISP-Mesh"
