@@ -1,8 +1,18 @@
 config 'server' 'home'
-  option 'address' '10.10.10.2'
+  # the vpn_provider (dummy, openvpn, vtun)
+  option 'vpn_provider' 'openvpn'
+
+  # VPN server endpoint (not unused if vpn_provider is dummy)
+  option 'address' 'my_public.server.com'
+
+  # VPN port endpoint
   option 'port' ''
   option 'status' 'configured'
+
+  # OWM ip address of server (inside vpn, if any)
   option 'inner_server' ''
+
+  # OWM port of the server
   option 'inner_server_port' ''
 
 config 'server' 'local'

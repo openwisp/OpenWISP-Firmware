@@ -82,30 +82,6 @@ stop_dns_masq() {
 }
 
 # -------
-# Function:     start_vpn
-# Description:  Starts the setup vpn
-# Input:        nothing
-# Output:       nothing
-# Returns:      0 if success, !0 otherwise
-# Notes:
-start_vpn() {
-  vtund -f /etc/vtund-client.conf $VTUN_CLIENT $VTUN_SERVER
-  return $?
-}
-
-# -------
-# Function:     stop_vpn
-# Description:  Stops the setup vpn
-# Input:        nothing
-# Output:       nothing
-# Returns:      0
-# Notes:
-stop_vpn() {
-  killall vtund
-  return 0
-}
-
-# -------
 # Function:     restart_vpn
 # Description:  Restarts the setup vpn
 # Input:        nothing
@@ -511,6 +487,11 @@ elif [ "$__ret" -eq "1" ]; then
 elif [ "$__ret" -eq "2" ]; then
   echo "$PHYDEV ok, let's rock!"
     . $HOME_PATH/tools/mac80211.sh
+fi
+
+# Include vpn_provider functions
+if [ -f $HOME_PATH/vpn_provider/$VPN_PROVIDER.sh ]; then
+  . $HOME_PATH/vpn_provider/$VPN_PROVIDER.sh
 fi
 
 mkdir -p $CONFIGURATIONS_PATH >/dev/null 2>&1

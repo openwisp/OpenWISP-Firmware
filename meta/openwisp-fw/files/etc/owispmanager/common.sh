@@ -56,6 +56,8 @@ POST_INSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/post_install.sh"
 UPKEEP_SCRIPT_FILE="$CONFIGURATIONS_PATH/upkeep.sh"
 PRE_UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/pre_unistall.sh"
 UNINSTALL_SCRIPT_FILE="$CONFIGURATIONS_PATH/uninstall.sh"
+#vpn provider
+DEFAULT_VPN_PROVIDER="openvpn"
 # openVPN
 VPN_FILE="$TMP_PATH/owispmanager.ovpn"
 VPN_PIDFILE="$TMP_PATH/owispmanager-ovpn.pid"
@@ -121,11 +123,12 @@ check_prerequisites() {
     echo "hostapd is missing!"
   fi
 
-  if [ -x "`which openvpn`" ]; then
-    echo "OpenVPN is present"
-  else
-    __ret="2"
-    echo "OpenVPN is missing!"
+  # VPN provider check
+  if [ -f $HOME_PATH/vpn_provider/${VPN_PROVIDER}_provider.sh ]; then
+    . $HOME_PATH/vpn_provider/${VPN_PROVIDER}_provider.sh
+    if [ check_prerequisites_vpn() -ne 0 ]; then
+      __ret="2"
+    fi
   fi
 
   # Dnsmasq
@@ -136,7 +139,7 @@ check_prerequisites() {
     echo "dnsmasq is missing!"
   fi
 
-  # The following ar not "fatal"
+  # The following are not "fatal"
 
   # ntpclient
   if [ -x "`which ntpdate`" ] || [ -x "`which htpdate`" ]; then
@@ -242,6 +245,7 @@ load_startup_config() {
   SSID=${CONFIG_local_setup_ssid:-$DEFAULT_SSID}
   INNER_SERVER=${CONFIG_home_inner_server:-$DEFAULT_INNER_SERVER}
   INNER_SERVER_PORT=${CONFIG_home_inner_server_port:-$DEFAULT_INNER_SERVER_PORT}
+  VPN_PROVIDER=${CONFIG_home_vpn_provider:-$DEFAULT_VPN_PROVIDER}
 
   CONFIGURATION_IP=$DEFAULT_CONFIGURATION_IP
   CONFIGURATION_NMASK=$DEFAULT_CONFIGURATION_NMASK
