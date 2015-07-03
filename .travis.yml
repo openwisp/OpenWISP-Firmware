@@ -5,9 +5,7 @@ install:
     - sudo apt-get install git-core build-essential libssl-dev libncurses5-dev unzip subversion
 
 before_script:
-    - wget https://raw.githubusercontent.com/claudyus/owrt-package-test/master/owrt-pkgtest
-    - sudo mv owrt-pkgtest /usr/local/bin
-    - sudo chmod a+x /usr/local/bin/owrt-pkgtest
+    - export OPENWISP_CONF=`pwd`/tests/dummy_config/
 
 script:
-    - OPENWISP_CONF=`pwd`/tests/dummy_config/ owrt-pkgtest -d meta openwisp-fw
+    - bash ./owrt-pkgtest/owrt-pkgtest -m http://mirror1.mirror.garr.it/mirrors/openwrt/ -d `pwd`/meta openwisp-fw
