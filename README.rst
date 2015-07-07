@@ -7,8 +7,6 @@ OpenWISP Firmware
 .. image:: https://travis-ci.org/openwisp/OpenWISP-Firmware.svg?branch=master
     :target: https://travis-ci.org/openwisp/OpenWISP-Firmware
 
-**Current Version**: 1.3
-
 Description
 -----------
 
