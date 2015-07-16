@@ -1,13 +1,20 @@
+sudo: false
+
 language: python
 
-install:
-    - sudo apt-get update
-    - sudo apt-get install git-core build-essential libssl-dev libncurses5-dev unzip subversion
+addons:
+  apt:
+    packages:
+    - git-core
+    - build-essential
+    - libssl-dev
+    - libncurses5-dev-
+    - unzip
+    - subversion
 
 before_script:
-    - wget https://raw.githubusercontent.com/claudyus/owrt-package-test/master/owrt-pkgtest
-    - sudo mv owrt-pkgtest /usr/local/bin
-    - sudo chmod a+x /usr/local/bin/owrt-pkgtest
+    - wget https://raw.githubusercontent.com/claudyus/owrt-package-test/master/owrt-pkgtest -P $HOME
+    - chmod a+x $HOME/owrt-pkgtest
 
 script:
-    - OPENWISP_CONF=`pwd`/tests/dummy_config/ owrt-pkgtest -d meta openwisp-fw
+    - OPENWISP_CONF=`pwd`/tests/dummy_config/ $HOME/owrt-pkgtest -d meta openwisp-fw
