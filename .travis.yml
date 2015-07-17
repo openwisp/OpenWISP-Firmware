@@ -5,10 +5,9 @@ language: python
 addons:
   apt:
     packages:
-    - git-core
     - build-essential
     - libssl-dev
-    - libncurses5-dev-
+    - libncurses5-dev
     - unzip
     - subversion
 
