@@ -367,6 +367,10 @@ configuration_uninstall() {
 
   cd $CONFIGURATIONS_PATH
 
+  # WORKAROUND: 
+  # add compatibility with chaos calmer (backward compatible with older openwrt versions) 
+  sed -i "s/=openvpn/='openvpn'/g" $CONFIGURATIONS_PATH/uninstall.sh
+
   if [ -f "$PRE_UNINSTALL_SCRIPT_FILE" ]; then
     $PRE_UNINSTALL_SCRIPT_FILE
   fi
