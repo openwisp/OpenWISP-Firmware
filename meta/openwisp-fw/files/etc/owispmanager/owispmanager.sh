@@ -367,6 +367,10 @@ configuration_uninstall() {
 
   cd $CONFIGURATIONS_PATH
 
+  # WORKAROUND: 
+  # add compatibility with chaos calmer (backward compatible with older openwrt versions) 
+  sed -i "s/=openvpn/='openvpn'/g" $CONFIGURATIONS_PATH/uninstall.sh
+
   if [ -f "$PRE_UNINSTALL_SCRIPT_FILE" ]; then
     $PRE_UNINSTALL_SCRIPT_FILE
   fi
@@ -416,6 +420,10 @@ configuration_install() {
   # Please FIX the test with the correct revision number
   if [ $REV_NUMBER -gt 40000 ]; then
     sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
+    # Workaround for issue #34
+    sed -i "s/uci -m import network -f \$PROGDIR\/uci\/network.conf/uci -m -f \$PROGDIR\/uci\/network.conf import network/g" $CONFIGURATIONS_PATH/install.sh
+    sed -i "s/uci -m import wireless -f \$PROGDIR\/uci\/wireless.conf/uci -m -f \$PROGDIR\/uci\/wireless.conf import wireless/g" $CONFIGURATIONS_PATH/install.sh
+    sed -i "s/uci -m import openvpn -f \$PROGDIR\/uci\/openvpn.conf/uci -m -f \$PROGDIR\/uci\/openvpn.conf import openvpn/g" $CONFIGURATIONS_PATH/install.sh
   fi
   $INSTALL_SCRIPT_FILE
   if [ "$?" -eq "0" ]; then
