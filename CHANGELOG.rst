@@ -1,3 +1,17 @@
+1.3.1 [Unreleased]
+==================
+
+Features
+--------
+- `1330d0e <https://github.com/openwisp/OpenWISP-Firmware/commit/1330d0ef2bba67e5c36288301f943eff3a921fa3>`__ Added support for USB-RLY16
+- `#36 <https://github.com/openwisp/OpenWISP-Firmware/pull/36>`__ Chaos Calmer compatibility
+
+Bugfixes
+--------
+- Fixed compilation procedure and instructions
+- `cd956d3 <https://github.com/openwisp/OpenWISP-Firmware/commit/cd956d3cbf6b911e982b3e0976ad9be14089e9c9>`__ Removed unused uci settings #30
+- `4efaa0a <https://github.com/openwisp/OpenWISP-Firmware/commit/4efaa0aed410f810d8b9c24e059e95a9acf0aa53>`__ Fixed revision number for polarssl #32
+
 1.3 [2015-03-26]
 ================
 
