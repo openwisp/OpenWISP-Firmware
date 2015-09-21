@@ -18,9 +18,6 @@ config 'server' 'local'
   option 'hide_umts_page' '1'
   option 'hide_mesh_page' '1'
   option 'hide_ethernet_page' '0'
-  option 'ethernet_device' 'eth0'
-  option 'ethernet_enable' '0'
-
 
 config 'server' 'vpn_fail'
   option 'reboot_enabled' '0'

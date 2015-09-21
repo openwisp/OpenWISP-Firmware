@@ -44,17 +44,17 @@ If you have a properly configured machine follow this steps inside the OpenWRT r
   export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" (see below)
   make
 
-The full version of OWF will support UMTS and mesh capability, but will require better hardware and 
+The full version of OWF will support UMTS and mesh capability, but will require better hardware and
 much more space on flash/disk, we recommends an appropriate hardware under this condition.
 
 Our firmware should idealy run on every OpenWRT-complatible devices, but we have tested mainly atheros, x86, ar71xx platforms.
 
 Stable version features:
 
-  * MESH Support  
-  * 3G support  
-  * wifi support (Both drivers works alone or togheter)  
-  * interface failover script  
+  * MESH Support
+  * 3G support
+  * wifi support (Both drivers works alone or togheter)
+  * interface failover script
 
 Overlay Configuration File
 --------------------------
@@ -94,8 +94,6 @@ This is an exmaple of the contents of ``etc/config/owispmanager``::
     option 'hide_umts_page' '1'
     option 'hide_mesh_page' '1'
     option 'hide_ethernet_page' '0'
-    option 'ethernet_device' 'eth0'
-    option 'ethernet_enable' '0'
 
 The ``etc/openvpn/`` directory will contain the RSA certificates to establish a successfull connection with your own **openvpn** server (aka setup vpn) while ``/etc/shadow`` will provide a default password for the root user, here the file content for password "*pass*"::
 
