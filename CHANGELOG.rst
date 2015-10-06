@@ -1,3 +1,10 @@
+1.3.2 [Unreleased]
+==================
+
+Bugfixes
+--------
+- `f1599ac <https://github.com/openwisp/OpenWISP-Firmware/commit/f1599ac064ca9506da6dded41b553b40a02fd090>`__ fixed backward compatibility with older openwrt versions
+
 1.3.1 [2015-09-21]
 ==================
 
