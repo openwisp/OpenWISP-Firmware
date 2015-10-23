@@ -476,6 +476,14 @@ close_status_log_results() {
   fi
 }
 
+check_rclocal() {
+  grep boot_done $ETC_PATH/rc.local > /dev/null 2>&1
+  if [ "$?" -eq "1" ]; then
+    sed -i "/exit 0/i touch \/tmp\/boot_done" $ETC_PATH/rc.local
+    reboot
+  fi
+}
+
 # ------------------- MAIN
 
 clean_up() {
@@ -517,6 +525,8 @@ if [ "$__ret" -gt "0" ]; then
   fi
   close_status_log_results
 fi
+# Added check to prevent infinite loop when sysupgrade from owf1.2 to owf1.3
+check_rclocal
 # While loop to test if bootstrap is finished
 while [ ! -f /tmp/boot_done ] ;
     do
