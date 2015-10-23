@@ -8,12 +8,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -123,7 +123,7 @@ render_select() {
   local index=1
 
   echo "<select name=\"$name\" id=\"$id\">"
-  while [ "$index" -le "$values_len" ]; do 
+  while [ "$index" -le "$values_len" ]; do
     value=`echo "$values" | cut -d',' -f$index`
     description=`echo "$descriptions" | cut -d',' -f$index`
     if [ "$value" == "$default_value" ]; then
@@ -236,7 +236,7 @@ render_page() {
     <div class="clear">&nbsp;</div>
     <div class="grid_12" id="site_info">
       <div class="box" style="text-align:center">
-        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) 2012 <a href="http://openwisp.org/"> OpenWISP.org</a></p>
+        <p>$_APP_NAME v. $_APP_VERS - Copyright (C) $_APP_YEAR <a href="http://openwisp.org/"> OpenWISP.org</a></p>
       </div>
     </div>
     <div class="clear">&nbsp;</div>
@@ -396,7 +396,7 @@ umts_connectivity_form() {
     </table>
     <p>
        <label for="umts_enable">Enable UMTS connectivity</label><br />
-       <input $_umts_enable_checked id="umts_enable" name="umts_enable" type="checkbox" onclick="_toggle_umts()" /> 
+       <input $_umts_enable_checked id="umts_enable" name="umts_enable" type="checkbox" onclick="_toggle_umts()" />
     </p>
     <div id="_umts" style="$_umts_display">
       <p>
@@ -477,7 +477,7 @@ mesh_connectivity_form() {
     </table>
     <p>
        <label for="mesh_enable">Enable MESH connectivity</label><br />
-       <input $_mesh_enable_checked id="mesh_enable" name="mesh_enable" type="checkbox" onclick="_toggle_mesh()" /> 
+       <input $_mesh_enable_checked id="mesh_enable" name="mesh_enable" type="checkbox" onclick="_toggle_mesh()" />
     </p>
     <div id="_mesh" style="$_mesh_display">
      <table>
@@ -627,7 +627,7 @@ test_default_gw_present() {
   local result="`route -n | grep "^0\.0\.0\.0" | sed 's/[\ ]*/ /g' | cut -d' ' -f 3`"
 
   eval "$1=\"$result\""
-  if [ "$result" != "" ]; then 
+  if [ "$result" != "" ]; then
     return 1
   else
     return 0
@@ -643,7 +643,7 @@ test_default_gw_arp() {
   local result=$(cat /proc/net/arp | grep "^$gw" | sed 's/[\ ]*/ /g' | cut -d' ' -f 5)
 
   eval "$1=\"$result\""
-  if [ -z "$result" -o "$result" == "00:00:00:00:00:00" ]; then 
+  if [ -z "$result" -o "$result" == "00:00:00:00:00:00" ]; then
     return 0
   else
     return 1
@@ -656,7 +656,7 @@ test_dns() {
 
   eval "$1=\"$result\""
 
-  if [ "$__ret" -eq "0" -a "$result" != "" ]; then 
+  if [ "$__ret" -eq "0" -a "$result" != "" ]; then
     return 1
   fi
 
@@ -664,7 +664,7 @@ test_dns() {
 }
 
 test_trace_small() {
-  if [ -z "$CONFIG_home_address" ]; then 
+  if [ -z "$CONFIG_home_address" ]; then
     eval "$1=\"Address not present! Please check your configuration.\""
     return 0
   fi
@@ -674,7 +674,7 @@ test_trace_small() {
   local result="`traceroute -w 2 -q 2 -m 5 -n -f2 $server 100 2>&1`"
 
   eval "$1=\"$result\""
-  if [ "$result" != "" ]; then 
+  if [ "$result" != "" ]; then
     return 1
   else
     return 0
@@ -682,7 +682,7 @@ test_trace_small() {
 }
 
 test_trace_big() {
-  if [ -z "$CONFIG_home_address" ]; then 
+  if [ -z "$CONFIG_home_address" ]; then
     eval "$1=\"Address not present! Please check your configuration.\""
     return 0
   fi
@@ -700,7 +700,7 @@ test_trace_big() {
 }
 
 test_configuration_retrieve() {
-  if [ -z "$CONFIG_home_address" ]; then 
+  if [ -z "$CONFIG_home_address" ]; then
     eval "$1=\"Address not present! Please check your configuration.\""
     return 0
   fi
@@ -718,7 +718,7 @@ test_configuration_retrieve() {
     eval "$1=\"$INNER_SERVER is responding on port $INNER_SERVER_PORT\""
     return 1
   else
-    #Check if configuration tarball exist 
+    #Check if configuration tarball exist
     wget -s http://$INNER_SERVER:$INNER_SERVER_PORT/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1
     wget_rc="$?"
 
@@ -752,7 +752,7 @@ render_access_point_page() {
             <tr>
               <td><em>Ethernet (eth0) MAC address</em></td>
               <td class="code"><big>$ETH0_MAC</big></td>
-            </tr>	
+            </tr>
             <tr>
               <td><em>CPU Info</em></td>
               <td class="code"><pre>$__cpu</pre></td>
@@ -812,7 +812,7 @@ EOH
     __content="$__content <tr><td><em>Gateway reachable?</em></td>"
     test_default_gw_arp gw_mac
     if [ "$?" -ne "1" ]; then
-      if [ "$CURRENT_UMTS_ENABLE" -eq "1" ]; then 
+      if [ "$CURRENT_UMTS_ENABLE" -eq "1" ]; then
         __content="$__content <td><font style="color:#FDD017">Skipped</font> Default gateway for UMTS connectivity not tested!</td></tr>"
       else
         __content="$__content <td><font style="color:red">No</font>  Please check your connectivity!</td></tr>"
@@ -839,7 +839,7 @@ EOH
       if [ ! -z "$CONFIG_home_address" ]; then
         __content="$__content <tr><td><em>Can I download my configuration?</em></td>"
         test_configuration_retrieve configuration
-        rc="$?" 
+        rc="$?"
         if [ "$rc" -eq "1" ]; then
           __content="$__content <td><font style="color:green">Yes</font> ( $configuration )</td></tr>"
         elif [ "$rc" -eq "2" ]; then
@@ -882,7 +882,7 @@ render_site_test_wait_page() {
 <div class="grid_8 prefix_2 suffix_2">
   <div class="box">
     <div class="block" id="connectivity-block">
-      <h1>Please wait... 
+      <h1>Please wait...
         <img alt="please wait" border="0" class="spin" height="16" width="16" src="/images/spinner.gif" />
       </h1>
       This could be a looong test... Really, <strong>please</strong> <b>DO NOT</b> reload this page...
@@ -1205,7 +1205,7 @@ case $F_page in
 
           local essid="`echo \"$F_essid\" | sed 's/[^0-9a-zA-Z\s\-\_\.]/\-/g'`"
 
-          if [ -z "$essid" ]; then 
+          if [ -z "$essid" ]; then
             essid="$DEFAULT_MESH_ESSID"
           fi
 
@@ -1289,7 +1289,7 @@ case $F_page in
           uci_set "firewall" "owisp_mesh2lan" "src" "mesh"
           uci_set "firewall" "owisp_mesh2lan" "dest" "lan"
 
-          uci_add "firewall" "forwarding" "owisp_mesh2umts" 
+          uci_add "firewall" "forwarding" "owisp_mesh2umts"
           uci_set "firewall" "owisp_mesh2umts" "src" "mesh"
           uci_set "firewall" "owisp_mesh2umts" "dest" "umts"
 
