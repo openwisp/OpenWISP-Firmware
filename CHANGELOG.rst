@@ -1,3 +1,11 @@
+1.3.3 [Unreleased]
+==================
+
+Bugfixes
+--------
+- `99e1e59 <https://github.com/openwisp/OpenWISP-Firmware/commit/99e1e597f0a69674c9b586e2a0af3029d5b5d0cc>`__ Added check to prevent infinite loop when sysupgrade from owf1.2 to owf1.3
+- `3dd5fac <https://github.com/openwisp/OpenWISP-Firmware/commit/3dd5facc1eb0164bef4c1fb724beff2838971dd6>`__ Fixed firmware version/year in Web interface
+
 1.3.2 [2015-10-06]
 ==================
 
