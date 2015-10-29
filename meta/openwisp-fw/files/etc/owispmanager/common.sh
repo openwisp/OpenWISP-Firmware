@@ -79,7 +79,7 @@ DATE_UPDATE_TIMEOUT=10
 DATE_UPDATE_SERVERS_NTP="ntp.ien.it"
 DATE_UPDATE_SERVERS_HTTP="www.google.it"
 HAS_RADIO=1
-NETWORK_PROTO=`uci show network.lan.proto | cut -f2 -d'='`
+NETWORK_PROTO=`uci show network.lan.proto | cut -f2 -d'=' | tr -d "\'"`
 DHCP_ON="dhcp"
 IFACE_LAN="br-lan"
 

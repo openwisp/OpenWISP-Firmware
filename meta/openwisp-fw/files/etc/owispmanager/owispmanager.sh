@@ -475,7 +475,7 @@ close_status_log_results() {
     sed -i 1,`expr $lines - $STATUS_FILE_MAXLINES`\d $STATUS_FILE
   fi
 }
-
+# Added check to prevent infinite loop when sysupgrade from owf1.2 to owf1.3
 check_rclocal() {
   grep boot_done $ETC_PATH/rc.local > /dev/null 2>&1
   if [ "$?" -eq "1" ]; then
