@@ -343,9 +343,9 @@ start_configuration_services() {
     fi
     if [ "$?" -eq "0" ]; then
       if [ "$HAS_RADIO" -eq "0" ]; then
-        start_dns_masq $IFACE
-      else
         start_dns_masq $IFACE_LAN
+      else
+        start_dns_masq $IFACE
       fi
     else
       echo "* BUG: Cannot start dnsmasq!"
