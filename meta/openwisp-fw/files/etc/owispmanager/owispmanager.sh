@@ -62,7 +62,7 @@ start_dns_masq() {
 
   touch $DNSMASQ_LEASE_FILE
 
-  dnsmasq -i $IFACE -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN \
+  dnsmasq -i $1 -I lo -z -a $CONFIGURATION_IP -x $DNSMASQ_PIDFILE -K -D -y -b -E -s $CONFIGURATION_DOMAIN \
           -S /$CONFIGURATION_DOMAIN/ -l $DNSMASQ_LEASE_FILE -r $DNSMASQ_RESOLV_FILE \
           --dhcp-range=$CONFIGURATION_IP_RANGE_START,$CONFIGURATION_IP_RANGE_END,12h
 
@@ -308,32 +308,32 @@ start_configuration_services() {
       if [ "$NETWORK_PROTO" == "$DHCP_ON" ]; then
         ifconfig $IFACE_LAN $CONFIGURATION_IP netmask $CONFIGURATION_NMASK up
         if [ "$?" -ne "0" ]; then
+          echo "* BUG: assign ip to the lan interface failed!"
+          stop_configuration_services
           return 1
         fi
       fi
-      /etc/init.d/uhttpd start
-      return 0
     else
-      # Support 5GHz devices
+    # Support 2.4GHz || 5GHz devices
       if [ "`iw phy0 info | grep '2[0-9]\{3\} MHz'`" ]; then
         create_wifi_interface 1
       else
         create_wifi_interface 36
       fi
+      if [ "$?" -ne "0" ]; then
+        echo "* BUG: create_wifi_interface failed!"
+        stop_configuration_services
+        return 1
+      fi
+      if [ "$?" -eq "0" ]; then
+        start_hostapd
+      else
+        echo "* BUG: Cannot start hostapd!"
+        stop_configuration_services
+        return 1
+      fi
     fi
-
-    if [ "$?" -ne "0" ]; then
-      echo "* BUG: create_wifi_interface failed!"
-      stop_configuration_services
-      return 1
-    fi
-    if [ "$?" -eq "0" ]; then
-      start_hostapd
-    else
-      echo "* BUG: Cannot start hostapd!"
-      stop_configuration_services
-      return 1
-    fi
+    # Enable httpd && dnsmasq for all confs
     if [ "$?" -eq "0" ]; then
       start_httpd
     else
@@ -342,7 +342,11 @@ start_configuration_services() {
       return 1
     fi
     if [ "$?" -eq "0" ]; then
-      start_dns_masq
+      if [ "$HAS_RADIO" -eq "0" ]; then
+        start_dns_masq $IFACE
+      else
+        start_dns_masq $IFACE_LAN
+      fi
     else
       echo "* BUG: Cannot start dnsmasq!"
       stop_configuration_services
