@@ -1,3 +1,14 @@
+1.3.4 [Unreleased]
+==================
+
+Features
+--------
+- `4eab99a <https://github.com/openwisp/OpenWISP-Firmware/commit/4eab99a0bcbcc83e25f72f458940814816f0c046>`__ Added dhcp IP assignment to the lan interface when use a device without wifi interfaces
+
+Bugfixes
+--------
+- `802810a <https://github.com/openwisp/OpenWISP-Firmware/commit/802810a24c44bf8ea243ed8fcb000d867225db0f>`__ Fix noradio IP assignment to the lan interface
+
 1.3.3 [2015-10-23]
 ==================
 
