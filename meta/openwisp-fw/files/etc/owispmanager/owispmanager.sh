@@ -212,7 +212,7 @@ configuration_retrieve() {
   fi
 
   # Retrieve the configuration
-  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
+  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_FILE http://$INNER_SERVER:$INNER_SERVER_PORT/$CONFIGURATION_TARGZ_REMOTE_URL >/dev/null 2>&1" 15
 
   if [ "$?" -eq "0" ]; then
     md5sum $CONFIGURATION_TARGZ_FILE | cut -d' ' -f1 > $CONFIGURATION_TARGZ_MD5_FILE
@@ -242,7 +242,7 @@ is_configuration_changed() {
     return 0 # Assume configuration isn't changed!
   fi
 
-  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1" 15
+  exec_with_timeout "$RETRIEVE_CMD $CONFIGURATION_TARGZ_MD5_FILE.tmp http://$INNER_SERVER:$INNER_SERVER_PORT/$CONFIGURATION_TARGZ_MD5_REMOTE_URL >/dev/null 2>&1" 15
   if [ "$?" -eq "0" ]; then
     # Validates md5 format
     if [ -z "`head -1 $CONFIGURATION_TARGZ_MD5_FILE.tmp | egrep -e \"^[0-9a-z]{32}$\"`" ]; then
