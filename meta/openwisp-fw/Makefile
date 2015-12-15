@@ -69,7 +69,7 @@ define Package/openwisp-fw-base/install
 		tar xvzf $(OPENWISP_CONF) -C $(1)/; \
 	elif [ `echo $(OPENWISP_CONF) | grep '^http' -` ]; then \
 		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
-	elif \
+	else \
 		echo "ERROR: Missed configuration of OPENWISP_CONF variable"; \
 		exit 2; \
 	fi
