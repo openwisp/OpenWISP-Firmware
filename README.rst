@@ -51,10 +51,9 @@ Our firmware should idealy run on every OpenWRT-complatible devices, but we have
 
 Stable version features:
 
-  * MESH Support
-  * 3G support
-  * wifi support (Both drivers works alone or togheter)
-  * interface failover script
+* wifi support (Both drivers works alone or togheter)
+* 3G support
+* interface failover script
 
 Overlay Configuration File
 --------------------------
