@@ -4,3 +4,6 @@
 [submodule "tests/dnsmasq"]
 	path = tests/dnsmasq
 	url = git@github.com:Unidata-SpA/dnsmasq.git
+[submodule "owrt-pkgtest"]
+	path = owrt-pkgtest
+	url = https://github.com/claudyus/owrt-package-test.git
