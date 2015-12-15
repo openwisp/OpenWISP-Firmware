@@ -30,12 +30,6 @@ define Package/openwisp-fw
 	DEPENDS+=+openwisp-fw-base +openvpn-polarssl
 endef
 
-define Package/openwisp-fw-mesh
-	$(call Package/openwisp-fw)
-	TITLE:=OpenWisp Firmware MESH extension
-	DEPENDS:=+openwisp-fw +batctl
-endef
-
 define Package/openwisp-fw-umts
 	$(call Package/openwisp-fw)
 	TITLE:=OpenWisp Firmware UMTS extension
@@ -51,10 +45,6 @@ endef
 
 define Package/openwisp-fw/description
 	 meta package for standard OpenWisp firmware, this extend base function with openvpn ability
-endef
-
-define Package/openwisp-fw-mesh/description
-	 meta package for OpenWisp firmware - MESH
 endef
 
 define Package/openwisp-fw-umts/description
@@ -87,12 +77,6 @@ define Package/openwisp-fw-base/install
 	git describe --tags --always || echo 'no-git-version' > $(1)/etc/openwisp_version
 endef
 
-define Package/openwisp-fw-mesh/install
-	$(INSTALL_DIR) $(1)/
-	#$(CP) -r ./files-mesh/* $(1)/
-	#TODO fix owispconfig https://github.com/openwisp/OpenWISP-Firmware/blob/umts-improvement/deploy-firmware.sh#L469
-endef
-
 define Package/openwisp-fw-umts/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files-umts/* $(1)/
@@ -104,5 +88,4 @@ endef
 
 $(eval $(call BuildPackage,openwisp-fw-base))
 $(eval $(call BuildPackage,openwisp-fw))
-$(eval $(call BuildPackage,openwisp-fw-mesh))
 $(eval $(call BuildPackage,openwisp-fw-umts))
