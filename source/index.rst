@@ -43,7 +43,7 @@ Q. How firmware can recognize configuration changes?
 
 A. Thanks to an MD5 sum between his tarball and the tarball stored in OWM
 
-Q. How OWF handles different driver for different radio cards? 
+.. Q. How OWF handles different driver for different radio cards? 
 
 .. A. In a loop in owispmanager.sh OWF checks for a brand new card when its
    recognized by the system so OWF sources a different file for different
