@@ -5,6 +5,10 @@
 # See /LICENSE for more information.
 #
 
+ifeq ($(OPENWISP_CONF),)
+  $(error OPENWISP_CONF is not set)
+endif
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-fw
@@ -59,10 +63,6 @@ define Build/Compile
 endef
 
 define Package/openwisp-fw-base/install
-	check-env:
-        ifndef OPENWISP_CONFIG
-                $(error OPENWISP_CONFIG is not set)
-        endif
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
 
