@@ -40,14 +40,14 @@ If you have a properly configured machine follow this steps inside the OpenWRT r
   echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
-  make menuconfig (choice your arch and include openwisp-fw package and submodule if appropriate)
-  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" (see below)
-  make
+  make menuconfig # (choose your arch and include openwisp-fw package and submodule if appropriate)
+  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" # (see below)
+  make -j 1 V=s
 
 The full version of OWF will support UMTS and mesh capability, but will require better hardware and
 much more space on flash/disk, we recommends an appropriate hardware under this condition.
 
-Our firmware should idealy run on every OpenWRT-complatible devices, but we have tested mainly atheros, x86, ar71xx platforms.
+Our firmware should ideally run on any OpenWRT-compatible device, but we have tested mainly atheros, x86, ar71xx platforms.
 
 Stable version features:
 
@@ -105,12 +105,11 @@ The ``etc/openvpn/`` directory will contain the RSA certificates to establish a 
 The overlay configuration layer **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` it could be a local targz file,
 a valid http url to download the targz or a local directory.
 
-For and example of directory structure see tests/dummy_config and refer to .travis.yml to setup the correct build enviroment.
+For an example of directory structure see tests/dummy_config and refer to .travis.yml to setup the correct build enviroment.
 
 *Beware:* if you update your overlay configuration file please ensure to clean and recompile the openwisp package. This can be done using the following command inside openwrt build dir::
 
    make package/openwisp-fw/clean
-
 
 Developing the firmware
 -----------------------
@@ -144,13 +143,13 @@ Here follows an example script to compile OWF for different arch targets::
     echo "CONFIG_PACKAGE_openwisp-fw=y" >> .config
     make defconfig;
     make package/openwisp-fw/clean;
-    make -j 4;
+    make -j 1 V=s;
   done
 
 Copyright
 ---------
 
-Copyright (C) 2012-2015 OpenWISP.org
+Copyright (C) 2012-2016 OpenWISP.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
