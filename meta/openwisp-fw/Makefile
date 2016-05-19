@@ -59,11 +59,14 @@ define Build/Compile
 endef
 
 define Package/openwisp-fw-base/install
+	check-env:
+        ifndef OPENWISP_CONFIG
+                $(error OPENWISP_CONFIG is not set)
+        endif
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
 
 	#unpack external configuration
-	if [ -z "$(OPENWISP_CONF)" ]; then exit 2; fi      # system unconfigured
 	if [ -d $(OPENWISP_CONF) ]; then \
 		cp -fr $(OPENWISP_CONF) $(1)/; \
 	fi
