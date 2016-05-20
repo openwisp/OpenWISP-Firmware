@@ -60,7 +60,7 @@ Overlay Configuration File
 
 The overlay configuration file is a *tar.gz* file that is extracted inside the target rootfs and can potentially overwrite any other config file or add new files inside filesytem.
 
-Here I will provide a structural example of the overlay configuration file that should be provided to be fully compliant with OWM and OWF v1.2::
+Here I will provide a structural example of the overlay configuration file that should be provided to be fully compliant with OWM and OWF v1.x::
 
   etc
   ├── config
@@ -117,6 +117,7 @@ Developing the firmware
 If you'd like to work locally on firmare improvement you should use a local OpenWisp Firmware repo clone and a local OpenWrt repo clone. In this configuration you should use the following commands for feed configuration::
 
   echo "src-link openwisp /path/to/local/git/repo/" >> feeds.conf
+  export OPENWISP_CONF="overlay.tar.gz"
   ./scripts/feeds update
 
 Compile Openwrt for multiple architectures
@@ -132,10 +133,9 @@ Here follows an example script to compile OWF for different arch targets::
   #configure feeds
   cp feeds.conf.default feeds.conf
   echo "src-git openwisp https://github.com/openwisp/openwrt-feed.git" >> feeds.conf
+  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz"
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
-
-  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" (see below)
 
   #config target
   for arch in ar71xx atheros x86; do
