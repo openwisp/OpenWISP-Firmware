@@ -4,6 +4,7 @@ config 'server' 'home'
   option 'status' 'unconfigured'
   option 'inner_server' ''
   option 'inner_server_port' ''
+  option 'ntp_server' ''
 
 config 'server' 'local'
   option 'hide_server_page' '0'

@@ -343,6 +343,17 @@ ethernet_connectivity_form() {
         <label for="dns">Dns</label><br />
         <input id="dns" name="dns" size="30" type="text" value="$CURRENT_ETHERNET_DNS" />
       </p>
+    <table>
+      <thead>
+        <tr>
+          <th colspan="3">NTP server configuration</th>
+        </tr>
+      </thead>
+    </table>
+       <p>
+        <label for="ntp_server">NTP server address</label><br />
+        <input id="ntp_server" name="ntp_server" size="30" type="text" value="$DATE_UPDATE_SERVERS_NTP" />
+       </p>
     </div>
     <p>
       <input id="addressing_submit" name="commit" type="submit" value="Ok" />
@@ -1153,6 +1164,9 @@ case $F_page in
         uci_set "network" "umts" "keepalive" "5"
 
         uci_commit "network"
+
+        uci_set "owispmanager" "home" "ntp_server" "$F_ntp_server"
+        uci_commit "owispmanager"
 
         ifdown umts >/dev/null 2>&1
         # UMTS interface handled by /etc/owispmanager/umts.sh script
