@@ -127,7 +127,7 @@ Here follows an example script to compile OWF for different arch targets::
 
   #!/bin/bash
 
-  git clone git://git.openwrt.org/openwrt.git --depth 10
+  git clone https://github.com/openwrt/openwrt.git
   cd openwrt
 
   #configure feeds
