@@ -132,7 +132,7 @@ Here follows an example script to compile OWF for different arch targets::
 
   #configure feeds
   cp feeds.conf.default feeds.conf
-  echo "src-git openwisp https://github.com/openwisp/openwrt-feed.git" >> feeds.conf
+  echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
   export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz"
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
