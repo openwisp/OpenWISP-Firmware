@@ -12,7 +12,6 @@ PKG_VERSION:=$(shell git describe --always --tags 2> /dev/null || echo 1.3)
 
 include $(INCLUDE_DIR)/package.mk
 
-
 define Package/openwisp-fw-base
 	SECTION:=openwisp
 	CATEGORY:=OpenWisp
@@ -38,17 +37,17 @@ endef
 
 
 define Package/openwisp-fw-base/description
-	 meta package for OpenWisp firmware, this package is a base and small package for small devices
+	meta package for OpenWisp firmware, this package is a base and small package for small devices
 
 	Extra files (like VPN certificates and other configurations) should be added in the "files/" dir
 endef
 
 define Package/openwisp-fw/description
-	 meta package for standard OpenWisp firmware, this extend base function with openvpn ability
+	meta package for standard OpenWisp firmware, this extend base function with openvpn ability
 endef
 
 define Package/openwisp-fw-umts/description
-	 meta package for OpenWisp firmware - UMTS
+	meta package for OpenWisp firmware - UMTS
 endef
 
 define Package/openwisp-fw/config
