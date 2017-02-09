@@ -40,8 +40,8 @@ If you have a properly configured machine follow this steps inside the OpenWRT r
   echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
+  mkdir files # (see below)
   make menuconfig # (choose your arch and include openwisp-fw package and submodule if appropriate)
-  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz" # (see below)
   make -j 1 V=s
 
 The full version of OWF will support UMTS and mesh capability, but will require better hardware and
@@ -102,8 +102,7 @@ The ``etc/openvpn/`` directory will contain the RSA certificates to establish a 
   network:*:0:0:99999:7:::
   nobody:*:0:0:99999:7:::
 
-The overlay configuration layer **MUST** be provided using the enviroment variable ``OPENWISP_CONF`` it could be a local targz file,
-a valid http url to download the targz or a local directory.
+The overlay configuration layer **MUST** be provided in the ``files/`` directory.
 
 For an example of directory structure see tests/dummy_config and refer to .travis.yml to setup the correct build enviroment.
 
@@ -117,7 +116,7 @@ Developing the firmware
 If you'd like to work locally on firmare improvement you should use a local OpenWisp Firmware repo clone and a local OpenWrt repo clone. In this configuration you should use the following commands for feed configuration::
 
   echo "src-link openwisp /path/to/local/git/repo/" >> feeds.conf
-  export OPENWISP_CONF="overlay.tar.gz"
+  mkdir files  # put your overlay configuration here
   ./scripts/feeds update
 
 Compile Openwrt for multiple architectures
@@ -133,7 +132,7 @@ Here follows an example script to compile OWF for different arch targets::
   #configure feeds
   cp feeds.conf.default feeds.conf
   echo "src-git openwisp https://github.com/openwisp/OpenWISP-Firmware.git" >> feeds.conf
-  export OPENWISP_CONF="http://myserver.com/config_file_example.tar.gz"
+  mkdir files  # put your overlay configuration here
   ./scripts/feeds update
   ./scripts/feeds install openwisp-fw
 

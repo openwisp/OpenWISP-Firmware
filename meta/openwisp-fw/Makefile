@@ -5,10 +5,6 @@
 # See /LICENSE for more information.
 #
 
-ifeq ($(OPENWISP_CONF),)
-  $(error OPENWISP_CONF is not set)
-endif
-
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-fw
@@ -44,7 +40,7 @@ endef
 define Package/openwisp-fw-base/description
 	 meta package for OpenWisp firmware, this package is a base and small package for small devices
 
-	 This package can use extra file from targz fetched through wget using the $OPENWISP_CONF variable
+	Extra files (like VPN certificates and other configurations) should be added in the "files/" dir
 endef
 
 define Package/openwisp-fw/description
@@ -65,18 +61,6 @@ endef
 define Package/openwisp-fw-base/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) -r ./files/* $(1)/
-
-	#unpack external configuration
-	if [ -d $(OPENWISP_CONF) ]; then \
-		cp -fr $(OPENWISP_CONF) $(1)/; \
-	fi
-	if [ -f $(OPENWISP_CONF) ]; then \
-		tar xvzf $(OPENWISP_CONF) -C $(1)/; \
-	fi
-	if [ `echo $(OPENWISP_CONF) | grep '^http' -` ]; then \
-		wget $(OPENWISP_CONF) -qO - | tar xvz -C $(1)/; \
-	fi
-
 	git describe --tags --always || echo 'no-git-version' > $(1)/etc/openwisp_version
 endef
 

@@ -16,5 +16,6 @@ before_script:
     - chmod a+x $HOME/owrt-pkgtest
 
 script:
-    - export OPENWISP_CONF=`pwd`/tests/dummy_config/
+    - mkdir files
+    - cp -R tests/dummy_config/* files/
     - $HOME/owrt-pkgtest -r chaos_calmer -d meta openwisp-fw
