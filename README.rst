@@ -3,6 +3,7 @@ OpenWISP Firmware
 =================
 
 .. image:: http://img.shields.io/github/release/openwisp/OpenWISP-Firmware.svg
+    :target: https://github.com/openwisp/OpenWISP-Firmware/releases
 
 .. image:: https://travis-ci.org/openwisp/OpenWISP-Firmware.svg?branch=master
     :target: https://travis-ci.org/openwisp/OpenWISP-Firmware
