@@ -17,9 +17,6 @@ fi
 # htpdate
 rm /etc/rc.d/S*htpdate 2>/dev/null
 
-# ntpdate
-rm /etc/rc.d/S*ntpdate 2>/dev/null
-
 # httpd
 rm /etc/rc.d/S*httpd 2>/dev/null
 
