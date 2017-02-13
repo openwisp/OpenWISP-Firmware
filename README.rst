@@ -64,14 +64,14 @@ Stable version features:
 * 3G support
 * interface failover script
 
-Overlay Configuration File
---------------------------
+Overlay Configuration
+---------------------
 
-The overlay configuration file is a *tar.gz* file that is extracted inside the
+The overlay configuration file is a directory that OpenWRT extracts inside the
 target rootfs and can potentially overwrite any other config file or add new files
-inside filesytem.
+in the filesytem of the resulting firmware images.
 
-Here I will provide a structural example of the overlay configuration file that
+Here's an example of the overlay configuration directory structure that
 should be provided to be fully compliant with OWM and OWF v1.x::
 
   etc
@@ -117,7 +117,7 @@ content for password "*pass*"::
   network:*:0:0:99999:7:::
   nobody:*:0:0:99999:7:::
 
-The overlay configuration layer **MUST** be provided in the ``files/`` directory.
+The overlay configuration **MUST** be provided in a directory named ``files/`` in the OpenWRT/LEDE source.
 
 For an example of directory structure see `tests/dummy_config
 <https://github.com/openwisp/OpenWISP-Firmware/tree/master/tests/dummy_config>`_
