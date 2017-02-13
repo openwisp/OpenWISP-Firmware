@@ -1135,8 +1135,8 @@ case $F_page in
       fi
       uci_commit "network"
 
-      uci_set "owispmanager" "home" "ntp_server" "$F_ntp_server"
-      uci_commit "owispmanager"
+      uci_set "system" "ntp" "server" "$F_ntp_server"
+      uci_commit "system"
 
       ifdown lan >/dev/null 2>&1
       rm /etc/resolv.conf >/dev/null 2>&1

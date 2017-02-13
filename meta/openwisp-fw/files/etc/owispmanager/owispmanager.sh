@@ -172,14 +172,6 @@ vpn_watchdog() {
   else
     open_status_log_results
     echo "* VPN is down, trying to restart it"
-
-    update_date
-    if [ "$?" -eq "0" ]; then
-      echo "* Date/time correctly updated!"
-    else
-      echo "** Can't update date/time: check network configuration, DNS and NTP and/or HTTP connectivity **"
-    fi
-
     restart_vpn
     if [ "$?" -eq "0" ]; then
       echo "* VPN correctly started"
