@@ -89,8 +89,8 @@ STATE_UNCONFIGURED="unconfigured"
 STATE_CONFIGURED="configured"
 # Misc
 _APP_NAME="OpenWISP Firmware"
-_APP_VERS="1.3.4"
-_APP_YEAR="2015"
+_APP_VERS="1.4"
+_APP_YEAR="2017"
 
 # -------
 # Function:     check_prerequisites

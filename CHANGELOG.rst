@@ -1,3 +1,16 @@
+1.4 [2017-02-14]
+==================
+
+Features
+--------
+- Supporting both Chaos Calmer 15.05.1 and Designated Driver (trunk)
+- `#46 <https://github.com/openwisp/OpenWISP-Firmware/pull/46>`__ Deprecating OPENWISP_CONF variable requirement
+- `#47 <https://github.com/openwisp/OpenWISP-Firmware/pull/47>`__ Removed ntpdate to use ntpd instead
+
+Bugfixes
+--------
+- `071de13 <https://github.com/openwisp/OpenWISP-Firmware/commit/071de13fb77766ceb59ee0c958d8cc4d9088068b>`__ Switched to openvpn-openssl
+
 1.3.4 [2015-11-04]
 ==================
 
