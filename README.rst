@@ -8,6 +8,13 @@ OpenWISP Firmware
 .. image:: https://travis-ci.org/openwisp/OpenWISP-Firmware.svg?branch=master
     :target: https://travis-ci.org/openwisp/OpenWISP-Firmware
 
+This is legacy software
+-----------------------
+
+If you are looking for a `wifi controller <http://openwisp.org/whatis.html>`_ solution to manage your OpenWRT/LEDE based networks, check out the more recent
+`OpenWISP 2 Controller <https://github.com/openwisp/ansible-openwisp2>`_ and the
+`openwisp-config <https://github.com/openwisp/openwisp-config>`_ OpenWRT/LEDE daemon.
+
 Description
 -----------
 
