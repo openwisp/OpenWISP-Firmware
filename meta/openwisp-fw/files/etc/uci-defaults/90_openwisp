@@ -1,0 +1,38 @@
+#!/bin/sh
+
+uci -q batch <<-EOT
+ delete uhttpd.defaults
+ delete uhttpd.main.redirect_https
+ delete uhttpd.main.cert
+ delete uhttpd.main.key
+ delete uhttpd.main.listen_http
+ add_list uhttpd.main.listen_http='0.0.0.0:8080'
+ add_list uhttpd.main.listen_http='[::]:8080'
+ delete uhttpd.main.listen_https
+ add_list uhttpd.main.listen_https='0.0.0.0:443'
+ add_list uhttpd.main.listen_https='[::]:443'
+ set uhttpd.main.home='/etc/owispmanager/web'
+ set uhttpd.main.rfc1918_filter='1'
+ set uhttpd.main.max_requests='3'
+ set uhttpd.main.max_connections='100'
+ set uhttpd.main.cgi_prefix='/cgi-bin'
+ set uhttpd.main.script_timeout='60'
+ set uhttpd.main.network_timeout='30'
+ set uhttpd.main.http_keepalive='20'
+ set uhttpd.main.tcp_keepalive='1'
+ commit uhttpd
+EOT
+
+uci batch <<EOF
+delete wireless.default_radio0
+set wireless.radio0.disabled='1'
+commit wireless
+EOF
+
+[ -e /etc/init.d/openvpn.new ] && mv /etc/init.d/openvpn.new /etc/init.d/openvpn
+
+grep boot_done /etc/rc.local || sed -i "/exit 0/i touch \/tmp\/boot_done" /etc/rc.local
+
+/etc/owispmanager/preinit.sh
+
+exit 0

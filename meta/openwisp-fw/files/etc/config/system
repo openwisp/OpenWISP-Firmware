@@ -1,10 +1,12 @@
 config system
         option hostname Unconfigured
         option timezone "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"
+        option ttylogin '1'
 
 config timeserver ntp
         list server     ntp1.inrim.it
         list server     ntp2.inrim.it
+        list server     ntp.ien.it
         list server     0.openwrt.pool.ntp.org
         list server     1.openwrt.pool.ntp.org
         list server     2.openwrt.pool.ntp.org
