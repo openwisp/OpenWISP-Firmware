@@ -27,6 +27,7 @@ uci batch <<EOF
 delete wireless.default_radio0
 set wireless.radio0.htmode='HT40'
 set wireless.radio0.disabled='1'
+delete wireless.default_radio1
 commit wireless
 EOF
 
