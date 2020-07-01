@@ -48,7 +48,7 @@ See below for more information on this file.
 We strongly suggest to build OpenWRT on a GNU/Linux environment, you can find
 other pre-requisites here: http://wiki.openwrt.org/doc/howto/build.
 
-If you have a properly configured machine follow this steps inside the OpenWRT
+If you have a properly configured machine follow these steps inside the OpenWRT
 root directory::
 
   cp feeds.conf.default feeds.conf
