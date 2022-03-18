@@ -358,6 +358,27 @@ start_configuration_services() {
 }
 
 # -------
+# Function:     is_LEDE
+# Description:  Check if we are running on LEDE (or OpenWrt)
+# Input:        nothing
+# Output:       nothing
+# Returns:      1 LEDE is running, 0 if OpenWrt (or unknown)
+# Notes:
+is_LEDE() {
+  source /etc/openwrt_release
+  if [ -n "$DISTRIB_ID" ] && [ $DISTRIB_ID == "LEDE" ]; then
+    return 1
+  fi
+
+  REV_NUMBER=`echo $DISTRIB_REVISION | cut -d "r" -f2 | cut -d "-" -f1 -s`
+  if [ -n "$REV_NUMBER" ] ||  [ $REV_NUMBER -gt 3000 ]; then
+    return 1 # Revision number calculation for git, so it's OpenWrt/LEDE
+  fi
+
+  return 0 # Assume OpenWrt!
+}
+
+# -------
 # Function:     configuration_uninstall
 # Description:  uninstall configuration retrieved from server
 # Input:        nothing
@@ -374,7 +395,8 @@ configuration_uninstall() {
   # add compatibility with chaos calmer (backward compatible with older openwrt versions fixed)
   source /etc/openwrt_release
   REV_NUMBER=`echo $DISTRIB_REVISION | cut -d "r" -f2`
-  if [ $REV_NUMBER -ge 46767 ]; then
+  is_LEDE
+  if [ "$?" -eq "1" ] || [ $REV_NUMBER -ge 46767 ]; then
     sed -i "s/=openvpn/='openvpn'/g" $CONFIGURATIONS_PATH/uninstall.sh
   fi
 
@@ -425,8 +447,10 @@ configuration_install() {
   # See issue #32
   source /etc/openwrt_release
   REV_NUMBER=`echo $DISTRIB_REVISION | cut -d "r" -f2`
-  if [ $REV_NUMBER -gt 44061 ]; then
+  is_LEDE
+  if [ "$?" -eq "1" ] ||  [ $REV_NUMBER -gt 44061 ]; then
     sed -i "s/'comp_lzo' '1'/'comp_lzo' 'yes'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
+    sed -i "s/option 'mtu_disc'/#option 'mtu_disc'/g" $CONFIGURATIONS_PATH/uci/openvpn.conf
     # Workaround for issue #34
     sed -i "s/uci -m import network -f \$PROGDIR\/uci\/network.conf/uci -m -f \$PROGDIR\/uci\/network.conf import network/g" $CONFIGURATIONS_PATH/install.sh
     sed -i "s/uci -m import wireless -f \$PROGDIR\/uci\/wireless.conf/uci -m -f \$PROGDIR\/uci\/wireless.conf import wireless/g" $CONFIGURATIONS_PATH/install.sh

@@ -5,7 +5,7 @@
 # See /LICENSE for more information.
 
 START=90
-STOP=10
+STOP=11
 
 USE_PROCD=1
 PROG=/usr/sbin/openvpn
